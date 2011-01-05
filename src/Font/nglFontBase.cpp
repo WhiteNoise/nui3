@@ -95,7 +95,7 @@ public:
   {
     if (mpFontInstance)
     {
-      nglFontInstance::Uninstall(mpFontInstance);
+      //nglFontInstance::Uninstall(mpFontInstance);
       mpFontInstance->Release();
     }
   }
