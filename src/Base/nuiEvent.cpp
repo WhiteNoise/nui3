@@ -142,7 +142,7 @@ bool nuiEventSource::SendEvent(const nuiEvent& rEvent)
       ++it;
     }
 
-    return handled;
+    return handled; 
   }
 
   return false;

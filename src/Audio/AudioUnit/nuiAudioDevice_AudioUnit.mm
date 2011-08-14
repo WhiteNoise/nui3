@@ -71,6 +71,8 @@ nuiAudioDevice_AudioUnit::nuiAudioDevice_AudioUnit()
   AudioSessionSetProperty(kAudioSessionProperty_OverrideAudioRoute, size, &value);  
 
   AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, audioRouteChangeListenerCallback, this);
+	
+
   
 	// Initialize our session
 	err = AudioSessionInitialize(NULL, NULL, interruptionListener, NULL);	
@@ -87,6 +89,15 @@ nuiAudioDevice_AudioUnit::nuiAudioDevice_AudioUnit()
   //    NGL_ASSERT(0);
   //    return false;
   //  } 		
+	
+	UInt32 doChangeDefaultRoute = 1;
+	
+	// default output to the speaker, not the headset.
+	AudioSessionSetProperty (
+							 kAudioSessionProperty_OverrideCategoryDefaultToSpeaker,
+							 sizeof (doChangeDefaultRoute),
+							 &doChangeDefaultRoute
+							 );	
   
   
   EnumSampleRates();

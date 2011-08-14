@@ -852,7 +852,6 @@
 		E524137511CB860B0025CA71 /* nuiOutliner.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CE40C3CECAB00902DFE /* nuiOutliner.h */; };
 		E524137611CB860B0025CA71 /* nglIFile.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C8D0C3CECAB00902DFE /* nglIFile.h */; };
 		E524137711CB860B0025CA71 /* nuiD3DPainter.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CBC0C3CECAB00902DFE /* nuiD3DPainter.h */; };
-		E524137811CB860B0025CA71 /* nglDataObjects.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C810C3CECAB00902DFE /* nglDataObjects.h */; };
 		E524137911CB860B0025CA71 /* nuiShapeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CFF0C3CECAB00902DFE /* nuiShapeView.h */; };
 		E524137A11CB860B0025CA71 /* nuiTessellator.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D0C0C3CECAB00902DFE /* nuiTessellator.h */; };
 		E524137B11CB860B0025CA71 /* nglContext.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C7F0C3CECAB00902DFE /* nglContext.h */; };
@@ -2182,7 +2181,6 @@
 		E5241C5011CBCE9E0025CA71 /* nuiOutliner.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CE40C3CECAB00902DFE /* nuiOutliner.h */; };
 		E5241C5111CBCE9E0025CA71 /* nglIFile.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C8D0C3CECAB00902DFE /* nglIFile.h */; };
 		E5241C5211CBCE9E0025CA71 /* nuiD3DPainter.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CBC0C3CECAB00902DFE /* nuiD3DPainter.h */; };
-		E5241C5311CBCE9E0025CA71 /* nglDataObjects.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C810C3CECAB00902DFE /* nglDataObjects.h */; };
 		E5241C5411CBCE9E0025CA71 /* nuiShapeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CFF0C3CECAB00902DFE /* nuiShapeView.h */; };
 		E5241C5511CBCE9E0025CA71 /* nuiTessellator.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D0C0C3CECAB00902DFE /* nuiTessellator.h */; };
 		E5241C5611CBCE9E0025CA71 /* nglContext.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C7F0C3CECAB00902DFE /* nglContext.h */; };
@@ -4135,7 +4133,6 @@
 		E5429FEC0C3F0A5900225219 /* nuiOutliner.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CE40C3CECAB00902DFE /* nuiOutliner.h */; };
 		E5429FED0C3F0A5900225219 /* nglIFile.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C8D0C3CECAB00902DFE /* nglIFile.h */; };
 		E5429FEE0C3F0A5900225219 /* nuiD3DPainter.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CBC0C3CECAB00902DFE /* nuiD3DPainter.h */; };
-		E5429FEF0C3F0A5900225219 /* nglDataObjects.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C810C3CECAB00902DFE /* nglDataObjects.h */; };
 		E5429FF00C3F0A5900225219 /* nuiShapeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CFF0C3CECAB00902DFE /* nuiShapeView.h */; };
 		E5429FF10C3F0A5900225219 /* nuiTessellator.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D0C0C3CECAB00902DFE /* nuiTessellator.h */; };
 		E5429FF20C3F0A5900225219 /* nglContext.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C7F0C3CECAB00902DFE /* nglContext.h */; };
@@ -5094,7 +5091,6 @@
 		E58176A30C3D110A00902DFE /* nuiOutliner.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CE40C3CECAB00902DFE /* nuiOutliner.h */; };
 		E58176A40C3D110A00902DFE /* nglIFile.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C8D0C3CECAB00902DFE /* nglIFile.h */; };
 		E58176A50C3D110A00902DFE /* nuiD3DPainter.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CBC0C3CECAB00902DFE /* nuiD3DPainter.h */; };
-		E58176A60C3D110A00902DFE /* nglDataObjects.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C810C3CECAB00902DFE /* nglDataObjects.h */; };
 		E58176A70C3D110A00902DFE /* nuiShapeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CFF0C3CECAB00902DFE /* nuiShapeView.h */; };
 		E58176A80C3D110A00902DFE /* nuiTessellator.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D0C0C3CECAB00902DFE /* nuiTessellator.h */; };
 		E58176A90C3D110A00902DFE /* nglContext.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C7F0C3CECAB00902DFE /* nglContext.h */; };
@@ -5757,7 +5753,6 @@
 		E5A8CD5611E33A54004E14CE /* nuiOutliner.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CE40C3CECAB00902DFE /* nuiOutliner.h */; };
 		E5A8CD5711E33A54004E14CE /* nglIFile.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C8D0C3CECAB00902DFE /* nglIFile.h */; };
 		E5A8CD5811E33A54004E14CE /* nuiD3DPainter.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CBC0C3CECAB00902DFE /* nuiD3DPainter.h */; };
-		E5A8CD5911E33A54004E14CE /* nglDataObjects.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C810C3CECAB00902DFE /* nglDataObjects.h */; };
 		E5A8CD5A11E33A54004E14CE /* nuiShapeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CFF0C3CECAB00902DFE /* nuiShapeView.h */; };
 		E5A8CD5B11E33A54004E14CE /* nuiTessellator.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D0C0C3CECAB00902DFE /* nuiTessellator.h */; };
 		E5A8CD5C11E33A54004E14CE /* nglContext.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C7F0C3CECAB00902DFE /* nglContext.h */; };
@@ -7173,7 +7168,6 @@
 		E5D63F631209AB9C009C26A9 /* nuiOutliner.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CE40C3CECAB00902DFE /* nuiOutliner.h */; };
 		E5D63F641209AB9C009C26A9 /* nglIFile.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C8D0C3CECAB00902DFE /* nglIFile.h */; };
 		E5D63F651209AB9C009C26A9 /* nuiD3DPainter.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CBC0C3CECAB00902DFE /* nuiD3DPainter.h */; };
-		E5D63F661209AB9C009C26A9 /* nglDataObjects.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C810C3CECAB00902DFE /* nglDataObjects.h */; };
 		E5D63F671209AB9C009C26A9 /* nuiShapeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816CFF0C3CECAB00902DFE /* nuiShapeView.h */; };
 		E5D63F681209AB9C009C26A9 /* nuiTessellator.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D0C0C3CECAB00902DFE /* nuiTessellator.h */; };
 		E5D63F691209AB9C009C26A9 /* nglContext.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816C7F0C3CECAB00902DFE /* nglContext.h */; };
@@ -13011,7 +13005,6 @@
 				E524137511CB860B0025CA71 /* nuiOutliner.h in Headers */,
 				E524137611CB860B0025CA71 /* nglIFile.h in Headers */,
 				E524137711CB860B0025CA71 /* nuiD3DPainter.h in Headers */,
-				E524137811CB860B0025CA71 /* nglDataObjects.h in Headers */,
 				E524137911CB860B0025CA71 /* nuiShapeView.h in Headers */,
 				E524137A11CB860B0025CA71 /* nuiTessellator.h in Headers */,
 				E524137B11CB860B0025CA71 /* nglContext.h in Headers */,
@@ -13826,7 +13819,6 @@
 				E5241C5011CBCE9E0025CA71 /* nuiOutliner.h in Headers */,
 				E5241C5111CBCE9E0025CA71 /* nglIFile.h in Headers */,
 				E5241C5211CBCE9E0025CA71 /* nuiD3DPainter.h in Headers */,
-				E5241C5311CBCE9E0025CA71 /* nglDataObjects.h in Headers */,
 				E5241C5411CBCE9E0025CA71 /* nuiShapeView.h in Headers */,
 				E5241C5511CBCE9E0025CA71 /* nuiTessellator.h in Headers */,
 				E5241C5611CBCE9E0025CA71 /* nglContext.h in Headers */,
@@ -14642,7 +14634,6 @@
 				E5429FEC0C3F0A5900225219 /* nuiOutliner.h in Headers */,
 				E5429FED0C3F0A5900225219 /* nglIFile.h in Headers */,
 				E5429FEE0C3F0A5900225219 /* nuiD3DPainter.h in Headers */,
-				E5429FEF0C3F0A5900225219 /* nglDataObjects.h in Headers */,
 				E5429FF00C3F0A5900225219 /* nuiShapeView.h in Headers */,
 				E5429FF10C3F0A5900225219 /* nuiTessellator.h in Headers */,
 				E5429FF20C3F0A5900225219 /* nglContext.h in Headers */,
@@ -15443,7 +15434,6 @@
 				E58176A30C3D110A00902DFE /* nuiOutliner.h in Headers */,
 				E58176A40C3D110A00902DFE /* nglIFile.h in Headers */,
 				E58176A50C3D110A00902DFE /* nuiD3DPainter.h in Headers */,
-				E58176A60C3D110A00902DFE /* nglDataObjects.h in Headers */,
 				E58176A70C3D110A00902DFE /* nuiShapeView.h in Headers */,
 				E58176A80C3D110A00902DFE /* nuiTessellator.h in Headers */,
 				E58176A90C3D110A00902DFE /* nglContext.h in Headers */,
@@ -16244,7 +16234,6 @@
 				E5A8CD5611E33A54004E14CE /* nuiOutliner.h in Headers */,
 				E5A8CD5711E33A54004E14CE /* nglIFile.h in Headers */,
 				E5A8CD5811E33A54004E14CE /* nuiD3DPainter.h in Headers */,
-				E5A8CD5911E33A54004E14CE /* nglDataObjects.h in Headers */,
 				E5A8CD5A11E33A54004E14CE /* nuiShapeView.h in Headers */,
 				E5A8CD5B11E33A54004E14CE /* nuiTessellator.h in Headers */,
 				E5A8CD5C11E33A54004E14CE /* nglContext.h in Headers */,
@@ -17046,7 +17035,6 @@
 				E5D63F631209AB9C009C26A9 /* nuiOutliner.h in Headers */,
 				E5D63F641209AB9C009C26A9 /* nglIFile.h in Headers */,
 				E5D63F651209AB9C009C26A9 /* nuiD3DPainter.h in Headers */,
-				E5D63F661209AB9C009C26A9 /* nglDataObjects.h in Headers */,
 				E5D63F671209AB9C009C26A9 /* nuiShapeView.h in Headers */,
 				E5D63F681209AB9C009C26A9 /* nuiTessellator.h in Headers */,
 				E5D63F691209AB9C009C26A9 /* nglContext.h in Headers */,
@@ -21430,6 +21418,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PRODUCT_NAME = nuiPhoneD;
 				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Default;
@@ -21487,6 +21476,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PRODUCT_NAME = nuiPhone;
 				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Default;
@@ -21517,7 +21507,8 @@
 				PREBINDING = NO;
 				PRELINK_LIBS = "-liconv";
 				PRODUCT_NAME = nui3;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
+				SKIP_INSTALL = YES;
 				ZERO_LINK = NO;
 			};
 			name = Default;
@@ -21580,7 +21571,7 @@
 				GCC_VERSION = 4.2;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx10.6;
+				SDKROOT = iphoneos4.3;
 				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = ". include deps/libpng deps/gameswf deps/zlib deps/ungif deps/ucdata deps/libjpeg src/Application/Carbon src/Stream/Zip deps/freetype2/include deps/expat/include deps/harfbuzz deps/expat/lib deps/tracemonkey deps/libcss/src deps/libcss/src/libwapcaplet deps/libcss/src/libparserutils deps/libcss/include";
 			};
@@ -21589,7 +21580,7 @@
 		E58173AC0C3D108900902DFE /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = i386;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_FAST_OBJC_DISPATCH = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -21615,7 +21606,7 @@
 		E5A8D1D211E33A54004E14CE /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = i386;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_FAST_OBJC_DISPATCH = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -21657,7 +21648,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PREBINDING = NO;
 				PRODUCT_NAME = nui3CocoaD;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
+				SKIP_INSTALL = YES;
 			};
 			name = Default;
 		};

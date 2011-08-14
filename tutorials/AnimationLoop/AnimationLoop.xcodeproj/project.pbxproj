@@ -157,8 +157,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				61A9DFD70B833F1500BC506C /* AGL.framework in Frameworks */,
-				61A9DFD80B833F1500BC506C /* CoreFoundation.framework in Frameworks */,
 				61A9DFD90B833F1500BC506C /* CoreServices.framework in Frameworks */,
+				61A9DFD80B833F1500BC506C /* CoreFoundation.framework in Frameworks */,
 				61A9DFDA0B833F1500BC506C /* Carbon.framework in Frameworks */,
 				61A9DFDB0B833F1500BC506C /* OpenGL.framework in Frameworks */,
 				BCD448B811D2121C00BEF227 /* libnui3.a in Frameworks */,

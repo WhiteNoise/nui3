@@ -37,7 +37,7 @@ licence: see nui3/LICENCE.TXT
 #define ngl_strnicmp wcsncasecmp
 #define ngl_mbs_stricmp strcasecmp
 
-static int wcscasecmp(const nglChar* s1, const nglChar* s2)
+int wcscasecmp(const nglChar* s1, const nglChar* s2)
 {
   nglChar c1;
   nglChar c2;
