@@ -899,31 +899,31 @@ void nglWindow::SetTitle (const nglString& rTitle)
 
 bool IsThisKeyDown(const short theKey)
 {
-  return CGEventSourceKeyState(kCGEventSourceStateHIDSystemState, theKey);
+  return CGEventSourceKeyState(kCGEventSourceStateCombinedSessionState, theKey);
 }
 
 
 bool IsCommandKeyDown()
 {
-  const short kCommandKey = 55;
+  const CGKeyCode kCommandKey = 55;
   return IsThisKeyDown(kCommandKey);
 }
 
 bool IsControlKeyDown()
 {
-  const short kCtlKey = 0x3B;
+  const CGKeyCode kCtlKey = 0x3B;
   return IsThisKeyDown(kCtlKey);
 }
 
 bool IsOptionKeyDown()
 {
-  const short kOptionKey = 58;
+  const CGKeyCode kOptionKey = 58;
   return IsThisKeyDown(kOptionKey);
 }
 
 bool IsShiftKeyDown()
 {
-  const short kShiftKey = 56;
+  const CGKeyCode kShiftKey = 56;
   return IsThisKeyDown(kShiftKey);
 }
 

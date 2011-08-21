@@ -369,7 +369,8 @@ static NSString* GetApplicationName(void)
 - (BOOL) openURL: (NSURL*) pUrl
 {
   //NGL_OUT(_T("[nglNSApplication openURL]\n"));
-  [super openURL: pUrl];
+
+    [[NSWorkspace sharedWorkspace] openURL: pUrl ];
   return true;
 }
 

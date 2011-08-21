@@ -43,7 +43,7 @@ public:
   virtual nuiXMLNode* Serialize(nuiXMLNode* pParentNode, bool Recursive) const;
 
 
-  bool IsKeyDown (nglKeyCode Key) const;
+  bool virtual IsKeyDown (nglKeyCode Key) const;
 //  void GetMouseInfo(nglMouseInfo& rMouseInfo);
 
   /* @name Inherited from nuiWidget */
