@@ -167,7 +167,13 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
 
 - (void) dealloc
 {
-  [self disconnect];
+  if (glView)
+  {
+    [glView removeFromSuperview];
+    [glView release];
+    glView = nil;
+  }
+  //[self disconnect];
   [super dealloc];
 }
 
@@ -807,7 +813,7 @@ extern float NUI_INV_SCALE_FACTOR;
     {
       NSLog(@"Unable to resizeFromLayer\n");
     }
-}
+  }
   else
   {
     NSLog(@"EAGLView init failed :-/\n");
@@ -1046,8 +1052,16 @@ nglWindow::~nglWindow()
 {
   if (mpUIWindow)
   {
-    [mpUIWindow disconnect];
-    [mpUIWindow removeFromSuperview];
+
+    UIWindow* win = (UIWindow*)mpUIWindow;
+    [win disconnect];
+    UIWindow* oldwin = [[UIApplication sharedApplication].windows objectAtIndex:0];
+    if (win != oldwin)
+    {
+      [oldwin makeKeyWindow];
+    }
+    //[win removeFromSuperview];
+    [win release];
   }
   Unregister();
 }

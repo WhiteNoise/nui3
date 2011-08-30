@@ -395,6 +395,8 @@ void nuiGLPainter::StartRendering()
   glDisable(GL_STENCIL_TEST);
   glDisable(GL_BLEND);
   glDisable(GL_ALPHA_TEST);
+  glDisable(GL_CULL_FACE);
+
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   BlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   
@@ -1639,10 +1641,12 @@ void nuiGLPainter::UploadTexture(nuiTexture* pTexture)
       
       if (allocated)
         free(pBuffer);
-      //#FIXME
-      //      if (!pTexture->IsBufferRetained()) { 
-      //        pTexture->ReleaseBuffer();
-      //      }
+      #ifdef _UIKIT_
+      if (!pTexture->IsBufferRetained()) 
+      { 
+        pTexture->ReleaseBuffer();
+      }
+      #endif
       
     }
   }
