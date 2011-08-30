@@ -1070,13 +1070,13 @@ void nglWindow::SetState (StateChange State)
 	switch (State)
 	{
 		case eHide:
-			[pApp setStatusBarHidden:FALSE animated:TRUE];
+			[pApp setStatusBarHidden:TRUE animated:TRUE];
 			break;
 		case eShow:
-			[pApp setStatusBarHidden:FALSE animated:TRUE];
+			[pApp setStatusBarHidden:TRUE animated:TRUE];
 			break;
 		case eMinimize:
-			[pApp setStatusBarHidden:FALSE animated:TRUE];
+			[pApp setStatusBarHidden:TRUE animated:TRUE];
 			break;
 		case eMaximize:
 		{
