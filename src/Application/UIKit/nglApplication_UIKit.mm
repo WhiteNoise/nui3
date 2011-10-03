@@ -14,6 +14,7 @@ using namespace std;
 
 void objCCallOnInit(void* pUIApplication);
 void objCCallOnInitWithURL(void* pUIApplication, const nglString &url);
+void objCCallOnOpenURL(const nglString &url);
 void objCCallOnExit(int code);
 void objCCallOnWillExit();
 void objCCallOnActivation();
@@ -65,18 +66,20 @@ void objCCallOnMemoryWarning();
 - (BOOL)application:(UIApplication *)pUIApplication didFinishLaunchingWithOptions:(NSDictionary *)launchOptions;
 {
 	NGL_ASSERT(App);
-	NSURL *launchURL = [launchOptions objectForKey:UIApplicationLaunchOptionsURLKey];	
-	//objCCallOnInitWithURL(pUIApplication, nglString ((CFStringRef)@"bleepbox://oauth?oauth_verifier=fffff"));
-	
-	if(launchURL)
-	{
-		NSString *urlstr = [launchURL absoluteString];
-		
-		objCCallOnInitWithURL(pUIApplication, nglString ((CFStringRef)urlstr));
-	} else {
-		
-		objCCallOnInit(pUIApplication);
-	}
+
+    objCCallOnInit(pUIApplication);
+}
+
+- (BOOL) application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    NSString *urlstr;
+    
+    if([url isFileURL])
+        urlstr = [url path];
+    else
+        urlstr = [url absoluteString];
+    
+    objCCallOnOpenURL(nglString ((CFStringRef)urlstr));
 }
 
 - (void) applicationDidBecomeActive:          (UIApplication*) pUIApplication
@@ -99,6 +102,8 @@ void objCCallOnMemoryWarning();
 			pWindow->CallOnActivation();			
 		}
 	}	
+    
+
 }
 
 - (void) applicationDidEnterBackground:         (UIApplication*) pUIApplication
@@ -145,7 +150,7 @@ void objCCallOnMemoryWarning();
 	
 	id win;
 	while ((win = [e nextObject]))
-  {
+    {
 		[win release];
 	}	
  

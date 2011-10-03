@@ -32,7 +32,8 @@ public:
   const nglString& GetOutputChannelName(uint32 OutputChannel) const;
 
   bool IsPresent() const;
-
+  uint64 getProcessHostTime() { return processHostTime; };
+    void setProcessHostTime(uint64 t) { processHostTime = t; };
 protected:
   nuiAudioDevice();
   
@@ -44,6 +45,8 @@ protected:
   std::vector<nglString> mInputChannels;
   std::vector<nglString> mOutputChannels;
   bool mIsPresent;
+    
+    uint64 processHostTime;
 };
 
 class nuiAudioDeviceAPI : public nuiNonCopyable

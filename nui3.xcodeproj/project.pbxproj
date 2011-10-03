@@ -1699,6 +1699,7 @@
 		73F09ABE12E9D09E00656E84 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5D435961004DC5300388BF5 /* ApplicationServices.framework */; };
 		73F09ABF12E9D09E00656E84 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 408D9C88109764A000AEE78A /* QTKit.framework */; };
 		73F09AC012E9D09E00656E84 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59DF6CC1196396000E46CF8 /* AudioToolbox.framework */; settings = {ATTRIBUTES = (Required, ); }; };
+		8784DF66142FA33F0063AEB4 /* nuiAudioDevice_AudioUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = 8784DF65142FA33F0063AEB4 /* nuiAudioDevice_AudioUnit.h */; };
 		941A98BB0E8BEAAE00CAFC3A /* nuiScrollingLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941A98BA0E8BEAAE00CAFC3A /* nuiScrollingLabel.cpp */; };
 		941A98BC0E8BEAAE00CAFC3A /* nuiScrollingLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941A98BA0E8BEAAE00CAFC3A /* nuiScrollingLabel.cpp */; };
 		941A98BE0E8BEAD000CAFC3A /* nuiScrollingLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 941A98BD0E8BEAD000CAFC3A /* nuiScrollingLabel.h */; };
@@ -7336,6 +7337,7 @@
 		61D085130EAFAA5400B73835 /* nuiSurface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nuiSurface.h; path = include/nuiSurface.h; sourceTree = SOURCE_ROOT; };
 		73F086E612E9BA0700656E84 /* libnuiPhone_arm7.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnuiPhone_arm7.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		73F09AC312E9D09E00656E84 /* libthirdparty_ios_arm7.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libthirdparty_ios_arm7.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		8784DF65142FA33F0063AEB4 /* nuiAudioDevice_AudioUnit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nuiAudioDevice_AudioUnit.h; path = include/nuiAudioDevice_AudioUnit.h; sourceTree = SOURCE_ROOT; };
 		941A98BA0E8BEAAE00CAFC3A /* nuiScrollingLabel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nuiScrollingLabel.cpp; path = src/Text/nuiScrollingLabel.cpp; sourceTree = SOURCE_ROOT; };
 		941A98BD0E8BEAD000CAFC3A /* nuiScrollingLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nuiScrollingLabel.h; path = include/nuiScrollingLabel.h; sourceTree = SOURCE_ROOT; };
 		941A98CA0E8BF04700CAFC3A /* nuiScrollBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nuiScrollBox.cpp; path = src/Layout/nuiScrollBox.cpp; sourceTree = SOURCE_ROOT; };
@@ -9072,6 +9074,7 @@
 				406F782812DC9AAA00DBAC43 /* nuiAudioDb.cpp */,
 				406F78B412DC9F2900DBAC43 /* nuiAudioEngine.h */,
 				406F782A12DC9AAA00DBAC43 /* nuiAudioEngine.cpp */,
+				BC9CB3FD0D3E3DA70093CAC3 /* nuiAudioFifo.h */,
 				406F78C112DC9F3C00DBAC43 /* nuiSound.h */,
 				406F782C12DC9AAA00DBAC43 /* nuiSound.cpp */,
 				406F78C212DC9F3C00DBAC43 /* nuiSoundManager.h */,
@@ -9917,12 +9920,12 @@
 		E52E1A230CD7EE46006FBCDD /* Audio */ = {
 			isa = PBXGroup;
 			children = (
+				8784DF65142FA33F0063AEB4 /* nuiAudioDevice_AudioUnit.h */,
 				E52417F411CB86810025CA71 /* nuiAudioDevice_AudioUnit.mm */,
 				BC9CB4A30D3E48000093CAC3 /* nuiAudioResampler.h */,
 				BC9CB3F60D3E3D9A0093CAC3 /* nuiAudioConvert.cpp */,
 				BC9CB3FC0D3E3DA70093CAC3 /* nuiAudioConvert.h */,
 				BC9CB3F70D3E3D9A0093CAC3 /* nuiAudioFifo.cpp */,
-				BC9CB3FD0D3E3DA70093CAC3 /* nuiAudioFifo.h */,
 				E52E1A240CD7EEAF006FBCDD /* nuiAudioDevice.h */,
 				E52E1A270CD7F397006FBCDD /* nuiAudioDevice.cpp */,
 				56CEA8B50ECB2E8A009F6CF4 /* nuiAudioDevice_CoreAudio.h */,
@@ -14215,6 +14218,7 @@
 				BC2475031377D7EA000F1ABB /* nuiNavigationBarStyle.h in Headers */,
 				BCF87560137D27570092DAAD /* nuiImageAnimation.h in Headers */,
 				BC1684E21381606C00A605E6 /* nuiGestureRecognizer.h in Headers */,
+				8784DF66142FA33F0063AEB4 /* nuiAudioDevice_AudioUnit.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -16076,6 +16080,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = NO;
+				LastUpgradeCheck = 0410;
 				ORGANIZATIONNAME = libNUI;
 			};
 			buildConfigurationList = E58167300C3CEBF100902DFE /* Build configuration list for PBXProject "nui3" */;
@@ -19435,6 +19440,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PRODUCT_NAME = nuiPhone_arm7;
 				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = armv7;
 			};
@@ -19495,6 +19501,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PRODUCT_NAME = thirdparty_ios_arm7;
 				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALID_ARCHS = armv7;
 			};
@@ -19555,6 +19562,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PRODUCT_NAME = nuiPhoneD;
 				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Default;
@@ -19612,6 +19620,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PRODUCT_NAME = nuiPhone;
 				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Default;
@@ -19706,6 +19715,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = ". include deps/libpng deps/gameswf deps/zlib deps/ungif deps/ucdata deps/libjpeg src/Application/Carbon src/Stream/Zip deps/freetype2/include deps/expat/include deps/harfbuzz deps/expat/lib deps/tracemonkey deps/libcss/src deps/libcss/src/libwapcaplet deps/libcss/src/libparserutils deps/libcss/include";
 			};
@@ -19784,6 +19794,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = nui3CocoaD;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 			};
 			name = Default;
 		};
@@ -19879,6 +19890,7 @@
 				PREBINDING = NO;
 				PRELINK_LIBS = "-liconv";
 				PRODUCT_NAME = thirdparty;
+				SKIP_INSTALL = YES;
 				ZERO_LINK = NO;
 			};
 			name = Default;
@@ -19938,6 +19950,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PRODUCT_NAME = thirdparty_ios;
 				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Default;

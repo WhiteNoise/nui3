@@ -16,6 +16,7 @@ nuiAudioDevice::nuiAudioDevice()
   mAPIName = _T("Unknown");
   mName = _T("Unknown");
   mManufacturer = _T("Unknown");
+    processHostTime = 0;
 }
 
 nuiAudioDevice::~nuiAudioDevice()

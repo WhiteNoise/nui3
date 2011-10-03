@@ -1070,6 +1070,8 @@ void nuiFontManager::AddSystemFolders()
 
 void nuiFontManager::GetSystemFolders(std::map<nglString, nglPath>& rFolders)
 {
+    return;
+    
 #ifdef FONT_TEST_HACK
   rFolders[_T("System0")] = _T("/System/Library/Fonts/Cache/");
 #elif (defined _CARBON_)

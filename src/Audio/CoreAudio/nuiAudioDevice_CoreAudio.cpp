@@ -243,7 +243,7 @@ OSStatus nuiAudioDevice_CoreAudio::Process(AudioDeviceID inDevice, const AudioTi
                                            AudioBufferList* outOutputData, const AudioTimeStamp* inOutputTime)
 {
   uint32 ch = 0;
-  
+    
   if (mInMap.empty() && !mActiveInputChannels.empty())
   {
     // Create input and output maping tables:
@@ -335,6 +335,8 @@ OSStatus nuiAudioDevice_CoreAudio::Process(AudioDeviceID inDevice, const AudioTi
       mOutputBuffers[ch] = &mOutputSamples[ch][0];
     }
   }
+    
+  processHostTime = inOutputTime->mHostTime;
   
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // We are now ready to call our processing delegate:

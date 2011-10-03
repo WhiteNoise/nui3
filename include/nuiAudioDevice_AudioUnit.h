@@ -28,6 +28,8 @@ public:
                     UInt32 inBusNumber,
                     uint uNumFrames, AudioBufferList* ioData);
   
+    void pausePlayback();
+    void resumePlayback();
 protected:
   
   void EnumSampleRates();

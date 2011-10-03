@@ -111,6 +111,14 @@ void objCCallOnInitWithURL(void* pUIApplication, const nglString &url)
 	App->CallOnInit();
 }
 
+void objCCallOnOpenURL(const nglString &url)
+{
+    std::list<nglPath> paths;
+    paths.push_back( url );
+    
+    App->OpenDocuments( paths );
+}
+
 void objCCallOnWillExit()
 {
   NGL_ASSERT(App);
