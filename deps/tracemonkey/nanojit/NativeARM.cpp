@@ -100,7 +100,7 @@ inline uint32_t
 Assembler::CountLeadingZeroes(uint32_t data)
 {
     uint32_t    leading_zeroes;
-
+/*
     // We can't do CLZ on anything earlier than ARMv5. Architectures as early
     // as that aren't supported, but assert that we aren't running on one
     // anyway.
@@ -129,6 +129,7 @@ Assembler::CountLeadingZeroes(uint32_t data)
     // WinCE can do this with an intrinsic.
     leading_zeroes = _CountLeadingZeros(data);
 #else
+ */
     // Other platforms must fall back to a C routine. This won't be as
     // efficient as the CLZ instruction, but it is functional.
     uint32_t    try_shift;
@@ -143,7 +144,7 @@ Assembler::CountLeadingZeroes(uint32_t data)
             leading_zeroes = shift;
         }
     }
-#endif
+//#endif
 
     // Assert that the operation worked!
     NanoAssert(((0xffffffff >> leading_zeroes) & data) == data);

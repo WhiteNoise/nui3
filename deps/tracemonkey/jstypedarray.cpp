@@ -1241,8 +1241,9 @@ JSPropertySpec TypedArray::jsprops[] = {
  */
 
 #define IMPL_TYPED_ARRAY_STATICS(_typedArray)                                  \
+template<> JSObjectOps _typedArray::fastObjectOps;                             \
 template<> JSObjectMap _typedArray::fastObjectMap(&_typedArray::fastObjectOps, \
-                                                  JSObjectMap::SHAPELESS);     \
+JSObjectMap::SHAPELESS);                                                        \
 template<> JSObjectOps _typedArray::fastObjectOps = {                          \
     &_typedArray::fastObjectMap,                                               \
     _typedArray::obj_lookupProperty,                                           \
@@ -1265,7 +1266,8 @@ template<> JSObjectOps _typedArray::fastObjectOps = {                          \
 template<> JSFunctionSpec _typedArray::jsfuncs[] = {                           \
     JS_FN("slice", _typedArray::fun_slice, 2, 0),                              \
     JS_FS_END                                                                  \
-}
+}                                                                             \
+   
 
 #define IMPL_TYPED_ARRAY_SLOW_CLASS(_typedArray)                               \
 {                                                                              \
@@ -1298,7 +1300,8 @@ do {                                                                           \
     if (!proto)                                                                \
         return NULL;                                                           \
     proto->setPrivate(0);                                                      \
-} while (0)
+} while (0)                                                                   \
+
 
 IMPL_TYPED_ARRAY_STATICS(Int8Array);
 IMPL_TYPED_ARRAY_STATICS(Uint8Array);

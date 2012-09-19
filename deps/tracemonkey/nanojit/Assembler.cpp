@@ -38,9 +38,11 @@
  * ***** END LICENSE BLOCK ***** */
 #include "js-confdefs.h"
 
-#include "nanojit.h"
+
 
 #ifdef FEATURE_NANOJIT
+
+#include "nanojit.h"
 
 #ifdef VTUNE
 #include "../core/CodegenLIR.h"
