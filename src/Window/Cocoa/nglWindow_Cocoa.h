@@ -22,10 +22,10 @@
   uint32        mModifiers;
 }
 
-+ (Class) layerClass;
+//+ (Class) layerClass;
 - (id) initWithFrame: (NSRect) rect andNGLWindow: (nglWindow*) pNGLWindow;
-- (id) initWithWindow: (nglNSWindow*)pNSWindow;
-- (void) setContext: (void*) pContext renderBuffer: (GLint) buffer;
+//- (id) initWithWindow: (nglNSWindow*)pNSWindow;
+//- (void) setContext: (void*) pContext renderBuffer: (GLint) buffer;
 - (void) dealloc;
 - (void) invalidate;
 - (nglWindow *) getNGLWindow;

@@ -529,7 +529,9 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
         gAvailableTouches.push_back(rTouch.mTouchId);
         gPressedTouches[rTouch.mTouchId] = false;
         
-        mTouches.erase(it);
+        it = mTouches.find(pTouch);
+        if(it != mTouches.end())
+           mTouches.erase(it);
         
       }
       else if (rTouch.X != x || rTouch.Y != y)
@@ -759,13 +761,14 @@ extern float NUI_INV_SCALE_FACTOR;
   rect.origin.y = 0;
   if ((self = [super initWithFrame:rect]))
   {
-    if ([self respondsToSelector:@selector(contentScaleFactor)])
+    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
     {
       /* on iOS 4.0, use contentsScaleFactor */
       NUI_SCALE_FACTOR = [UIScreen mainScreen].scale;
       NUI_INV_SCALE_FACTOR = 1.0f / NUI_SCALE_FACTOR;
-      NSLog(@"Scale: %f\n", self.contentScaleFactor);
-      self.contentScaleFactor = NUI_SCALE_FACTOR;
+      
+      self.contentScaleFactor = [UIScreen mainScreen].scale;
+        NSLog(@"Scale: %f\n", self.contentScaleFactor);
     }
     else
     {
@@ -888,6 +891,7 @@ extern float NUI_INV_SCALE_FACTOR;
   
   NSLog(@"Resize frame buffer: %d x %d\n", backingWidth, backingHeight);
   
+
   // Angle:
   UIDevice* pUIDev = [UIDevice currentDevice];
   unsigned int orientation = pUIDev.orientation;
