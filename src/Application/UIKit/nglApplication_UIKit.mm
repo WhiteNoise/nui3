@@ -23,6 +23,7 @@ void objCCallOnMemoryWarning();
 
 @implementation nglUIApplication
 
+
 - (void) dealloc
 {
 //  NGL_OUT(_T("[nglUIApplication dealloc]\n"));
@@ -49,6 +50,7 @@ void objCCallOnMemoryWarning();
 */
 @implementation nglUIApplicationDelegate
 
+
 - (void) dealloc
 {
   //NGL_OUT(_T("[nglUIApplicationDelegate dealloc]\n"));
@@ -67,7 +69,25 @@ void objCCallOnMemoryWarning();
 {
 	NGL_ASSERT(App);
 
-    objCCallOnInit(pUIApplication);
+//    objCCallOnInit(pUIApplication);
+    
+	NSURL *launchURL = nil;
+    
+#ifdef NUI_IOS
+    launchURL = [launchOptions objectForKey:NSApplicationLaunchOptionsURLKey];	
+#endif
+
+  	if(launchURL)
+  	{
+  		NSString *urlstr = [launchURL absoluteString];
+  		
+  		objCCallOnInitWithURL(pNSApplication, nglString ((CFStringRef)urlstr));
+  	} else {
+  		
+  		objCCallOnInit(pNSApplication);
+  	}
+    
+
 }
 
 - (BOOL) application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation

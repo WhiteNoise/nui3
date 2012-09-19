@@ -15,7 +15,9 @@
 
 @end//nglUIApplication
 
-@interface nglUIApplicationDelegate : NSObject
+@class RootViewController; 
+
+@interface nglUIApplicationDelegate : UIResponder <UIApplicationDelegate>
 {
 }
 - (void) dealloc;
@@ -26,6 +28,7 @@
 - (void) applicationDidReceiveMemoryWarning:  (UIApplication*) pUIApp;
 - (void) applicationSignificantTimeChange:    (UIApplication*) pUIApp;
 - (void) applicationWillTerminate:            (UIApplication*) pUIApp;
+
 
 
 @end//nglUIApplicationDelegate
