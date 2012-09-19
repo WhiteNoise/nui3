@@ -2458,16 +2458,16 @@ void nuiWidget::SetVisible(bool Visible)
     else if (pShowAnim && pShowAnim->IsPlaying())
     {
       //  Do nothing (return)
-      NGL_ASSERT(mVisible == true);
+      //NGL_ASSERT(mVisible == true);
       return;
     }
     else if (mVisible)
     {
       // Do nothing (return)
-      NGL_ASSERT(mVisible == true);
+      //NGL_ASSERT(mVisible == true);
       return;
     }
-    else // !mVisible
+    else if (!mVisible)
     {
       // Start Show Anim if there is one
       if (pShowAnim)
@@ -2492,6 +2492,8 @@ void nuiWidget::SetVisible(bool Visible)
         DebugRefreshInfo();
         ApplyCSSForStateChange(NUI_WIDGET_MATCHTAG_STATE);
       }
+    } else {
+        return;
     }
   }
   else // !Visible

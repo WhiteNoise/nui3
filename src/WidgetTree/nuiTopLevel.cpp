@@ -1669,7 +1669,8 @@ bool nuiTopLevel::DrawTree(class nuiDrawContext *pContext)
     pContext->DrawRect(r, eStrokeAndFillShape);
     pContext->ResetState();
   }
-  
+
+    
   mIsDrawing = false;
 
   return true;
