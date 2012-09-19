@@ -360,6 +360,11 @@ void nglKernel::OnDeactivation()
 {
 }
 
+void nglKernel::OpenDocuments(std::list<nglPath>& paths)
+{
+    
+}
+
 bool nglKernel::IsActive() const
 {
   return mActive;

@@ -385,8 +385,9 @@ static NSString* GetApplicationName(void)
 
 @implementation nglNSApplicationDelegate
 
-- (void)applicationWillFinishLaunching:(NSNotification *)notification
+- (void)applicationWillFinishLaunching:(NSNotification *)aNotification
 {
+    nglNSApplication *pNSApplication = NSApp;
   printf("nglNSApplicationDelegate applicationWillFinishLaunching\n");
   [MenuPopulator populateMainMenu];
   //  [pItem setTarget:NSApp];
@@ -394,35 +395,21 @@ static NSString* GetApplicationName(void)
   
 }
 
-- (void) applicationDidFinishLaunching:       (NSApplication*) pNSApplication
+- (void) applicationDidFinishLaunching:        (NSNotification *) aNotification;
 {
+    NSApplication *pNSApplication = [NSApplication sharedApplication];
+    
   //NGL_OUT(_T("[nglNSApplicationDelegate applicationDidFinishLaunching]\n"));
   NGL_ASSERT(App);
   
   objCCallOnInit(pNSApplication);
 }
 
-- (BOOL)application:(NSApplication *)pNSApplication didFinishLaunchingWithOptions:(NSDictionary *)launchOptions;
-{
-	NGL_ASSERT(App);
-	//NSURL *launchURL = [launchOptions objectForKey:NSApplicationLaunchOptionsURLKey];	
-	//objCCallOnInitWithURL(pNSApplication, nglString ((CFStringRef)@"bleepbox://oauth?oauth_verifier=fffff"));
-	
-  //	if(launchURL)
-  //	{
-  //		NSString *urlstr = [launchURL absoluteString];
-  //		
-  //		objCCallOnInitWithURL(pNSApplication, nglString ((CFStringRef)urlstr));
-  //	} else {
-  //		
-  //		objCCallOnInit(pNSApplication);
-  //	}
-  
-	
-}
 
-- (void) applicationDidBecomeActive:          (NSApplication*) pNSApplication
+- (void) applicationDidBecomeActive:          (NSNotification *) pNotification
 {
+    
+    NSApplication *pNSApplication = [NSApplication sharedApplication];
   NGL_DEBUG( NGL_OUT(_T("[nglNSApplicationDelegate applicationDidBecomeActive]\n")); )
   NGL_ASSERT(App);
   
@@ -440,8 +427,10 @@ static NSString* GetApplicationName(void)
 			pWindow->CallOnActivation();			
 		}
 	}	
+    
+NGL_DEBUG( NGL_OUT(_T("[nglNSApplicationDelegate applicationDidBecomeActive complete]\n")); )
 }
-
+/*
 - (void) applicationDidEnterBackground:         (NSApplication*) pNSApplication
 {
   NGL_DEBUG( NGL_OUT(_T("[nglNSApplicationDelegate applicationDidEnterBackground]\n")); )
@@ -468,11 +457,12 @@ static NSString* GetApplicationName(void)
 {
   //NGL_OUT(_T("[nglNSApplicationDelegate applicationSignificantTimeChange]\n"));
 }
+*/
+- (void) applicationWillTerminate:            (NSNotification *) aNotification;
 
-- (void) applicationWillTerminate:            (NSApplication*) pNSApplication
 {
   //	NGL_DEBUG( NGL_OUT(_T("[nglNSApplicationDelegate applicationWillTerminate]\n")) );
-  
+    NSApplication *pNSApplication = [aNotification object];
 	objCCallOnWillExit();
   
 	NSEnumerator *e = [[pNSApplication windows] objectEnumerator];
@@ -563,7 +553,7 @@ int nglApplication::Main(int argc, const char** argv)
 
   //GetLog().SetLevel(_T("window"), 100);
   
-  nglNSApplication *applicationObject = [nglNSApplication sharedApplication];
+  nglNSApplication *applicationObject = (nglNSApplication *)[nglNSApplication sharedApplication];
   
   nglNSApplicationDelegate* appDelegate = [[nglNSApplicationDelegate alloc] init];
   [applicationObject setDelegate:appDelegate];
