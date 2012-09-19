@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -429,13 +429,10 @@
 		73F084BC12E9BA0700656E84 /* nglFontInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D7F0C3CECAB00902DFE /* nglFontInstance.h */; };
 		73F084BD12E9BA0700656E84 /* nglInputDeviceInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816E2C0C3CECAB00902DFE /* nglInputDeviceInstance.h */; };
 		73F084BE12E9BA0700656E84 /* ConvertUTF.h in Headers */ = {isa = PBXBuildFile; fileRef = E51B694E0C4E564D008EF7A3 /* ConvertUTF.h */; };
-		73F084BF12E9BA0700656E84 /* nglFontBase.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBCF80C5898320026DE07 /* nglFontBase.h */; };
-		73F084C012E9BA0700656E84 /* nglFontLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBF730C5C9FBF0026DE07 /* nglFontLayout.h */; };
 		73F084C112E9BA0700656E84 /* nuiFastDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC7580C63EA070026DE07 /* nuiFastDelegate.h */; };
 		73F084C212E9BA0700656E84 /* nuiSignalsSlots.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC75B0C63EA1A0026DE07 /* nuiSignalsSlots.h */; };
 		73F084C312E9BA0700656E84 /* nuiTreeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A2A6E60C7F2877008E2827 /* nuiTreeView.h */; };
 		73F084C412E9BA0700656E84 /* nuiBindingManager.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EB3A9B0C82270400CF21E2 /* nuiBindingManager.h */; };
-		73F084C512E9BA0700656E84 /* nuiDialog.h in Headers */ = {isa = PBXBuildFile; fileRef = E591D80B0C83272700844D3E /* nuiDialog.h */; };
 		73F084C612E9BA0700656E84 /* nuiHBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DC0C85704900190FF9 /* nuiHBox.h */; };
 		73F084C712E9BA0700656E84 /* nuiVBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DD0C85704900190FF9 /* nuiVBox.h */; };
 		73F084C812E9BA0700656E84 /* nuiSimpleContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = E577AB430C8C071B00CE9A7A /* nuiSimpleContainer.h */; };
@@ -558,7 +555,6 @@
 		73F0853D12E9BA0700656E84 /* nuiAiffWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = 40EAFD780F2780550072C6DE /* nuiAiffWriter.h */; };
 		73F0853E12E9BA0700656E84 /* nuiAttributeAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = E5B678C80F39EFE100DBF325 /* nuiAttributeAnimation.h */; };
 		73F0853F12E9BA0700656E84 /* nuiRangeKnobAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = BC97B4180F41E14100CCA06C /* nuiRangeKnobAttributeEditor.h */; };
-		73F0854012E9BA0700656E84 /* nuiOffscreenView.h in Headers */ = {isa = PBXBuildFile; fileRef = E561CCB00F432B1F003B042C /* nuiOffscreenView.h */; };
 		73F0854112E9BA0700656E84 /* nuiCoverFlow.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EA30180F55926F0057CCA7 /* nuiCoverFlow.h */; };
 		73F0854212E9BA0700656E84 /* nuiGenericAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = E55C02D20F5E99A00045FBFE /* nuiGenericAttributeEditor.h */; };
 		73F0854312E9BA0700656E84 /* nuiProgressBar.h in Headers */ = {isa = PBXBuildFile; fileRef = BC2A8A5C0F691D8800502BAB /* nuiProgressBar.h */; };
@@ -1699,7 +1695,12 @@
 		73F09ABE12E9D09E00656E84 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5D435961004DC5300388BF5 /* ApplicationServices.framework */; };
 		73F09ABF12E9D09E00656E84 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 408D9C88109764A000AEE78A /* QTKit.framework */; };
 		73F09AC012E9D09E00656E84 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59DF6CC1196396000E46CF8 /* AudioToolbox.framework */; settings = {ATTRIBUTES = (Required, ); }; };
+		872B9F0115D8397C00CC7609 /* libthirdparty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DD341012E09CA800F1EF4E /* libthirdparty.a */; };
+		8733294D1440917C00F3BE0C /* libthirdparty_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DD3FF412E0B08300F1EF4E /* libthirdparty_ios.a */; };
+		8733294E1440918700F3BE0C /* libthirdparty_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DD3FF412E0B08300F1EF4E /* libthirdparty_ios.a */; };
+		8733294F1440919000F3BE0C /* libthirdparty_ios_arm7.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73F09AC312E9D09E00656E84 /* libthirdparty_ios_arm7.a */; };
 		8784DF66142FA33F0063AEB4 /* nuiAudioDevice_AudioUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = 8784DF65142FA33F0063AEB4 /* nuiAudioDevice_AudioUnit.h */; };
+		879C1F1415008076005BFA87 /* NativeARM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E52CBE0F11750ADF0031DFA8 /* NativeARM.cpp */; };
 		941A98BB0E8BEAAE00CAFC3A /* nuiScrollingLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941A98BA0E8BEAAE00CAFC3A /* nuiScrollingLabel.cpp */; };
 		941A98BC0E8BEAAE00CAFC3A /* nuiScrollingLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941A98BA0E8BEAAE00CAFC3A /* nuiScrollingLabel.cpp */; };
 		941A98BE0E8BEAD000CAFC3A /* nuiScrollingLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 941A98BD0E8BEAD000CAFC3A /* nuiScrollingLabel.h */; };
@@ -2282,13 +2283,10 @@
 		E52413D511CB860B0025CA71 /* nglFontInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D7F0C3CECAB00902DFE /* nglFontInstance.h */; };
 		E52413D611CB860B0025CA71 /* nglInputDeviceInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816E2C0C3CECAB00902DFE /* nglInputDeviceInstance.h */; };
 		E52413D711CB860B0025CA71 /* ConvertUTF.h in Headers */ = {isa = PBXBuildFile; fileRef = E51B694E0C4E564D008EF7A3 /* ConvertUTF.h */; };
-		E52413D811CB860B0025CA71 /* nglFontBase.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBCF80C5898320026DE07 /* nglFontBase.h */; };
-		E52413D911CB860B0025CA71 /* nglFontLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBF730C5C9FBF0026DE07 /* nglFontLayout.h */; };
 		E524144711CB860B0025CA71 /* nuiFastDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC7580C63EA070026DE07 /* nuiFastDelegate.h */; };
 		E524144811CB860B0025CA71 /* nuiSignalsSlots.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC75B0C63EA1A0026DE07 /* nuiSignalsSlots.h */; };
 		E524144A11CB860B0025CA71 /* nuiTreeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A2A6E60C7F2877008E2827 /* nuiTreeView.h */; };
 		E524144B11CB860B0025CA71 /* nuiBindingManager.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EB3A9B0C82270400CF21E2 /* nuiBindingManager.h */; };
-		E524144C11CB860B0025CA71 /* nuiDialog.h in Headers */ = {isa = PBXBuildFile; fileRef = E591D80B0C83272700844D3E /* nuiDialog.h */; };
 		E524144D11CB860B0025CA71 /* nuiHBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DC0C85704900190FF9 /* nuiHBox.h */; };
 		E524144E11CB860B0025CA71 /* nuiVBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DD0C85704900190FF9 /* nuiVBox.h */; };
 		E524145011CB860B0025CA71 /* nuiSimpleContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = E577AB430C8C071B00CE9A7A /* nuiSimpleContainer.h */; };
@@ -2411,7 +2409,6 @@
 		E52414EF11CB860B0025CA71 /* nuiAiffWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = 40EAFD780F2780550072C6DE /* nuiAiffWriter.h */; };
 		E52414F011CB860B0025CA71 /* nuiAttributeAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = E5B678C80F39EFE100DBF325 /* nuiAttributeAnimation.h */; };
 		E52414F111CB860B0025CA71 /* nuiRangeKnobAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = BC97B4180F41E14100CCA06C /* nuiRangeKnobAttributeEditor.h */; };
-		E52414F211CB860B0025CA71 /* nuiOffscreenView.h in Headers */ = {isa = PBXBuildFile; fileRef = E561CCB00F432B1F003B042C /* nuiOffscreenView.h */; };
 		E52414F311CB860B0025CA71 /* nuiCoverFlow.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EA30180F55926F0057CCA7 /* nuiCoverFlow.h */; };
 		E52414F411CB860B0025CA71 /* nuiGenericAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = E55C02D20F5E99A00045FBFE /* nuiGenericAttributeEditor.h */; };
 		E52414F511CB860B0025CA71 /* nuiProgressBar.h in Headers */ = {isa = PBXBuildFile; fileRef = BC2A8A5C0F691D8800502BAB /* nuiProgressBar.h */; };
@@ -2935,13 +2932,10 @@
 		E5241CAC11CBCE9E0025CA71 /* nglFontInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D7F0C3CECAB00902DFE /* nglFontInstance.h */; };
 		E5241CAD11CBCE9E0025CA71 /* nglInputDeviceInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816E2C0C3CECAB00902DFE /* nglInputDeviceInstance.h */; };
 		E5241CAE11CBCE9E0025CA71 /* ConvertUTF.h in Headers */ = {isa = PBXBuildFile; fileRef = E51B694E0C4E564D008EF7A3 /* ConvertUTF.h */; };
-		E5241CAF11CBCE9E0025CA71 /* nglFontBase.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBCF80C5898320026DE07 /* nglFontBase.h */; };
-		E5241CB011CBCE9E0025CA71 /* nglFontLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBF730C5C9FBF0026DE07 /* nglFontLayout.h */; };
 		E5241D1E11CBCE9E0025CA71 /* nuiFastDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC7580C63EA070026DE07 /* nuiFastDelegate.h */; };
 		E5241D1F11CBCE9E0025CA71 /* nuiSignalsSlots.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC75B0C63EA1A0026DE07 /* nuiSignalsSlots.h */; };
 		E5241D2111CBCE9E0025CA71 /* nuiTreeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A2A6E60C7F2877008E2827 /* nuiTreeView.h */; };
 		E5241D2211CBCE9E0025CA71 /* nuiBindingManager.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EB3A9B0C82270400CF21E2 /* nuiBindingManager.h */; };
-		E5241D2311CBCE9E0025CA71 /* nuiDialog.h in Headers */ = {isa = PBXBuildFile; fileRef = E591D80B0C83272700844D3E /* nuiDialog.h */; };
 		E5241D2411CBCE9E0025CA71 /* nuiHBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DC0C85704900190FF9 /* nuiHBox.h */; };
 		E5241D2511CBCE9E0025CA71 /* nuiVBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DD0C85704900190FF9 /* nuiVBox.h */; };
 		E5241D2711CBCE9E0025CA71 /* nuiSimpleContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = E577AB430C8C071B00CE9A7A /* nuiSimpleContainer.h */; };
@@ -3064,7 +3058,6 @@
 		E5241DC511CBCE9E0025CA71 /* nuiAiffWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = 40EAFD780F2780550072C6DE /* nuiAiffWriter.h */; };
 		E5241DC611CBCE9E0025CA71 /* nuiAttributeAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = E5B678C80F39EFE100DBF325 /* nuiAttributeAnimation.h */; };
 		E5241DC711CBCE9E0025CA71 /* nuiRangeKnobAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = BC97B4180F41E14100CCA06C /* nuiRangeKnobAttributeEditor.h */; };
-		E5241DC811CBCE9E0025CA71 /* nuiOffscreenView.h in Headers */ = {isa = PBXBuildFile; fileRef = E561CCB00F432B1F003B042C /* nuiOffscreenView.h */; };
 		E5241DC911CBCE9E0025CA71 /* nuiCoverFlow.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EA30180F55926F0057CCA7 /* nuiCoverFlow.h */; };
 		E5241DCA11CBCE9E0025CA71 /* nuiGenericAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = E55C02D20F5E99A00045FBFE /* nuiGenericAttributeEditor.h */; };
 		E5241DCB11CBCE9E0025CA71 /* nuiProgressBar.h in Headers */ = {isa = PBXBuildFile; fileRef = BC2A8A5C0F691D8800502BAB /* nuiProgressBar.h */; };
@@ -3873,8 +3866,6 @@
 		E561099B0EF5ED83000170A7 /* nuiUnicode.h in Headers */ = {isa = PBXBuildFile; fileRef = E56109990EF5ED82000170A7 /* nuiUnicode.h */; };
 		E561099D0EF5F3F1000170A7 /* nuiUnicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E561099C0EF5F3F1000170A7 /* nuiUnicode.cpp */; };
 		E561099E0EF5F3F1000170A7 /* nuiUnicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E561099C0EF5F3F1000170A7 /* nuiUnicode.cpp */; };
-		E561CCB10F432B1F003B042C /* nuiOffscreenView.h in Headers */ = {isa = PBXBuildFile; fileRef = E561CCB00F432B1F003B042C /* nuiOffscreenView.h */; };
-		E561CCB30F432B1F003B042C /* nuiOffscreenView.h in Headers */ = {isa = PBXBuildFile; fileRef = E561CCB00F432B1F003B042C /* nuiOffscreenView.h */; };
 		E567ADF70F73D14D009A9D6F /* nui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816D520C3CECAB00902DFE /* nui.cpp */; };
 		E56D24040FE2F3AD00C16F53 /* nuiFlowView.h in Headers */ = {isa = PBXBuildFile; fileRef = E56D24020FE2F3AD00C16F53 /* nuiFlowView.h */; };
 		E56D24050FE2F3AD00C16F53 /* nuiFlowView.h in Headers */ = {isa = PBXBuildFile; fileRef = E56D24020FE2F3AD00C16F53 /* nuiFlowView.h */; };
@@ -3904,22 +3895,16 @@
 		E57951D3100AB47200821E44 /* nglStringConv_iconv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5795182100AB20400821E44 /* nglStringConv_iconv.cpp */; };
 		E57BBCD90C5800A30026DE07 /* nuiFontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E57BBCD70C5800A30026DE07 /* nuiFontManager.cpp */; };
 		E57BBCDB0C5800A30026DE07 /* nuiFontManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E57BBCD70C5800A30026DE07 /* nuiFontManager.cpp */; };
-		E57BBCF90C5898320026DE07 /* nglFontBase.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBCF80C5898320026DE07 /* nglFontBase.h */; };
-		E57BBCFA0C5898320026DE07 /* nglFontBase.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBCF80C5898320026DE07 /* nglFontBase.h */; };
-		E57BBF740C5C9FBF0026DE07 /* nglFontLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBF730C5C9FBF0026DE07 /* nglFontLayout.h */; };
-		E57BBF750C5C9FBF0026DE07 /* nglFontLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBF730C5C9FBF0026DE07 /* nglFontLayout.h */; };
 		E57BC7560C63E9E00026DE07 /* nuiSignalsSlots.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E57BC7550C63E9E00026DE07 /* nuiSignalsSlots.cpp */; };
 		E57BC7570C63E9E00026DE07 /* nuiSignalsSlots.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E57BC7550C63E9E00026DE07 /* nuiSignalsSlots.cpp */; };
 		E57BC7590C63EA070026DE07 /* nuiFastDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC7580C63EA070026DE07 /* nuiFastDelegate.h */; };
 		E57BC75A0C63EA070026DE07 /* nuiFastDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC7580C63EA070026DE07 /* nuiFastDelegate.h */; };
 		E57BC75C0C63EA1A0026DE07 /* nuiSignalsSlots.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC75B0C63EA1A0026DE07 /* nuiSignalsSlots.h */; };
 		E57BC75D0C63EA1A0026DE07 /* nuiSignalsSlots.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC75B0C63EA1A0026DE07 /* nuiSignalsSlots.h */; };
-		E57D21481318B327007B3B7A /* libthirdparty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DD341012E09CA800F1EF4E /* libthirdparty.a */; };
 		E57D214B1318B35A007B3B7A /* nuiNavigationViewDecoration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BC19B5CE12AFC0F1002DA665 /* nuiNavigationViewDecoration.cpp */; };
 		E57D214C1318B35B007B3B7A /* nuiNavigationViewDecoration.h in Headers */ = {isa = PBXBuildFile; fileRef = BC19B5D312AFC0FE002DA665 /* nuiNavigationViewDecoration.h */; };
 		E57D214D1318B35E007B3B7A /* nuiNavigationViewDecoration.h in Headers */ = {isa = PBXBuildFile; fileRef = BC19B5D312AFC0FE002DA665 /* nuiNavigationViewDecoration.h */; };
 		E57D214E1318B35F007B3B7A /* nuiNavigationViewDecoration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BC19B5CE12AFC0F1002DA665 /* nuiNavigationViewDecoration.cpp */; };
-		E57D215F1318B45F007B3B7A /* libthirdparty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DD341012E09CA800F1EF4E /* libthirdparty.a */; };
 		E57D818113B386F000348211 /* nuiNavigationBarStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = BC2475021377D7EA000F1ABB /* nuiNavigationBarStyle.h */; };
 		E57D818213B386F100348211 /* nuiNavigationBarStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = BC2475021377D7EA000F1ABB /* nuiNavigationBarStyle.h */; };
 		E57D818313B386F200348211 /* nuiNavigationBarStyle.h in Headers */ = {isa = PBXBuildFile; fileRef = BC2475021377D7EA000F1ABB /* nuiNavigationBarStyle.h */; };
@@ -4288,8 +4273,6 @@
 		E58DF27C1268844C007E63DE /* nuiMatrixNode.h in Headers */ = {isa = PBXBuildFile; fileRef = E58DF2781268844C007E63DE /* nuiMatrixNode.h */; };
 		E58DF27D1268844C007E63DE /* nuiMatrixNode.h in Headers */ = {isa = PBXBuildFile; fileRef = E58DF2781268844C007E63DE /* nuiMatrixNode.h */; };
 		E58DF27E1268844C007E63DE /* nuiMatrixNode.h in Headers */ = {isa = PBXBuildFile; fileRef = E58DF2781268844C007E63DE /* nuiMatrixNode.h */; };
-		E58E1B9012EDDF2600D92EEB /* libthirdparty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DD341012E09CA800F1EF4E /* libthirdparty.a */; };
-		E58E1B9112EDDF2E00D92EEB /* libthirdparty_ios_arm7.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73F09AC312E9D09E00656E84 /* libthirdparty_ios_arm7.a */; };
 		E58E8A97115057B000C2D204 /* nuiTypeTraits.h in Headers */ = {isa = PBXBuildFile; fileRef = E58E8A96115057B000C2D204 /* nuiTypeTraits.h */; };
 		E58E8A98115057B000C2D204 /* nuiTypeTraits.h in Headers */ = {isa = PBXBuildFile; fileRef = E58E8A96115057B000C2D204 /* nuiTypeTraits.h */; };
 		E5901BEB1043F2C200D3FD5F /* nuiToggleButton.h in Headers */ = {isa = PBXBuildFile; fileRef = E5901BEA1043F2C200D3FD5F /* nuiToggleButton.h */; };
@@ -4322,8 +4305,6 @@
 		E591D61E0C82DBF600844D3E /* nuiFormater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E591D61B0C82DBF600844D3E /* nuiFormater.cpp */; };
 		E591D6200C82DBF600844D3E /* nuiFormatedLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E591D61A0C82DBF600844D3E /* nuiFormatedLabel.cpp */; };
 		E591D6210C82DBF600844D3E /* nuiFormater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E591D61B0C82DBF600844D3E /* nuiFormater.cpp */; };
-		E591D80C0C83272700844D3E /* nuiDialog.h in Headers */ = {isa = PBXBuildFile; fileRef = E591D80B0C83272700844D3E /* nuiDialog.h */; };
-		E591D80D0C83272700844D3E /* nuiDialog.h in Headers */ = {isa = PBXBuildFile; fileRef = E591D80B0C83272700844D3E /* nuiDialog.h */; };
 		E592C51D0EFE8D0900340B35 /* nglModule_Carbon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816D300C3CECAB00902DFE /* nglModule_Carbon.cpp */; };
 		E592C51E0EFE8D0900340B35 /* nglPlugin_Carbon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816D310C3CECAB00902DFE /* nglPlugin_Carbon.cpp */; };
 		E592C5200EFE8D4100340B35 /* nglConsole_Carbon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816D2C0C3CECAB00902DFE /* nglConsole_Carbon.cpp */; };
@@ -4529,13 +4510,10 @@
 		E5A8CDB611E33A54004E14CE /* nglFontInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D7F0C3CECAB00902DFE /* nglFontInstance.h */; };
 		E5A8CDB711E33A54004E14CE /* nglInputDeviceInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816E2C0C3CECAB00902DFE /* nglInputDeviceInstance.h */; };
 		E5A8CDB811E33A54004E14CE /* ConvertUTF.h in Headers */ = {isa = PBXBuildFile; fileRef = E51B694E0C4E564D008EF7A3 /* ConvertUTF.h */; };
-		E5A8CDB911E33A54004E14CE /* nglFontBase.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBCF80C5898320026DE07 /* nglFontBase.h */; };
-		E5A8CDBA11E33A54004E14CE /* nglFontLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBF730C5C9FBF0026DE07 /* nglFontLayout.h */; };
 		E5A8CE2811E33A54004E14CE /* nuiFastDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC7580C63EA070026DE07 /* nuiFastDelegate.h */; };
 		E5A8CE2911E33A54004E14CE /* nuiSignalsSlots.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC75B0C63EA1A0026DE07 /* nuiSignalsSlots.h */; };
 		E5A8CE2B11E33A54004E14CE /* nuiTreeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A2A6E60C7F2877008E2827 /* nuiTreeView.h */; };
 		E5A8CE2C11E33A54004E14CE /* nuiBindingManager.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EB3A9B0C82270400CF21E2 /* nuiBindingManager.h */; };
-		E5A8CE2D11E33A54004E14CE /* nuiDialog.h in Headers */ = {isa = PBXBuildFile; fileRef = E591D80B0C83272700844D3E /* nuiDialog.h */; };
 		E5A8CE2E11E33A54004E14CE /* nuiHBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DC0C85704900190FF9 /* nuiHBox.h */; };
 		E5A8CE2F11E33A54004E14CE /* nuiVBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DD0C85704900190FF9 /* nuiVBox.h */; };
 		E5A8CE3111E33A54004E14CE /* nuiSimpleContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = E577AB430C8C071B00CE9A7A /* nuiSimpleContainer.h */; };
@@ -4659,7 +4637,6 @@
 		E5A8CED011E33A54004E14CE /* nuiAiffWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = 40EAFD780F2780550072C6DE /* nuiAiffWriter.h */; };
 		E5A8CED111E33A54004E14CE /* nuiAttributeAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = E5B678C80F39EFE100DBF325 /* nuiAttributeAnimation.h */; };
 		E5A8CED211E33A54004E14CE /* nuiRangeKnobAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = BC97B4180F41E14100CCA06C /* nuiRangeKnobAttributeEditor.h */; };
-		E5A8CED311E33A54004E14CE /* nuiOffscreenView.h in Headers */ = {isa = PBXBuildFile; fileRef = E561CCB00F432B1F003B042C /* nuiOffscreenView.h */; };
 		E5A8CED411E33A54004E14CE /* nuiCoverFlow.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EA30180F55926F0057CCA7 /* nuiCoverFlow.h */; };
 		E5A8CED511E33A54004E14CE /* nuiGenericAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = E55C02D20F5E99A00045FBFE /* nuiGenericAttributeEditor.h */; };
 		E5A8CED611E33A54004E14CE /* nuiProgressBar.h in Headers */ = {isa = PBXBuildFile; fileRef = BC2A8A5C0F691D8800502BAB /* nuiProgressBar.h */; };
@@ -5228,13 +5205,10 @@
 		E5D63FC11209AB9C009C26A9 /* nglFontInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816D7F0C3CECAB00902DFE /* nglFontInstance.h */; };
 		E5D63FC21209AB9C009C26A9 /* nglInputDeviceInstance.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816E2C0C3CECAB00902DFE /* nglInputDeviceInstance.h */; };
 		E5D63FC31209AB9C009C26A9 /* ConvertUTF.h in Headers */ = {isa = PBXBuildFile; fileRef = E51B694E0C4E564D008EF7A3 /* ConvertUTF.h */; };
-		E5D63FC41209AB9C009C26A9 /* nglFontBase.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBCF80C5898320026DE07 /* nglFontBase.h */; };
-		E5D63FC51209AB9C009C26A9 /* nglFontLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BBF730C5C9FBF0026DE07 /* nglFontLayout.h */; };
 		E5D640331209AB9C009C26A9 /* nuiFastDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC7580C63EA070026DE07 /* nuiFastDelegate.h */; };
 		E5D640341209AB9C009C26A9 /* nuiSignalsSlots.h in Headers */ = {isa = PBXBuildFile; fileRef = E57BC75B0C63EA1A0026DE07 /* nuiSignalsSlots.h */; };
 		E5D640361209AB9C009C26A9 /* nuiTreeView.h in Headers */ = {isa = PBXBuildFile; fileRef = E5A2A6E60C7F2877008E2827 /* nuiTreeView.h */; };
 		E5D640371209AB9C009C26A9 /* nuiBindingManager.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EB3A9B0C82270400CF21E2 /* nuiBindingManager.h */; };
-		E5D640381209AB9C009C26A9 /* nuiDialog.h in Headers */ = {isa = PBXBuildFile; fileRef = E591D80B0C83272700844D3E /* nuiDialog.h */; };
 		E5D640391209AB9C009C26A9 /* nuiHBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DC0C85704900190FF9 /* nuiHBox.h */; };
 		E5D6403A1209AB9C009C26A9 /* nuiVBox.h in Headers */ = {isa = PBXBuildFile; fileRef = E517B0DD0C85704900190FF9 /* nuiVBox.h */; };
 		E5D6403C1209AB9C009C26A9 /* nuiSimpleContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = E577AB430C8C071B00CE9A7A /* nuiSimpleContainer.h */; };
@@ -5358,7 +5332,6 @@
 		E5D640DB1209AB9C009C26A9 /* nuiAiffWriter.h in Headers */ = {isa = PBXBuildFile; fileRef = 40EAFD780F2780550072C6DE /* nuiAiffWriter.h */; };
 		E5D640DC1209AB9C009C26A9 /* nuiAttributeAnimation.h in Headers */ = {isa = PBXBuildFile; fileRef = E5B678C80F39EFE100DBF325 /* nuiAttributeAnimation.h */; };
 		E5D640DD1209AB9C009C26A9 /* nuiRangeKnobAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = BC97B4180F41E14100CCA06C /* nuiRangeKnobAttributeEditor.h */; };
-		E5D640DE1209AB9C009C26A9 /* nuiOffscreenView.h in Headers */ = {isa = PBXBuildFile; fileRef = E561CCB00F432B1F003B042C /* nuiOffscreenView.h */; };
 		E5D640DF1209AB9C009C26A9 /* nuiCoverFlow.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EA30180F55926F0057CCA7 /* nuiCoverFlow.h */; };
 		E5D640E01209AB9C009C26A9 /* nuiGenericAttributeEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = E55C02D20F5E99A00045FBFE /* nuiGenericAttributeEditor.h */; };
 		E5D640E11209AB9C009C26A9 /* nuiProgressBar.h in Headers */ = {isa = PBXBuildFile; fileRef = BC2A8A5C0F691D8800502BAB /* nuiProgressBar.h */; };
@@ -6433,7 +6406,6 @@
 		E5DD340B12E09CA800F1EF4E /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59CD7FA0CDAAAE100B1C729 /* CoreAudioKit.framework */; };
 		E5DD340C12E09CA800F1EF4E /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5D435961004DC5300388BF5 /* ApplicationServices.framework */; };
 		E5DD340D12E09CA800F1EF4E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59DF6CC1196396000E46CF8 /* AudioToolbox.framework */; };
-		E5DD343F12E09FC400F1EF4E /* libthirdparty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DD341012E09CA800F1EF4E /* libthirdparty.a */; };
 		E5DD3A5E12E0B08300F1EF4E /* ftlist.h in Headers */ = {isa = PBXBuildFile; fileRef = E58168180C3CECA800902DFE /* ftlist.h */; };
 		E5DD3A5F12E0B08300F1EF4E /* jpeglib.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816A9A0C3CECA900902DFE /* jpeglib.h */; };
 		E5DD3A6012E0B08300F1EF4E /* jpegint.h in Headers */ = {isa = PBXBuildFile; fileRef = E5816A990C3CECA900902DFE /* jpegint.h */; };
@@ -6769,7 +6741,6 @@
 		E5DD3CEE12E0B08300F1EF4E /* LIR.h in Headers */ = {isa = PBXBuildFile; fileRef = E52CBE0B11750ADF0031DFA8 /* LIR.h */; };
 		E5DD3CEF12E0B08300F1EF4E /* nanojit.h in Headers */ = {isa = PBXBuildFile; fileRef = E52CBE0D11750ADF0031DFA8 /* nanojit.h */; };
 		E5DD3CF012E0B08300F1EF4E /* Native.h in Headers */ = {isa = PBXBuildFile; fileRef = E52CBE0E11750ADF0031DFA8 /* Native.h */; };
-		E5DD3CF112E0B08300F1EF4E /* NativeARM.h in Headers */ = {isa = PBXBuildFile; fileRef = E52CBE1011750ADF0031DFA8 /* NativeARM.h */; };
 		E5DD3CF212E0B08300F1EF4E /* Nativei386.h in Headers */ = {isa = PBXBuildFile; fileRef = E52CBE1211750ADF0031DFA8 /* Nativei386.h */; };
 		E5DD3CF312E0B08300F1EF4E /* NativeMIPS.h in Headers */ = {isa = PBXBuildFile; fileRef = E52CBE1411750ADF0031DFA8 /* NativeMIPS.h */; };
 		E5DD3CF412E0B08300F1EF4E /* NativePPC.h in Headers */ = {isa = PBXBuildFile; fileRef = E52CBE1611750ADF0031DFA8 /* NativePPC.h */; };
@@ -7067,7 +7038,6 @@
 		E5DD3F6412E0B08300F1EF4E /* Containers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E52CBE0611750ADF0031DFA8 /* Containers.cpp */; };
 		E5DD3F6512E0B08300F1EF4E /* Fragmento.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E52CBE0811750ADF0031DFA8 /* Fragmento.cpp */; };
 		E5DD3F6612E0B08300F1EF4E /* LIR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E52CBE0A11750ADF0031DFA8 /* LIR.cpp */; };
-		E5DD3F6712E0B08300F1EF4E /* NativeARM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E52CBE0F11750ADF0031DFA8 /* NativeARM.cpp */; };
 		E5DD3F6812E0B08300F1EF4E /* Nativei386.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E52CBE1111750ADF0031DFA8 /* Nativei386.cpp */; };
 		E5DD3F6912E0B08300F1EF4E /* NativeMIPS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E52CBE1311750ADF0031DFA8 /* NativeMIPS.cpp */; };
 		E5DD3F6A12E0B08300F1EF4E /* NativePPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E52CBE1511750ADF0031DFA8 /* NativePPC.cpp */; };
@@ -7159,8 +7129,6 @@
 		E5DD3FEF12E0B08300F1EF4E /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5D435961004DC5300388BF5 /* ApplicationServices.framework */; };
 		E5DD3FF012E0B08300F1EF4E /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 408D9C88109764A000AEE78A /* QTKit.framework */; };
 		E5DD3FF112E0B08300F1EF4E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59DF6CC1196396000E46CF8 /* AudioToolbox.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		E5DD45A012E0B18000F1EF4E /* libthirdparty_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DD3FF412E0B08300F1EF4E /* libthirdparty_ios.a */; };
-		E5DD45E412E0B5E100F1EF4E /* libthirdparty_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E5DD3FF412E0B08300F1EF4E /* libthirdparty_ios.a */; };
 		E5EA30190F55926F0057CCA7 /* nuiCoverFlow.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EA30180F55926F0057CCA7 /* nuiCoverFlow.h */; };
 		E5EA301B0F55926F0057CCA7 /* nuiCoverFlow.h in Headers */ = {isa = PBXBuildFile; fileRef = E5EA30180F55926F0057CCA7 /* nuiCoverFlow.h */; };
 		E5EA301D0F55963C0057CCA7 /* nuiCoverFlow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5EA301C0F55963C0057CCA7 /* nuiCoverFlow.cpp */; };
@@ -7200,54 +7168,40 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		73F09ACA12E9D0B200656E84 /* PBXContainerItemProxy */ = {
+		87332950144091E500F3BE0C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 73F097E812E9D09E00656E84;
 			remoteInfo = thirdparty_ios_arm7;
 		};
-		E57D21461318B31E007B3B7A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E5DD2E8D12E09CA700F1EF4E;
-			remoteInfo = thirdparty;
-		};
-		E57D215D1318B458007B3B7A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E5DD2E8D12E09CA700F1EF4E;
-			remoteInfo = thirdparty;
-		};
-		E5DD343D12E09FB900F1EF4E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E5DD2E8D12E09CA700F1EF4E;
-			remoteInfo = thirdparty;
-		};
-		E5DD3A1412E0A3A800F1EF4E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E5DD2E8D12E09CA700F1EF4E;
-			remoteInfo = thirdparty;
-		};
-		E5DD459612E0B13F00F1EF4E /* PBXContainerItemProxy */ = {
+		87332952144091EC00F3BE0C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E5DD3A5C12E0B08300F1EF4E;
 			remoteInfo = thirdparty_ios;
 		};
-		E5DD45E212E0B5D500F1EF4E /* PBXContainerItemProxy */ = {
+		873329551440924900F3BE0C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E5DD3A5C12E0B08300F1EF4E;
 			remoteInfo = thirdparty_ios;
+		};
+		873329571440926000F3BE0C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E5DD2E8D12E09CA700F1EF4E;
+			remoteInfo = thirdparty;
+		};
+		873329591440926600F3BE0C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E5DD2E8D12E09CA700F1EF4E;
+			remoteInfo = thirdparty;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -8945,7 +8899,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E58E1B9112EDDF2E00D92EEB /* libthirdparty_ios_arm7.a in Frameworks */,
+				8733294F1440919000F3BE0C /* libthirdparty_ios_arm7.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8968,7 +8922,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5DD45E412E0B5E100F1EF4E /* libthirdparty_ios.a in Frameworks */,
+				8733294D1440917C00F3BE0C /* libthirdparty_ios.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8976,7 +8930,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5DD45A012E0B18000F1EF4E /* libthirdparty_ios.a in Frameworks */,
+				8733294E1440918700F3BE0C /* libthirdparty_ios.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8984,7 +8938,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5DD343F12E09FC400F1EF4E /* libthirdparty.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8992,7 +8945,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E58E1B9012EDDF2600D92EEB /* libthirdparty.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9000,7 +8952,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E57D21481318B327007B3B7A /* libthirdparty.a in Frameworks */,
+				872B9F0115D8397C00CC7609 /* libthirdparty.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9008,7 +8960,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E57D215F1318B45F007B3B7A /* libthirdparty.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11997,13 +11948,10 @@
 				73F084BC12E9BA0700656E84 /* nglFontInstance.h in Headers */,
 				73F084BD12E9BA0700656E84 /* nglInputDeviceInstance.h in Headers */,
 				73F084BE12E9BA0700656E84 /* ConvertUTF.h in Headers */,
-				73F084BF12E9BA0700656E84 /* nglFontBase.h in Headers */,
-				73F084C012E9BA0700656E84 /* nglFontLayout.h in Headers */,
 				73F084C112E9BA0700656E84 /* nuiFastDelegate.h in Headers */,
 				73F084C212E9BA0700656E84 /* nuiSignalsSlots.h in Headers */,
 				73F084C312E9BA0700656E84 /* nuiTreeView.h in Headers */,
 				73F084C412E9BA0700656E84 /* nuiBindingManager.h in Headers */,
-				73F084C512E9BA0700656E84 /* nuiDialog.h in Headers */,
 				73F084C612E9BA0700656E84 /* nuiHBox.h in Headers */,
 				73F084C712E9BA0700656E84 /* nuiVBox.h in Headers */,
 				73F084C812E9BA0700656E84 /* nuiSimpleContainer.h in Headers */,
@@ -12126,7 +12074,6 @@
 				73F0853D12E9BA0700656E84 /* nuiAiffWriter.h in Headers */,
 				73F0853E12E9BA0700656E84 /* nuiAttributeAnimation.h in Headers */,
 				73F0853F12E9BA0700656E84 /* nuiRangeKnobAttributeEditor.h in Headers */,
-				73F0854012E9BA0700656E84 /* nuiOffscreenView.h in Headers */,
 				73F0854112E9BA0700656E84 /* nuiCoverFlow.h in Headers */,
 				73F0854212E9BA0700656E84 /* nuiGenericAttributeEditor.h in Headers */,
 				73F0854312E9BA0700656E84 /* nuiProgressBar.h in Headers */,
@@ -12838,13 +12785,10 @@
 				E52413D511CB860B0025CA71 /* nglFontInstance.h in Headers */,
 				E52413D611CB860B0025CA71 /* nglInputDeviceInstance.h in Headers */,
 				E52413D711CB860B0025CA71 /* ConvertUTF.h in Headers */,
-				E52413D811CB860B0025CA71 /* nglFontBase.h in Headers */,
-				E52413D911CB860B0025CA71 /* nglFontLayout.h in Headers */,
 				E524144711CB860B0025CA71 /* nuiFastDelegate.h in Headers */,
 				E524144811CB860B0025CA71 /* nuiSignalsSlots.h in Headers */,
 				E524144A11CB860B0025CA71 /* nuiTreeView.h in Headers */,
 				E524144B11CB860B0025CA71 /* nuiBindingManager.h in Headers */,
-				E524144C11CB860B0025CA71 /* nuiDialog.h in Headers */,
 				E524144D11CB860B0025CA71 /* nuiHBox.h in Headers */,
 				E524144E11CB860B0025CA71 /* nuiVBox.h in Headers */,
 				E524145011CB860B0025CA71 /* nuiSimpleContainer.h in Headers */,
@@ -12967,7 +12911,6 @@
 				E52414EF11CB860B0025CA71 /* nuiAiffWriter.h in Headers */,
 				E52414F011CB860B0025CA71 /* nuiAttributeAnimation.h in Headers */,
 				E52414F111CB860B0025CA71 /* nuiRangeKnobAttributeEditor.h in Headers */,
-				E52414F211CB860B0025CA71 /* nuiOffscreenView.h in Headers */,
 				E52414F311CB860B0025CA71 /* nuiCoverFlow.h in Headers */,
 				E52414F411CB860B0025CA71 /* nuiGenericAttributeEditor.h in Headers */,
 				E52414F511CB860B0025CA71 /* nuiProgressBar.h in Headers */,
@@ -13226,13 +13169,10 @@
 				E5241CAC11CBCE9E0025CA71 /* nglFontInstance.h in Headers */,
 				E5241CAD11CBCE9E0025CA71 /* nglInputDeviceInstance.h in Headers */,
 				E5241CAE11CBCE9E0025CA71 /* ConvertUTF.h in Headers */,
-				E5241CAF11CBCE9E0025CA71 /* nglFontBase.h in Headers */,
-				E5241CB011CBCE9E0025CA71 /* nglFontLayout.h in Headers */,
 				E5241D1E11CBCE9E0025CA71 /* nuiFastDelegate.h in Headers */,
 				E5241D1F11CBCE9E0025CA71 /* nuiSignalsSlots.h in Headers */,
 				E5241D2111CBCE9E0025CA71 /* nuiTreeView.h in Headers */,
 				E5241D2211CBCE9E0025CA71 /* nuiBindingManager.h in Headers */,
-				E5241D2311CBCE9E0025CA71 /* nuiDialog.h in Headers */,
 				E5241D2411CBCE9E0025CA71 /* nuiHBox.h in Headers */,
 				E5241D2511CBCE9E0025CA71 /* nuiVBox.h in Headers */,
 				E5241D2711CBCE9E0025CA71 /* nuiSimpleContainer.h in Headers */,
@@ -13355,7 +13295,6 @@
 				E5241DC511CBCE9E0025CA71 /* nuiAiffWriter.h in Headers */,
 				E5241DC611CBCE9E0025CA71 /* nuiAttributeAnimation.h in Headers */,
 				E5241DC711CBCE9E0025CA71 /* nuiRangeKnobAttributeEditor.h in Headers */,
-				E5241DC811CBCE9E0025CA71 /* nuiOffscreenView.h in Headers */,
 				E5241DC911CBCE9E0025CA71 /* nuiCoverFlow.h in Headers */,
 				E5241DCA11CBCE9E0025CA71 /* nuiGenericAttributeEditor.h in Headers */,
 				E5241DCB11CBCE9E0025CA71 /* nuiProgressBar.h in Headers */,
@@ -13619,13 +13558,10 @@
 				E542A05B0C3F0A5900225219 /* nglFontInstance.h in Headers */,
 				E542A05C0C3F0A5900225219 /* nglInputDeviceInstance.h in Headers */,
 				E51B69520C4E564D008EF7A3 /* ConvertUTF.h in Headers */,
-				E57BBCFA0C5898320026DE07 /* nglFontBase.h in Headers */,
-				E57BBF750C5C9FBF0026DE07 /* nglFontLayout.h in Headers */,
 				E57BC75A0C63EA070026DE07 /* nuiFastDelegate.h in Headers */,
 				E57BC75D0C63EA1A0026DE07 /* nuiSignalsSlots.h in Headers */,
 				E5A2A6E80C7F2877008E2827 /* nuiTreeView.h in Headers */,
 				E5EB3A9C0C82270400CF21E2 /* nuiBindingManager.h in Headers */,
-				E591D80C0C83272700844D3E /* nuiDialog.h in Headers */,
 				E517B0DE0C85704900190FF9 /* nuiHBox.h in Headers */,
 				E517B0DF0C85704900190FF9 /* nuiVBox.h in Headers */,
 				E577AB440C8C071B00CE9A7A /* nuiSimpleContainer.h in Headers */,
@@ -13747,7 +13683,6 @@
 				40EAFD7B0F2780550072C6DE /* nuiAiffWriter.h in Headers */,
 				E5B678C90F39EFE100DBF325 /* nuiAttributeAnimation.h in Headers */,
 				BC97B41A0F41E14100CCA06C /* nuiRangeKnobAttributeEditor.h in Headers */,
-				E561CCB10F432B1F003B042C /* nuiOffscreenView.h in Headers */,
 				E5EA30190F55926F0057CCA7 /* nuiCoverFlow.h in Headers */,
 				E55C02D50F5E99A00045FBFE /* nuiGenericAttributeEditor.h in Headers */,
 				BC2A8A5E0F691D8800502BAB /* nuiProgressBar.h in Headers */,
@@ -14004,13 +13939,10 @@
 				E58177D20C3D112C00902DFE /* nglFontInstance.h in Headers */,
 				E58177D30C3D112C00902DFE /* nglInputDeviceInstance.h in Headers */,
 				E51B69500C4E564D008EF7A3 /* ConvertUTF.h in Headers */,
-				E57BBCF90C5898320026DE07 /* nglFontBase.h in Headers */,
-				E57BBF740C5C9FBF0026DE07 /* nglFontLayout.h in Headers */,
 				E57BC7590C63EA070026DE07 /* nuiFastDelegate.h in Headers */,
 				E57BC75C0C63EA1A0026DE07 /* nuiSignalsSlots.h in Headers */,
 				E5A2A6E70C7F2877008E2827 /* nuiTreeView.h in Headers */,
 				E5EB3A9D0C82270400CF21E2 /* nuiBindingManager.h in Headers */,
-				E591D80D0C83272700844D3E /* nuiDialog.h in Headers */,
 				E517B0E00C85704900190FF9 /* nuiHBox.h in Headers */,
 				E517B0E10C85704900190FF9 /* nuiVBox.h in Headers */,
 				E577AB450C8C071B00CE9A7A /* nuiSimpleContainer.h in Headers */,
@@ -14134,7 +14066,6 @@
 				40EAFD7A0F2780550072C6DE /* nuiAiffWriter.h in Headers */,
 				E5B678CB0F39EFE100DBF325 /* nuiAttributeAnimation.h in Headers */,
 				BC97B4190F41E14100CCA06C /* nuiRangeKnobAttributeEditor.h in Headers */,
-				E561CCB30F432B1F003B042C /* nuiOffscreenView.h in Headers */,
 				E5EA301B0F55926F0057CCA7 /* nuiCoverFlow.h in Headers */,
 				E55C02D30F5E99A00045FBFE /* nuiGenericAttributeEditor.h in Headers */,
 				BC2A8A5D0F691D8800502BAB /* nuiProgressBar.h in Headers */,
@@ -14392,13 +14323,10 @@
 				E5A8CDB611E33A54004E14CE /* nglFontInstance.h in Headers */,
 				E5A8CDB711E33A54004E14CE /* nglInputDeviceInstance.h in Headers */,
 				E5A8CDB811E33A54004E14CE /* ConvertUTF.h in Headers */,
-				E5A8CDB911E33A54004E14CE /* nglFontBase.h in Headers */,
-				E5A8CDBA11E33A54004E14CE /* nglFontLayout.h in Headers */,
 				E5A8CE2811E33A54004E14CE /* nuiFastDelegate.h in Headers */,
 				E5A8CE2911E33A54004E14CE /* nuiSignalsSlots.h in Headers */,
 				E5A8CE2B11E33A54004E14CE /* nuiTreeView.h in Headers */,
 				E5A8CE2C11E33A54004E14CE /* nuiBindingManager.h in Headers */,
-				E5A8CE2D11E33A54004E14CE /* nuiDialog.h in Headers */,
 				E5A8CE2E11E33A54004E14CE /* nuiHBox.h in Headers */,
 				E5A8CE2F11E33A54004E14CE /* nuiVBox.h in Headers */,
 				E5A8CE3111E33A54004E14CE /* nuiSimpleContainer.h in Headers */,
@@ -14522,7 +14450,6 @@
 				E5A8CED011E33A54004E14CE /* nuiAiffWriter.h in Headers */,
 				E5A8CED111E33A54004E14CE /* nuiAttributeAnimation.h in Headers */,
 				E5A8CED211E33A54004E14CE /* nuiRangeKnobAttributeEditor.h in Headers */,
-				E5A8CED311E33A54004E14CE /* nuiOffscreenView.h in Headers */,
 				E5A8CED411E33A54004E14CE /* nuiCoverFlow.h in Headers */,
 				E5A8CED511E33A54004E14CE /* nuiGenericAttributeEditor.h in Headers */,
 				E5A8CED611E33A54004E14CE /* nuiProgressBar.h in Headers */,
@@ -14781,13 +14708,10 @@
 				E5D63FC11209AB9C009C26A9 /* nglFontInstance.h in Headers */,
 				E5D63FC21209AB9C009C26A9 /* nglInputDeviceInstance.h in Headers */,
 				E5D63FC31209AB9C009C26A9 /* ConvertUTF.h in Headers */,
-				E5D63FC41209AB9C009C26A9 /* nglFontBase.h in Headers */,
-				E5D63FC51209AB9C009C26A9 /* nglFontLayout.h in Headers */,
 				E5D640331209AB9C009C26A9 /* nuiFastDelegate.h in Headers */,
 				E5D640341209AB9C009C26A9 /* nuiSignalsSlots.h in Headers */,
 				E5D640361209AB9C009C26A9 /* nuiTreeView.h in Headers */,
 				E5D640371209AB9C009C26A9 /* nuiBindingManager.h in Headers */,
-				E5D640381209AB9C009C26A9 /* nuiDialog.h in Headers */,
 				E5D640391209AB9C009C26A9 /* nuiHBox.h in Headers */,
 				E5D6403A1209AB9C009C26A9 /* nuiVBox.h in Headers */,
 				E5D6403C1209AB9C009C26A9 /* nuiSimpleContainer.h in Headers */,
@@ -14911,7 +14835,6 @@
 				E5D640DB1209AB9C009C26A9 /* nuiAiffWriter.h in Headers */,
 				E5D640DC1209AB9C009C26A9 /* nuiAttributeAnimation.h in Headers */,
 				E5D640DD1209AB9C009C26A9 /* nuiRangeKnobAttributeEditor.h in Headers */,
-				E5D640DE1209AB9C009C26A9 /* nuiOffscreenView.h in Headers */,
 				E5D640DF1209AB9C009C26A9 /* nuiCoverFlow.h in Headers */,
 				E5D640E01209AB9C009C26A9 /* nuiGenericAttributeEditor.h in Headers */,
 				E5D640E11209AB9C009C26A9 /* nuiProgressBar.h in Headers */,
@@ -15779,7 +15702,6 @@
 				E5DD3CEE12E0B08300F1EF4E /* LIR.h in Headers */,
 				E5DD3CEF12E0B08300F1EF4E /* nanojit.h in Headers */,
 				E5DD3CF012E0B08300F1EF4E /* Native.h in Headers */,
-				E5DD3CF112E0B08300F1EF4E /* NativeARM.h in Headers */,
 				E5DD3CF212E0B08300F1EF4E /* Nativei386.h in Headers */,
 				E5DD3CF312E0B08300F1EF4E /* NativeMIPS.h in Headers */,
 				E5DD3CF412E0B08300F1EF4E /* NativePPC.h in Headers */,
@@ -15907,7 +15829,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				73F09ACB12E9D0B200656E84 /* PBXTargetDependency */,
+				87332951144091E500F3BE0C /* PBXTargetDependency */,
 			);
 			name = nuiPhone_arm7;
 			productName = nui3D;
@@ -15942,7 +15864,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				E5DD45E312E0B5D500F1EF4E /* PBXTargetDependency */,
+				873329561440924900F3BE0C /* PBXTargetDependency */,
 			);
 			name = nuiPhoneD;
 			productName = nui3D;
@@ -15960,7 +15882,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				E5DD459712E0B13F00F1EF4E /* PBXTargetDependency */,
+				87332953144091EC00F3BE0C /* PBXTargetDependency */,
 			);
 			name = nuiPhone;
 			productName = nui3D;
@@ -15978,7 +15900,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				E5DD343E12E09FB900F1EF4E /* PBXTargetDependency */,
 			);
 			name = nui3;
 			productName = nui3D;
@@ -15996,7 +15917,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				E5DD3A1512E0A3A800F1EF4E /* PBXTargetDependency */,
 			);
 			name = nui3D;
 			productName = nui3D;
@@ -16014,7 +15934,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				E57D21471318B31E007B3B7A /* PBXTargetDependency */,
+				8733295A1440926600F3BE0C /* PBXTargetDependency */,
 			);
 			name = nui3CocoaD;
 			productName = nui3D;
@@ -16032,7 +15952,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				E57D215E1318B458007B3B7A /* PBXTargetDependency */,
+				873329581440926000F3BE0C /* PBXTargetDependency */,
 			);
 			name = nui3Cocoa;
 			productName = nui3D;
@@ -16080,11 +16000,11 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = NO;
-				LastUpgradeCheck = 0410;
+				LastUpgradeCheck = 0420;
 				ORGANIZATIONNAME = libNUI;
 			};
 			buildConfigurationList = E58167300C3CEBF100902DFE /* Build configuration list for PBXProject "nui3" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -16102,8 +16022,8 @@
 				73F0841812E9BA0700656E84 /* nuiPhone_arm7 */,
 				E5A8CCAE11E33A54004E14CE /* nui3CocoaD */,
 				E5D63EBB1209AB9C009C26A9 /* nui3Cocoa */,
-				E5DD2E8D12E09CA700F1EF4E /* thirdparty */,
 				E5DD3A5C12E0B08300F1EF4E /* thirdparty_ios */,
+				E5DD2E8D12E09CA700F1EF4E /* thirdparty */,
 				73F097E812E9D09E00656E84 /* thirdparty_ios_arm7 */,
 			);
 		};
@@ -19072,34 +18992,35 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5DD3D9012E0B08300F1EF4E /* ftdebug.c in Sources */,
-				E5DD3D9112E0B08300F1EF4E /* psaux.c in Sources */,
 				E5DD3D9212E0B08300F1EF4E /* truetype.c in Sources */,
-				E5DD3D9312E0B08300F1EF4E /* sfnt.c in Sources */,
+				E5DD3DA012E0B08300F1EF4E /* pcf.c in Sources */,
+				E5DD3DAB12E0B08300F1EF4E /* jidctflt.c in Sources */,
 				E5DD3D9412E0B08300F1EF4E /* jcmaster.c in Sources */,
+				E5DD3D9D12E0B08300F1EF4E /* bdf.c in Sources */,
+				E5DD3DA912E0B08300F1EF4E /* rdswitch.c in Sources */,
+				E5DD3D9012E0B08300F1EF4E /* ftdebug.c in Sources */,
+				E5DD3D9312E0B08300F1EF4E /* sfnt.c in Sources */,
 				E5DD3D9512E0B08300F1EF4E /* autofit.c in Sources */,
 				E5DD3D9612E0B08300F1EF4E /* jcparam.c in Sources */,
 				E5DD3D9712E0B08300F1EF4E /* jdpostct.c in Sources */,
 				E5DD3D9812E0B08300F1EF4E /* jfdctflt.c in Sources */,
 				E5DD3D9912E0B08300F1EF4E /* jidctint.c in Sources */,
 				E5DD3D9A12E0B08300F1EF4E /* jdmarker.c in Sources */,
-				E5DD3D9B12E0B08300F1EF4E /* jccolor.c in Sources */,
 				E5DD3D9C12E0B08300F1EF4E /* raster.c in Sources */,
-				E5DD3D9D12E0B08300F1EF4E /* bdf.c in Sources */,
+				E5DD3D9B12E0B08300F1EF4E /* jccolor.c in Sources */,
+				879C1F1415008076005BFA87 /* NativeARM.cpp in Sources */,
+				E5DD3D9112E0B08300F1EF4E /* psaux.c in Sources */,
 				E5DD3D9E12E0B08300F1EF4E /* jdmerge.c in Sources */,
 				E5DD3D9F12E0B08300F1EF4E /* jfdctfst.c in Sources */,
-				E5DD3DA012E0B08300F1EF4E /* pcf.c in Sources */,
+				E5DD3DA312E0B08300F1EF4E /* transupp.c in Sources */,
 				E5DD3DA112E0B08300F1EF4E /* jerror.c in Sources */,
 				E5DD3DA212E0B08300F1EF4E /* jmemansi.c in Sources */,
-				E5DD3DA312E0B08300F1EF4E /* transupp.c in Sources */,
 				E5DD3DA412E0B08300F1EF4E /* ftbase.c in Sources */,
 				E5DD3DA512E0B08300F1EF4E /* ftsystem.c in Sources */,
 				E5DD3DA612E0B08300F1EF4E /* rdrle.c in Sources */,
 				E5DD3DA712E0B08300F1EF4E /* jdmainct.c in Sources */,
 				E5DD3DA812E0B08300F1EF4E /* cff.c in Sources */,
-				E5DD3DA912E0B08300F1EF4E /* rdswitch.c in Sources */,
 				E5DD3DAA12E0B08300F1EF4E /* rdbmp.c in Sources */,
-				E5DD3DAB12E0B08300F1EF4E /* jidctflt.c in Sources */,
 				E5DD3DAC12E0B08300F1EF4E /* ftbitmap.c in Sources */,
 				E5DD3DAD12E0B08300F1EF4E /* wrbmp.c in Sources */,
 				E5DD3DAE12E0B08300F1EF4E /* jdapimin.c in Sources */,
@@ -19259,7 +19180,6 @@
 				E5DD3F6412E0B08300F1EF4E /* Containers.cpp in Sources */,
 				E5DD3F6512E0B08300F1EF4E /* Fragmento.cpp in Sources */,
 				E5DD3F6612E0B08300F1EF4E /* LIR.cpp in Sources */,
-				E5DD3F6712E0B08300F1EF4E /* NativeARM.cpp in Sources */,
 				E5DD3F6812E0B08300F1EF4E /* Nativei386.cpp in Sources */,
 				E5DD3F6912E0B08300F1EF4E /* NativeMIPS.cpp in Sources */,
 				E5DD3F6A12E0B08300F1EF4E /* NativePPC.cpp in Sources */,
@@ -19349,40 +19269,30 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		73F09ACB12E9D0B200656E84 /* PBXTargetDependency */ = {
+		87332951144091E500F3BE0C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 73F097E812E9D09E00656E84 /* thirdparty_ios_arm7 */;
-			targetProxy = 73F09ACA12E9D0B200656E84 /* PBXContainerItemProxy */;
+			targetProxy = 87332950144091E500F3BE0C /* PBXContainerItemProxy */;
 		};
-		E57D21471318B31E007B3B7A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E5DD2E8D12E09CA700F1EF4E /* thirdparty */;
-			targetProxy = E57D21461318B31E007B3B7A /* PBXContainerItemProxy */;
-		};
-		E57D215E1318B458007B3B7A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E5DD2E8D12E09CA700F1EF4E /* thirdparty */;
-			targetProxy = E57D215D1318B458007B3B7A /* PBXContainerItemProxy */;
-		};
-		E5DD343E12E09FB900F1EF4E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E5DD2E8D12E09CA700F1EF4E /* thirdparty */;
-			targetProxy = E5DD343D12E09FB900F1EF4E /* PBXContainerItemProxy */;
-		};
-		E5DD3A1512E0A3A800F1EF4E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E5DD2E8D12E09CA700F1EF4E /* thirdparty */;
-			targetProxy = E5DD3A1412E0A3A800F1EF4E /* PBXContainerItemProxy */;
-		};
-		E5DD459712E0B13F00F1EF4E /* PBXTargetDependency */ = {
+		87332953144091EC00F3BE0C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E5DD3A5C12E0B08300F1EF4E /* thirdparty_ios */;
-			targetProxy = E5DD459612E0B13F00F1EF4E /* PBXContainerItemProxy */;
+			targetProxy = 87332952144091EC00F3BE0C /* PBXContainerItemProxy */;
 		};
-		E5DD45E312E0B5D500F1EF4E /* PBXTargetDependency */ = {
+		873329561440924900F3BE0C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E5DD3A5C12E0B08300F1EF4E /* thirdparty_ios */;
-			targetProxy = E5DD45E212E0B5D500F1EF4E /* PBXContainerItemProxy */;
+			targetProxy = 873329551440924900F3BE0C /* PBXContainerItemProxy */;
+		};
+		873329581440926000F3BE0C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E5DD2E8D12E09CA700F1EF4E /* thirdparty */;
+			targetProxy = 873329571440926000F3BE0C /* PBXContainerItemProxy */;
+		};
+		8733295A1440926600F3BE0C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E5DD2E8D12E09CA700F1EF4E /* thirdparty */;
+			targetProxy = 873329591440926600F3BE0C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -19409,7 +19319,7 @@
 					AVMPLUS_IA32,
 				);
 				GCC_THUMB_SUPPORT = NO;
-				GCC_VERSION = 4.2;
+				GCC_VERSION = "";
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				HEADER_SEARCH_PATHS = (
 					.,
@@ -19470,7 +19380,7 @@
 					AVMPLUS_IA32,
 				);
 				GCC_THUMB_SUPPORT = NO;
-				GCC_VERSION = 4.2;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				HEADER_SEARCH_PATHS = (
 					.,
@@ -19498,7 +19408,6 @@
 					deps/libcss/src/libparserutils,
 					deps/libcss/include,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PRODUCT_NAME = thirdparty_ios_arm7;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -19511,6 +19420,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = (
+					armv7,
+					armv6,
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -19532,7 +19445,7 @@
 					AVMPLUS_IA32,
 				);
 				GCC_THUMB_SUPPORT = NO;
-				GCC_VERSION = 4.2;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					.,
 					include,
@@ -19571,7 +19484,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = (
+					armv7,
+					armv6,
+				);
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = s;
@@ -19589,7 +19505,7 @@
 					AVMPLUS_IA32,
 				);
 				GCC_THUMB_SUPPORT = NO;
-				GCC_VERSION = 4.2;
+				GCC_VERSION = "";
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				HEADER_SEARCH_PATHS = (
 					.,
@@ -19628,13 +19544,13 @@
 		E542A1AD0C3F0A5900225219 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
@@ -19642,15 +19558,12 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				INSTALL_PATH = /usr/local/lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
 				);
-				PREBINDING = NO;
 				PRELINK_LIBS = "-liconv";
 				PRODUCT_NAME = nui3;
-				SDKROOT = macosx;
 				ZERO_LINK = NO;
 			};
 			name = Default;
@@ -19671,7 +19584,6 @@
 					DARWIN_NO_CARBON,
 					FT_CONFIG_OPTION_SYSTEM_ZLIB,
 					HAVE_BCOPY,
-					FEATURE_NANOJIT,
 					JS_TRACER,
 					XP_UNIX,
 					AVMPLUS_IA32,
@@ -19682,7 +19594,6 @@
 					DARWIN_NO_CARBON,
 					FT_CONFIG_OPTION_SYSTEM_ZLIB,
 					HAVE_BCOPY,
-					FEATURE_NANOJIT,
 					JS_TRACER,
 					XP_UNIX,
 					AVMPLUS_PPC,
@@ -19693,7 +19604,6 @@
 					DARWIN_NO_CARBON,
 					FT_CONFIG_OPTION_SYSTEM_ZLIB,
 					HAVE_BCOPY,
-					FEATURE_NANOJIT,
 					JS_TRACER,
 					XP_UNIX,
 					AVMPLUS_AMD64,
@@ -19704,7 +19614,6 @@
 					DARWIN_NO_CARBON,
 					FT_CONFIG_OPTION_SYSTEM_ZLIB,
 					HAVE_BCOPY,
-					FEATURE_NANOJIT,
 					JS_TRACER,
 					XP_UNIX,
 					AVMPLUS_ARM,
@@ -19712,8 +19621,8 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -19724,7 +19633,7 @@
 		E58173AC0C3D108900902DFE /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = i386;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_FAST_OBJC_DISPATCH = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -19740,18 +19649,15 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_THREADSAFE_STATICS = NO;
 				INSTALL_PATH = /usr/local/lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				PREBINDING = NO;
 				PRODUCT_NAME = nui3D;
 				SDKROOT = macosx;
-				VALID_ARCHS = "i386 ppc ppc7400 ppc970";
 			};
 			name = Default;
 		};
 		E5A8D1D211E33A54004E14CE /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_FAST_OBJC_DISPATCH = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -19790,10 +19696,7 @@
 				);
 				GCC_THREADSAFE_STATICS = NO;
 				INSTALL_PATH = /usr/local/lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				PREBINDING = NO;
 				PRODUCT_NAME = nui3CocoaD;
-				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
 			name = Default;
@@ -19838,30 +19741,22 @@
 					_COCOA_,
 				);
 				GCC_THREADSAFE_STATICS = NO;
-				GCC_VERSION = 4.2;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INSTALL_PATH = /usr/local/lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.5;
-				PREBINDING = NO;
 				PRODUCT_NAME = nui3Cocoa;
-				SDKROOT = macosx;
 			};
 			name = Default;
 		};
 		E5DD340F12E09CA800F1EF4E /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					x86_64,
-					ppc,
-					i386,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
@@ -19880,14 +19775,12 @@
 					AVMPLUS_AMD64,
 					_COCOA_,
 				);
-				GCC_VERSION = 4.2;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INSTALL_PATH = /usr/local/lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
 				);
-				PREBINDING = NO;
 				PRELINK_LIBS = "-liconv";
 				PRODUCT_NAME = thirdparty;
 				SKIP_INSTALL = YES;
@@ -19899,10 +19792,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				GCC_AUTO_VECTORIZATION = YES;
+				ARCHS = (
+					armv7,
+					armv6,
+				);
+				GCC_AUTO_VECTORIZATION = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS)";
@@ -19913,13 +19809,13 @@
 					FT_CONFIG_OPTION_SYSTEM_ZLIB,
 					HAVE_BCOPY,
 					UIKIT,
-					FEATURE_NANOJIT,
 					JS_TRACER,
 					XP_UNIX,
 					AVMPLUS_IA32,
 				);
-				GCC_THUMB_SUPPORT = NO;
-				GCC_VERSION = 4.2;
+				GCC_THUMB_SUPPORT = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				HEADER_SEARCH_PATHS = (
 					.,
@@ -19947,11 +19843,11 @@
 					deps/libcss/src/libparserutils,
 					deps/libcss/include,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				PRODUCT_NAME = thirdparty_ios;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "armv7 armv6";
 			};
 			name = Default;
 		};
