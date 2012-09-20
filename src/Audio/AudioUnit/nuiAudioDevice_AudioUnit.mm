@@ -75,7 +75,38 @@ void audioRouteChangeListenerCallback (void                   *inUserData,      
 nuiAudioDevice_AudioUnit::nuiAudioDevice_AudioUnit()
 {  
   mpIData = NULL;
-  mAudioUnit = NULL;
+   mAudioUnit = NULL;
+
+// do we need this?
+  OSStatus err;
+  UInt32 size = sizeof (UInt32);
+  UInt32 value = kAudioSessionOverrideAudioRoute_None;
+  AudioSessionSetProperty(kAudioSessionProperty_OverrideAudioRoute, size, &value);  
+
+  AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, audioRouteChangeListenerCallback, this);
+	// Initialize our session
+	err = AudioSessionInitialize(NULL, NULL, interruptionListener, NULL);	
+  
+  
+	// Set the category
+  UInt32 uCategory = kAudioSessionCategory_LiveAudio;
+  if (HasAudioInput())
+    uCategory = kAudioSessionCategory_PlayAndRecord;
+    
+	err = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(UInt32), &uCategory);
+  //	if (err != noErr)
+  //  {
+  //    NGL_ASSERT(0);
+  //    return false;
+  //  } 		
+  	UInt32 doChangeDefaultRoute = 1;
+	
+	// default output to the speaker, not the headset.
+	AudioSessionSetProperty (
+							 kAudioSessionProperty_OverrideCategoryDefaultToSpeaker,
+							 sizeof (doChangeDefaultRoute),
+							 &doChangeDefaultRoute
+							 );	
   
   EnumSampleRates();
   EnumBufferSizes();
