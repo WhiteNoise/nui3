@@ -6,12 +6,7 @@
 */
 
 #include "nui.h"
-#include "nui.h"
-#include "nuiXML.h"
-#include "nuiDrawContext.h"
-#include "nuiSVGShape.h"
 #include "float.h"
-#include "nuiContour.h"
 
 //#define NUI_SVG_USE_LISTS
 
@@ -56,7 +51,7 @@ private:
   nglString mText;
   nuiSize mTextX, mTextY;
 
-  nuiFontLayout* mpLayout;
+  nuiTextLayout* mpLayout;
   nuiFont* mpFont;
 };
 
@@ -405,7 +400,7 @@ bool nuiSVGElement::Load(nuiXMLNode* pNode)
     mText = pNode->GetChild(_T("##text"))->GetValue();
     if (!mpFont)
       mpFont = nuiFont::GetFont(mFontSize);
-    mpLayout = new nuiFontLayout(*mpFont);
+    mpLayout = new nuiTextLayout(mpFont);
     mpLayout->Layout(mText);
   }
   else if (pNode->GetName() == _T("circle"))

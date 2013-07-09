@@ -6,9 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiProgressBar.h"
-#include "nuiShape.h"
-#include "nuiDrawContext.h"
 
 #define AMP 0
 #define INC 0
@@ -49,19 +46,6 @@ nuiProgressBar::nuiProgressBar()
   mEndlessIncr = INC;
   if (mGlowStrength != 0 || mAlphaIncr != 0 || mEndless)
     StartAutoDraw();
-}
-
-bool nuiProgressBar::Load(const nuiXMLNode* pNode)
-{
-  nuiWidget::Load(pNode);
-  SetProgress(0);
-  mAlphaIncr = INC;
-  mAlphaAnim = 0;
-  mGlowStrength = 0;
-  if (mGlowStrength != 0 || mAlphaIncr != 0)
-    StartAutoDraw();
-  
-  return true;
 }
 
 nuiProgressBar::~nuiProgressBar()

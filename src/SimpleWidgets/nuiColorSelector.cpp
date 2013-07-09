@@ -6,9 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiColorSelector.h"
-#include "nuiMetaDecoration.h"
-#include "nuiFrame.h"
 
 
 
@@ -210,16 +207,6 @@ nuiWidget* nuiColorSelector::Tab_Swatches()
 
 nuiColorSelector::~nuiColorSelector()
 {
-}
-
-bool nuiColorSelector::Load(const nuiXMLNode* pNode)
-{
-  return nuiSimpleContainer::Load(pNode);
-}
-
-nuiXMLNode* nuiColorSelector::Serialize(nuiXMLNode* pParentNode, bool Recursive) const
-{
-  return nuiSimpleContainer::Serialize(pParentNode, Recursive);
 }
 
 void nuiColorSelector::MakeSwatchGrid()

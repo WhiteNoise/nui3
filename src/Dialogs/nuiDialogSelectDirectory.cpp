@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiDialogSelectDirectory.h"
 
 
 nuiDialogSelectDirectory::nuiDialogSelectDirectory(nuiMainWindow* pParent, const nglString& rTitle, const nglPath& rPath, const nglPath& rRootPath, nuiSize Left, nuiSize Top, nuiSize Width, nuiSize Height)
@@ -115,7 +114,7 @@ void nuiDialogSelectDirectory::OnCreateNewFolderDone(const nuiEvent& rEvent)
   {
     nglString text = mpCreateEditLine->GetText();
     text.Trim();
-    if (text == nglString::Null)
+    if (text.IsNull())
     {
       rEvent.Cancel();
       return;

@@ -6,14 +6,6 @@
 */
 
 #include "nui.h"
-#include "nui.h"
-#include "nglString.h"
-#include "nuiApplication.h"
-#include "nuiText.h"
-#include "nuiDrawContext.h"
-#include "nuiScrollBar.h"
-
-#include "nuiMainWindow.h"
 
 #define SBWIDTH 12
 #define INTERLINE 4
@@ -23,16 +15,6 @@ nuiText::nuiText(const nglString& rText)
 {
   SetObjectClass(_T("nuiText"));
   SetEditable(false);
-}
-
-bool nuiText::Load(const nuiXMLNode* pNode)
-{
-  nuiEditText::Load(pNode);
-  SetObjectClass(_T("nuiText"));
-  SetEditable(false);
-  //Inherits all from nuiEditText...
-  
-  return true;
 }
 
 nuiText::~nuiText()

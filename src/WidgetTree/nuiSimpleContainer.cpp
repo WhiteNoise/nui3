@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiSimpleContainer.h"
 
 class nuiSimpleContainerIterator : public nuiContainer::Iterator
 {
@@ -73,6 +72,7 @@ nuiSimpleContainer::nuiSimpleContainer()
   SetObjectClass(_T("nuiSimpleContainer"));
 }
 
+#if 0
 bool nuiSimpleContainer::Load(const nuiXMLNode* pNode)
 {
 	bool res=true;
@@ -107,14 +107,7 @@ bool nuiSimpleContainer::LoadChildren(const nuiXMLNode* pNode)
   
   return res;
 }
-
-
-bool nuiSimpleContainer::LoadAttributes(const nuiXMLNode* pNode)
-{
-  CheckValid();
-  return nuiContainer::Load(pNode);
-}
-
+#endif
 
 nuiSimpleContainer::~nuiSimpleContainer()
 {
@@ -128,7 +121,8 @@ nuiSimpleContainer::~nuiSimpleContainer()
     {
       if (!pItem->IsTrashed(false))
         pItem->SetParent(NULL);
-      pItem->Release();
+      if (pItem->Release())
+        pItem->SetParent(NULL);
     }
   }
   delete pIt;
@@ -152,7 +146,7 @@ bool nuiSimpleContainer::AddChild(nuiWidgetPtr pChild)
   CheckValid();
   if (GetDebug())
   {
-    NGL_OUT(_T("[%ls] Add Child 0x%x <--- 0x%x\n"), GetObjectClass().GetChars(), this, pChild);
+    NGL_OUT(_T("[%s] Add Child 0x%x <--- 0x%x\n"), GetObjectClass().GetChars(), this, pChild);
   }
   pChild->Acquire();
   nuiContainer* pParent = pChild->GetParent();
@@ -193,7 +187,7 @@ bool nuiSimpleContainer::DelChild(nuiWidgetPtr pChild)
 
   if (GetDebug())
   {
-    NGL_OUT(_T("[%ls] Del Child 0x%x <--- 0x%x (%s)\n"), GetObjectClass().GetChars(), this, pChild);
+    NGL_OUT(_T("[%s] Del Child 0x%x <--- 0x%x (%s)\n"), GetObjectClass().GetChars(), this, pChild);
   }
   
   nuiWidgetList::iterator it  = mpChildren.begin();
@@ -244,9 +238,9 @@ nuiWidgetPtr nuiSimpleContainer::GetChild(nuiSize X, nuiSize Y)
   return nuiContainer::GetChild(X, Y);
 }
 
-nuiWidgetPtr nuiSimpleContainer::GetChild(const nglString& rName, bool deepsearch)
+nuiWidgetPtr nuiSimpleContainer::GetChild(const nglString& rName, bool ResolveNameAsPath)
 {
-  return nuiContainer::GetChild(rName, deepsearch);
+  return nuiContainer::GetChild(rName, ResolveNameAsPath);
 }
 
 bool nuiSimpleContainer::Clear()

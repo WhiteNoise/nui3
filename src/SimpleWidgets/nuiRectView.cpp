@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiRectView.h"
 
 nuiRectView::nuiRectView(const nuiRect& rRect)
 : nuiWidget()
@@ -15,16 +14,6 @@ nuiRectView::nuiRectView(const nuiRect& rRect)
   mClicked = false;
   mCurrentRect = rRect;
   mDisplayRectOnlyOnHover = false;
-}
-
-bool nuiRectView::Load(const nuiXMLNode* pNode)
-{
-  return false;
-}
-
-nuiXMLNode* nuiRectView::Serialize(nuiXMLNode* pParentNode, bool Recursive) const
-{
-  return NULL;
 }
 
 nuiRectView::~nuiRectView()

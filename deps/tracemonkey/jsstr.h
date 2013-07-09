@@ -67,6 +67,10 @@ enum {
 extern jschar *
 js_GetDependentStringChars(JSString *str);
 
+extern JSString *
+js_ConcatStrings(JSContext *cx, JSString *left, JSString *right);
+
+
 JS_STATIC_ASSERT(JS_BITS_PER_WORD >= 32);
 
 /*
@@ -100,7 +104,7 @@ struct JSString {
     friend JSAtom *
     js_AtomizeString(JSContext *cx, JSString *str, uintN flags);
 
-    friend JSString * JS_FASTCALL
+    friend JSString *
     js_ConcatStrings(JSContext *cx, JSString *left, JSString *right);
 
     // Not private because we want to be able to use static
@@ -303,19 +307,16 @@ struct JSString {
 extern const jschar *
 js_GetStringChars(JSContext *cx, JSString *str);
 
-extern "C++" JSString * JS_FASTCALL
-js_ConcatStrings(JSContext *cx, JSString *left, JSString *right);
-
 extern const jschar *
 js_UndependString(JSContext *cx, JSString *str);
 
 extern JSBool
 js_MakeStringImmutable(JSContext *cx, JSString *str);
 
-extern JSString * JS_FASTCALL
+extern JSString *
 js_toLowerCase(JSContext *cx, JSString *str);
 
-extern JSString * JS_FASTCALL
+extern JSString *
 js_toUpperCase(JSContext *cx, JSString *str);
 
 struct JSSubString {
@@ -555,14 +556,14 @@ js_HashString(JSString *str);
  * Test if strings are equal. The caller can call the function even if str1
  * or str2 are not GC-allocated things.
  */
-extern JSBool JS_FASTCALL
+extern JSBool
 js_EqualStrings(JSString *str1, JSString *str2);
 
 /*
  * Return less than, equal to, or greater than zero depending on whether
  * str1 is less than, equal to, or greater than str2.
  */
-extern int32 JS_FASTCALL
+extern int32
 js_CompareStrings(JSString *str1, JSString *str2);
 
 /*

@@ -6,15 +6,10 @@
 */
 
 #include "nui.h"
-#include "nuiSVGView.h"
-#include "nglTime.h"
-#include "nglIFile.h"
-#include "nglKernel.h"
-#include "nuiTheme.h"
 
 nuiSVGView::nuiSVGView(nuiSVGShape* pShape)
   : nuiWidget(),
-    mCache(nuiRect())
+    mCache()
 {
   nuiSVGView::Init();
   mpShape = pShape;
@@ -23,7 +18,7 @@ nuiSVGView::nuiSVGView(nuiSVGShape* pShape)
 
 nuiSVGView::nuiSVGView(const nglPath& rSource)
   : nuiWidget(),
-    mCache(nuiRect())
+    mCache()
 {
   nuiSVGView::Init();
   nglIStream* pFile = rSource.OpenRead();
@@ -32,30 +27,6 @@ nuiSVGView::nuiSVGView(const nglPath& rSource)
     Load(*pFile);
     delete pFile;
   }
-}
-
-bool nuiSVGView::Load(const nuiXMLNode* pNode)
-{
-  nuiWidget::Load(pNode);
-  mCache = nuiRect();
-  nuiSVGView::Init();
-
-  if (pNode->HasAttribute("Source"))
-  {
-    nglIFile file(pNode->GetAttribute("Source"));
-    Load(file);
-  }
-  else // Is the SVG Desc embedded in the nui XML desc? 
-  {
-    nuiXMLNode* pSVG = pNode->GetChild(_T("svg"));
-    if (pSVG)
-    {
-      mpShape = new nuiSVGShape();
-      mpShape->Load(pSVG);
-    }
-  }
-
-  return true;
 }
 
 nuiSVGView::~nuiSVGView()
@@ -89,17 +60,6 @@ bool nuiSVGView::Load (nglIStream& rSource)
 
   NGL_OUT(_T("Xml load time: %f\nSvg load time: %f\n"), (double)xmlt - (double)t, (double)loadt - (double)xmlt);
 
-  nuiDrawContext* pContext = nuiDrawContext::CreateDrawContext(nuiRect(0, 0, 512, 512), eSoftware);
-  nuiPainter* pPainter = pContext->GetPainter();
-  mCache.Reset(NULL);
-  nuiRect r(mpShape->GetBoundingRect());
-  //mCache.SetSize(ToBelow(r.GetWidth()), ToBelow(r.GetHeight()));
-
-  pContext->SetPainter(&mCache);
-  mpShape->Draw(pContext, mAntialias);
-  pContext->SetPainter(pPainter);
-
-  delete pContext;
   return result;
 }
 
@@ -116,8 +76,7 @@ bool nuiSVGView::Draw(nuiDrawContext* pContext)
   y = mRect.GetHeight() / mIdealRect.GetHeight();
   pContext->Scale(x,y);
   pContext->SetFont(nuiFont::GetFont(12));
-//  mpShape->Draw(pContext, mAntialias);
-  mCache.ReDraw(pContext);
+  mpShape->Draw(pContext, mAntialias);
   pContext->PopMatrix();
   return true;
 }

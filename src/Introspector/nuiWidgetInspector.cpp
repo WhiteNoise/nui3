@@ -6,22 +6,6 @@
  */
 
 #include "nui.h"
-#include "nuiWidgetInspector.h"
-#include "nuiColumnTreeView.h"
-#include "nuiTreeView.h"
-#include "nuiSplitter.h"
-#include "nuiGrid.h"
-#include "nuiVBox.h"
-#include "nuiPane.h"
-#include "nuiFolderPane.h"
-#include "nuiPositioner.h"
-#include "nuiScrollView.h"
-#include "nuiLabel.h"
-#include "nuiDrawContext.h"
-#include "nuiColorDecoration.h"
-#include "nuiAttributeEditor.h"
-#include "nuiIntrospector.h"
-#include "nuiMetaPainter.h"
 
 class nuiMetaPainterInspector : public nuiSimpleContainer
   {
@@ -155,7 +139,7 @@ nuiWidget* nuiWidgetInspectorNode::GetTarget()
 }
 
 nuiWidgetInspector::nuiWidgetInspector(nuiWidget* pTarget)
-: nuiComposite(),
+: nuiSimpleContainer(),
 mInspectorSink(this)
 {
   SetObjectClass(_T("nuiWidgetInspector"));
@@ -263,7 +247,7 @@ class nuiWidgetProxy : public nuiWidget
   };
 
 nuiWidgetInfo::nuiWidgetInfo(nuiWidget* pTarget)
-: nuiComposite(),
+: nuiSimpleContainer(),
 mWISink(this)
 {
   mpTarget = NULL;
@@ -292,7 +276,6 @@ mWISink(this)
   mpNeedIdealRectCalc = NULL;
   mpGlobalRect = NULL;
   mpMatrix = NULL;
-  mpPropertyGrid = NULL;
   mpAttributeGrid = NULL;
   mpProxy = NULL;
   mpPainterInspector = NULL;
@@ -378,7 +361,7 @@ void nuiWidgetInfo::RebuildInfo(bool Reconstruct)
       text.Add(classes[i]);
     }
     mpClass->SetText(text);
-    //printf("Inheritance: %ls\n", text.GetChars());
+    //printf("Inheritance: %s\n", text.GetChars());
     
     nglString str(typeid(mpTarget).name());
     mpCType->SetText(str);
@@ -429,40 +412,14 @@ void nuiWidgetInfo::RebuildInfo(bool Reconstruct)
         mpMatrix->SetCell(j, k, new nuiLabel(text, nuiFont::GetFont(_T("INTROSPECTOR_FONT_NORMAL"))));
       }
     }
-    
-    // build properties list
-    std::list<nglString> pnames;
-    mpTarget->GetProperties(pnames);
-    uint i = 0;
-    std::list<nglString>::iterator it = pnames.begin();
-    std::list<nglString>::iterator end = pnames.end();
-    
-    uint rows = mpPropertyGrid->GetNbRows();
-    if (rows)
-      mpPropertyGrid->RemoveRows(0, rows);
-    
-    rows = pnames.size();
-    if (rows)
-      mpPropertyGrid->AddRows(0, rows);
-    
-    while (it != end)
-    {
-      nglString pname(*it);
-      mpPropertyGrid->SetCell(0, i, new nuiLabel(pname + nglString(":")));
-      nuiLabel* pLabel = new nuiLabel(mpTarget->GetProperty(pname));
-      pLabel->SetWrapping(true);
-      mpPropertyGrid->SetCell(1, i, pLabel);
-      
-      ++it;
-      i++;
-    }
-    
+
     if (Reconstruct)
     {
       // build attributes list
       std::map<nglString, nuiAttribBase> attributes;
       mpTarget->GetAttributes(attributes);
-      i = 0;
+      int32 i = 0;
+      int32 rows = 0;
       std::map<nglString, nuiAttribBase>::const_iterator it_a = attributes.begin();
       std::map<nglString, nuiAttribBase>::const_iterator end_a = attributes.end();
       
@@ -479,7 +436,7 @@ void nuiWidgetInfo::RebuildInfo(bool Reconstruct)
       while (it_a != end_a)
       {
         nglString pname(it_a->first);
-        //printf("\tattr: %ls\n", pname.GetChars());
+        //printf("\tattr: %s\n", pname.GetChars());
         nuiAttribBase Base = it_a->second;
         nuiAttributeEditor* pEditor = Base.GetEditor();
         mpAttributeGrid->SetCell(0, i, new nuiLabel(pname + nglString(":")));
@@ -700,24 +657,6 @@ void nuiWidgetInfo::BuildInfo()
     if (pTitlePaneDeco)
       pSPane->GetTitle()->SetDecoration(pTitlePaneDeco, eDecorationBorder);
     pMainBox->AddCell(pSPane);
-    
-    
-    /// Property list
-    mpPropertyGrid = new nuiGrid(2, 0);
-    mpPropertyGrid->DisplayGridBorder(true, 1.0f);
-    mpPropertyGrid->SetColumnExpand(1, nuiExpandShrinkAndGrow);
-    
-    nuiFolderPane* pVPane = new nuiFolderPane();
-    nuiLabel* pLabel2 = new nuiLabel(_T("Properties"), nuiFont::GetFont(_T("INTROSPECTOR_FONT_BOLD")));
-    pLabel2->SetColor(eNormalTextFg, INTROSPECTOR_COLOR_FOLDERPANE_TITLE);
-    pLabel2->SetColor(eSelectedTextFg, INTROSPECTOR_COLOR_FOLDERPANE_TITLE);
-    pVPane->SetTitleWithHandle(pLabel2);
-    if (pTitlePaneDeco)
-      pVPane->GetTitle()->SetDecoration(pTitlePaneDeco, eDecorationBorder);
-    
-    
-    pVPane->AddChild(mpPropertyGrid);
-    pMainBox->AddCell(pVPane);
     
     
     /// Attribute list

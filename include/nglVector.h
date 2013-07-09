@@ -15,7 +15,7 @@
 
 //#include "nui.h"
 #include "nglMath.h"
-#include "nglApplication.h"
+//#include "nglApplication.h"
 
 
 /// Two dimensional vectors
@@ -87,13 +87,13 @@ public:
   }
 
   /// Multiplication by a scalar (scaling)
-  void operator*=(const T & F)
+  void operator*=(T F)
   {
     Elt[0] *= F;
     Elt[1] *= F;
   }
 
-  nglVector2<T> operator*(const T & F)
+  nglVector2<T> operator*(T F) const
   {
     return nglVector2<T>(Elt[0] * F, Elt[1] * F);
   }
@@ -112,7 +112,7 @@ public:
   /// Length
   T Length() const
   {
-    return (T)sqrt(Elt[0]*Elt[0] + Elt[1]*Elt[1]);
+    return std::sqrt(Elt[0]*Elt[0] + Elt[1]*Elt[1]);
   }
   /// Normalize. Returns false if the length is zero
   bool Normalize()
@@ -149,6 +149,14 @@ public:
     Elt[1] = Y;
     Elt[2] = Z;
   }
+
+  nglVector3(const nglVector3<T>& rVector)
+  {
+    Elt[0] = rVector.Elt[0];
+    Elt[1] = rVector.Elt[1];
+    Elt[2] = rVector.Elt[2];
+  }
+
   /// Destructor
   virtual ~nglVector3() {}
 
@@ -219,18 +227,24 @@ public:
   }
   
   /// Multiplication by a scalar (scaling)
-  void operator*=(const T & F)
+  void operator*=(T F)
   {
     Elt[0] *= F;
     Elt[1] *= F;
     Elt[2] *= F;
   }
   
-  nglVector3<T> operator*(const T & F)
+  nglVector3<T> operator*(T F) const
   {
     return nglVector3<T>(Elt[0] * F, Elt[1] * F, Elt[2] * F);
-  }  
-  
+  }
+
+  nglVector3<T> operator/(T F) const
+  {
+    F = 1.0f / F;
+    return (*this) * F;
+  }
+
   /// Scalar product
   T operator*(const nglVector3<T>& rVector) const
   {
@@ -265,7 +279,7 @@ public:
   /// Length
   T Length() const
   {
-    return (T)sqrt(Elt[0]*Elt[0] + Elt[1]*Elt[1] + Elt[2]*Elt[2]);
+    return std::sqrt(Elt[0]*Elt[0] + Elt[1]*Elt[1] + Elt[2]*Elt[2]);
   }
   /// Normalize. Returns false if the length is zero
   bool Normalize()
@@ -280,6 +294,46 @@ public:
     }
     return false;
   }
+
+  bool GetValue(nglString& rDump, int32 NbElements = 3) const
+  {
+    switch (NbElements)
+    {
+      case 1:
+        rDump.CFormat(_T("{ %f }"), (T)Elt[0]);
+        break;
+      case 2:
+        rDump.CFormat(_T("{ %f %f }"), (T)Elt[0], (T)Elt[1]);
+        break;
+      default:
+        rDump.CFormat(_T("{ %f %f %f }"), (T)Elt[0], (T)Elt[1], (T)Elt[2]);
+        break;
+    }
+    return true;
+  }
+
+  bool SetValue(const nglString& rValue)
+  {
+    //rDump.CFormat(_T("{ %8.3f %8.3f %8.3f }"), (T)Elt[0], (T)Elt[1], (T)Elt[2]);
+
+    nglString val = rValue;
+
+    val.Trim();
+    val.TrimLeft(_T('{'));
+    val.TrimRight(_T('}'));
+
+    std::vector<nglString> tokens;
+    val.Tokenize(tokens, _T(' '));
+
+    for (uint i = 0; i < MIN(3, tokens.size()); i++)
+    {
+      Elt[i] = (T)tokens[i].GetCDouble();
+    }
+
+    return true;
+  }
+  
+
 };
 
 
@@ -297,6 +351,16 @@ public:
     Elt[2] = 0.f;
     Elt[3] = 0.f;
   }
+
+  nglVector(const nglVector<T>& rVector)
+  {
+    Elt[0] = rVector.Elt[0];
+    Elt[1] = rVector.Elt[1];
+    Elt[2] = rVector.Elt[2];
+    Elt[3] = rVector.Elt[3];
+  }
+
+
   /// Initialize with values
   nglVector(T X, T Y, T Z, T W = 1.f)
   {
@@ -366,6 +430,16 @@ public:
     return Elt[i]; 
   }
 
+  T& x() { return Elt[0]; }
+  const T& x() const { return Elt[0]; }
+  T& y() { return Elt[1]; }
+  const T& y() const { return Elt[1]; }
+  T& z() { return Elt[2]; }
+  const T& z() const { return Elt[2]; }
+  T& w() { return Elt[3]; }
+  const T& w() const { return Elt[3]; }
+
+
   /// Unary minus
   nglVector<T> operator-() const
   {
@@ -418,6 +492,18 @@ public:
     result *= F;
     return result;
   }
+
+  friend nglVector<T> operator* (T F, const nglVector<T>& rVector)
+  {
+    return rVector * F;
+  }
+
+  // Division by scalar:
+  friend nglVector<T> operator/ (const nglVector<T>& rVector, T F)
+  {
+    return rVector * ((T)1.0 / F);
+  }
+
   /// Scalar product
   T operator*(const nglVector<T>& rVector) const
   {
@@ -459,7 +545,7 @@ public:
   /// Length
   T Length() const
   {
-    return (T)sqrt(Elt[0]*Elt[0] + Elt[1]*Elt[1] + Elt[2]*Elt[2]); 
+    return std::sqrt(Elt[0]*Elt[0] + Elt[1]*Elt[1] + Elt[2]*Elt[2]);
   }
   /// Normalize. Returns false if the length is zero
   bool Normalize()
@@ -478,7 +564,7 @@ public:
   /// Display the vector's scalar values in the log
   void Dump (uint Level = 0, const nglChar* pTitle = NULL) const
   {
-    NGL_LOG(_T("math"), Level, _T("%ls%ls[ %8.3f %8.3f %8.3f %8.3f ]"),
+    NGL_LOG(_T("math"), Level, _T("%s%s[ %8.3f %8.3f %8.3f %8.3f ]"),
       pTitle ? pTitle : _T(""),
       pTitle ? _T(" = ") : _T(""),
       (T)Elt[0], (T)Elt[1], (T)Elt[2], (T)Elt[3]);
@@ -532,7 +618,17 @@ public:
     
     return true;
   }
-  
+
+  operator nglVector3<T> () const
+  {
+    return nglVector3<T>(Elt[0], Elt[1], Elt[2]);
+  }
+
+  operator nglVector2<T> () const
+  {
+    return nglVector2<T>(Elt[0], Elt[1]);
+  }
+
 };
 
 
@@ -558,7 +654,7 @@ void nuiDistanceFromLineAndSegment(T px, T py, T x0, T y0 , T x1, T y1, T &rDist
   //    
   T s =  ((y0 - py) * (x1 - x0) - (x0 - px) * (y1 - y0) ) / r_denominator;
   
-  rDistanceFromLine = fabs(s) * sqrt(r_denominator);
+  rDistanceFromLine = fabs(s) * std::sqrt(r_denominator);
   
   //
   // (xx,yy) is the point on the lineSegment closest to (px,py)
@@ -574,9 +670,9 @@ void nuiDistanceFromLineAndSegment(T px, T py, T x0, T y0 , T x1, T y1, T &rDist
     T dist1 = (px - x0) * (px - x0) + (py - y0) * (py - y0);
     T dist2 = (px - x1) * (px - x1) + (py - y1) * (py - y1);
     if (dist1 < dist2)
-      rDistanceFromSegment = sqrt(dist1);
+      rDistanceFromSegment = std::sqrt(dist1);
     else
-      rDistanceFromSegment = sqrt(dist2);
+      rDistanceFromSegment = std::sqrt(dist2);
   }
 
   return;
@@ -590,7 +686,7 @@ T nuiDistanceFromLine(T px, T py, T x0, T y0 , T x1, T y1)
 
   T s =  ((y0 - py) * (x1 - x0) - (x0 - px) * (y1 - y0) ) / r_denominator;
   
-  return fabs(s) * sqrt(r_denominator);
+  return fabs(s) * std::sqrt(r_denominator);
 }
 
 template <class T>

@@ -107,69 +107,115 @@ Lookup precompiled headers in the VC doc to learn how to use them.
 #include <dirent.h>
 #endif
 
-//#if (((defined _DEBUG) || (defined DEBUG)) || (defined _DEBUG_)) 
+//#if (((defined _DEBUG) || (defined DEBUG)) || (defined _DEBUG_))
 //#include "mmgr.h"
 //#endif
 
-
-#include "nglKernel.h"
-#include "nglTime.h"
-#include "nglPath.h"
-
-#include "ngl3DSLoader.h"
-#include "nglApplication.h"
-#include "nglBitmapTools.h"
-#include "nglCPUInfo.h"
-
-#include "nglClipBoard.h"
-
-#include "nglConsole.h"
-#include "nglContext.h"
-
-#include "nglDataObjects.h"
-#include "nglDataTypesRegistry.h"
-
-#include "nglDeviceInfo.h"
-
-#include "nglDragAndDropObjects.h"
-
+#include "nuiNonCopyable.h"
+#include "nglAtomic.h"
 #include "nglEndian.h"
 #include "nglError.h"
 #include "nglEvent.h"
+#include "nglTime.h"
+#include "nglString.h"
+#include "nglStream.h"
+#include "nuiFlags.h"
+#include "nuiFastDelegate.h"
+#include "nglMimeSource.h"
+
+#include "nglThread.h"
+#include "nglGuard.h"
+#include "nglLock.h"
+#include "nglCriticalSection.h"
+#include "nglLightLock.h"
+#include "nglThreadChecker.h"
+#include "nglCondition.h"
+#include "nglSyncEvent.h"
+#include "nglReaderWriterLock.h"
+#include "nglRingBuffer.h"
+#include "nglPath.h"
+
+#include "nglLog.h"
+#include "nglConsole.h"
+
+
+#include "nuiMessageQueue.h"
+
+#ifndef _MINUI3_
+#include "nglClipBoard.h"
+#include "nglDataTypesRegistry.h"
+#endif
+
+#include "nuiEvent.h"
+#include "nuiEventRegistry.h"
+
+#include "nglKernel.h"
+#include "nglModule.h"
+#include "nglMath.h"
+#include "nglVector.h"
+#include "nglMatrix.h"
+#include "nglQuaternion.h"
+#include "nuiRefCount.h"
+#include "nuiSignalsSlots.h"
+
+#include "ngl3DSLoader.h"
+#include "nglBitmapTools.h"
+#include "nglCPUInfo.h"
+
+
+#include "nglDeviceInfo.h"
+
 #include "nglFile.h"
-#include "nglFont.h"
-#include "nglFontBase.h"
-#include "nglFontCache.h"
-#include "nglFontLayout.h"
+#include "nglVolume.h"
+#include "nglNativeVolume.h"
+
+#include "nglIStream.h"
+#include "nglOStream.h"
+#include "nglIOStream.h"
+
 #include "nglIFile.h"
 #include "nglIMemory.h"
-#include "nglIOFile.h"
-#include "nglIOStream.h"
-#include "nglIStream.h"
 #include "nglIZip.h"
 #include "nglImage.h"
 #include "nglImageCodec.h"
-#include "nglInputDevice.h"
-#include "nglKeyboard.h"
-#include "nglLog.h"
-#include "nglMath.h"
-#include "nglMatrix.h"
-#include "nglMimeSource.h"
-#include "nglModule.h"
+
 #include "nglOFile.h"
 #include "nglOMemory.h"
-#include "nglOStream.h"
-#include "nglPlugin.h"
-#include "nglQuaternion.h"
-#include "nglStream.h"
-#include "nglString.h"
-#include "nglTimer.h"
-#include "nglVector.h"
-#include "nglVideoMode.h"
-#include "nglWindow.h"
+#include "nglIOFile.h"
 #include "nglZipFS.h"
+#include "nuiAsyncIStream.h"
+
+#include "nuiNativeResource.h"
+#include "nuiNativeResourceVolume.h"
+
+#include "nglVector.h"
+
+#include "nglUTFStringConv.h"
+
+#include "nuiTranslator.h"
+#include "nuiCSV.h"
+#include "nglPlugin.h"
+#include "nglTimer.h"
+
+#include "nuiCommand.h"
 
 #include "nglMath.h"
+
+#include "nuiParser.h"
+
+
+#ifndef _MINUI3_
+  #include "nglDataObjects.h"
+  #include "nglContext.h"
+  #include "nglVideoMode.h"
+  #include "nuiMouseCursor.h"
+  #include "nglInputDevice.h"
+  #include "nglDragAndDropObjects.h"
+  #include "nglKeyboard.h"
+  #include "nglWindow.h"
+  #include "nglApplication.h"
+  #include "ngl3DSLoader.h"
+#endif
 
 #endif // __ngl_all_h__
 

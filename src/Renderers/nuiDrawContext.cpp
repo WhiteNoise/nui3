@@ -1,3 +1,4 @@
+
 /*
   NUI3 - C++ cross-platform GUI framework for OpenGL based applications
   Copyright (C) 2002-2003 Sebastien Metrot
@@ -6,22 +7,6 @@
 */
 
 #include "nui.h"
-#include "nui.h"
-#include "nuiDrawContext.h"
-#include "nuiMetaPainter.h"
-#include "nuiGLPainter.h"
-#include "nuiD3DPainter.h"
-#include "nuiSoftwarePainter.h"
-#include "nuiWidget.h"
-#include "nuiTheme.h"
-#include "nuiContour.h"
-#include "nuiTessellator.h"
-#include "nuiOutliner.h"
-#include "nuiTexture.h"
-#include "nuiSurface.h"
-
-extern float NUI_SCALE_FACTOR;
-extern float NUI_INV_SCALE_FACTOR;
 
 
 /****************************************************************************
@@ -39,7 +24,8 @@ nuiDrawContext::nuiDrawContext(const nuiRect& rRect)
   mPermitAntialising = true;
 
   mpPainter = NULL;
-  mpOldPainter = NULL;
+  mpMainPainter = NULL;
+  mpSavedPainter = NULL;
   mpAATexture = nuiTexture::GetAATexture();
   
   mStateChanges = 1;
@@ -48,13 +34,15 @@ nuiDrawContext::nuiDrawContext(const nuiRect& rRect)
 nuiDrawContext::~nuiDrawContext()
 {
   SetTexture(NULL);
+  SetShader(NULL, NULL);
   SetFont(NULL);
   if (mpAATexture)
     mpAATexture->Release();
 
   delete mpPainter;
   mpPainter = NULL;
-  mpOldPainter = NULL;
+  mpMainPainter = NULL;
+  mpSavedPainter = NULL;
   while (!mpRenderStateStack.empty())
   {
     PopState();
@@ -79,6 +67,7 @@ void nuiDrawContext::EndSession()
 void nuiDrawContext::StopRendering()
 {
   SetTexture(NULL);
+  SetShader(NULL, NULL);
 }
 
 
@@ -90,6 +79,16 @@ void nuiDrawContext::SetPainter(nuiPainter* pPainter)
 nuiPainter* nuiDrawContext::GetPainter() const
 {
   return mpPainter;
+}
+
+void nuiDrawContext::SetMainPainter(nuiPainter* pPainter)
+{
+  mpMainPainter = pPainter;
+}
+
+nuiPainter* nuiDrawContext::GetMainPainter() const
+{
+  return mpMainPainter;
 }
 
 void nuiDrawContext::SetState(const nuiRenderState& rState)
@@ -293,13 +292,13 @@ void nuiDrawContext::SetBlendFunc(nuiBlendFunc Func)
  *
  ****************************************************************************/
 
-void nuiDrawContext::SetTexture(nuiTexture* pTex) 
+void nuiDrawContext::SetTexture(nuiTexture* pTex, int slot)
 {
-  nuiTexture* pOld = mCurrentState.mpTexture;
+  nuiTexture* pOld = mCurrentState.mpTexture[slot];
   if (pTex == pOld)
     return;
   
-  mCurrentState.mpTexture = pTex ;
+  mCurrentState.mpTexture[slot] = pTex ;
   if (pTex)
   {
     pTex->CheckValid();
@@ -310,14 +309,69 @@ void nuiDrawContext::SetTexture(nuiTexture* pTex)
   mStateChanges++;
 }
 
-bool nuiDrawContext::IsTextureCurrent(nuiTexture* pTex) const
+bool nuiDrawContext::IsTextureCurrent(nuiTexture* pTex, int slot) const
 {
-  return mCurrentState.mpTexture == pTex;
+  return mCurrentState.mpTexture[slot] == pTex;
 }
 
-nuiTexture* nuiDrawContext::GetTexture() const
+nuiTexture* nuiDrawContext::GetTexture(int slot) const
 { 
-  return mCurrentState.mpTexture; 
+  return mCurrentState.mpTexture[slot];
+}
+
+/****************************************************************************
+ *
+ * Shader manipulation
+ *
+ ****************************************************************************/
+
+void nuiDrawContext::SetShader(nuiShaderProgram* pShader, nuiShaderState* pShaderState)
+{
+  nuiShaderProgram* pOld = mCurrentState.mpShader;
+  if (pShader == pOld)
+    return;
+
+  mCurrentState.mpShader = pShader ;
+  if (pShader)
+  {
+    //pShader->CheckValid();
+    pShader->Acquire();
+
+    if (!pShaderState)
+    {
+      pShaderState = pShader->GetCurrentState();
+    }
+
+    SetShaderState(pShaderState);
+  }
+  if (pOld)
+    pOld->Release();
+  mStateChanges++;
+}
+
+bool nuiDrawContext::IsShaderCurrent(nuiShaderProgram* pShader) const
+{
+  return mCurrentState.mpShader == pShader;
+}
+
+nuiShaderProgram* nuiDrawContext::GetShader() const
+{
+  return mCurrentState.mpShader;
+}
+
+void nuiDrawContext::SetShaderState(nuiShaderState* pState)
+{
+  if (pState)
+    pState->Acquire();
+  if (mCurrentState.mpShaderState)
+    mCurrentState.mpShaderState->Release();
+  mCurrentState.mpShaderState = pState;
+  mStateChanges++;
+}
+
+nuiShaderState* nuiDrawContext::GetShaderState() const
+{
+  return mCurrentState.mpShaderState;
 }
 
 /****************************************************************************
@@ -403,12 +457,12 @@ void nuiDrawContext::SetClearColor(const nuiColor& ClearColor)
   }
 }
 
-void nuiDrawContext::Clear() 
+void nuiDrawContext::Clear(bool color, bool depth, bool stencil)
 { 
   if (mStateChanges)
     mpPainter->SetState(mCurrentState);
   mStateChanges = 0;
-  mpPainter->ClearColor(); 
+  mpPainter->Clear(color, depth, stencil);
 }
 
 void nuiDrawContext::DrawShape(nuiShape* pShape, nuiShapeMode Mode, float Quality)
@@ -507,9 +561,10 @@ void nuiDrawContext::DrawText(nuiSize x, nuiSize y, const nglString& rString, bo
   mCurrentState.mpFont->Print(this,x,y,rString, AlignGlyphPixels);
 }
 
-void nuiDrawContext::DrawText(nuiSize x, nuiSize y, const nuiFontLayout& rLayout, bool AlignGlyphPixels)
+void nuiDrawContext::DrawText(nuiSize x, nuiSize y, const nuiTextLayout& rLayout, bool AlignGlyphPixels)
 {
-  mCurrentState.mpFont->Print(this,x,y,rLayout, AlignGlyphPixels);
+  rLayout.Print(this, x, y, AlignGlyphPixels);
+  //mCurrentState.mpFont->Print(this,x,y,rLayout, AlignGlyphPixels);
 }
 
 void nuiDrawContext::PermitAntialiasing(bool Set)
@@ -552,10 +607,10 @@ void nuiDrawContext::DrawImageQuad(float x0, float y0, float x1, float y1, float
   tx3 = rSource.mLeft;
   ty3 = rSource.mBottom;
   
-  mCurrentState.mpTexture->ImageToTextureCoord(tx0, ty0);
-  mCurrentState.mpTexture->ImageToTextureCoord(tx1, ty1);
-  mCurrentState.mpTexture->ImageToTextureCoord(tx2, ty2);
-  mCurrentState.mpTexture->ImageToTextureCoord(tx3, ty3);
+  mCurrentState.mpTexture[0]->ImageToTextureCoord(tx0, ty0);
+  mCurrentState.mpTexture[0]->ImageToTextureCoord(tx1, ty1);
+  mCurrentState.mpTexture[0]->ImageToTextureCoord(tx2, ty2);
+  mCurrentState.mpTexture[0]->ImageToTextureCoord(tx3, ty3);
 
   nuiRenderArray* pArray = new nuiRenderArray(GL_TRIANGLE_STRIP);
   pArray->Reserve(4);
@@ -569,19 +624,20 @@ void nuiDrawContext::DrawImageQuad(float x0, float y0, float x1, float y1, float
   pArray->SetColor(mCurrentState.mFillColor);
   pArray->PushVertex();
 
-  pArray->SetTexCoords(tx1,ty1); 
-  pArray->SetVertex(x1, y1);
-  pArray->PushVertex();
-
   pArray->SetTexCoords(tx3,ty3); 
   pArray->SetVertex(x3, y3);
   pArray->PushVertex();
 
+  pArray->SetTexCoords(tx1,ty1); 
+  pArray->SetVertex(x1, y1);
+  pArray->PushVertex();
+  
   // 2
   pArray->SetTexCoords(tx2,ty2); 
   pArray->SetVertex(x2, y2);
   pArray->PushVertex();
-
+  
+  
   DrawArray(pArray);
 
   if (!texturing)
@@ -800,12 +856,12 @@ void nuiDrawContext::DrawGradient(const nuiGradient& rGradient, const nuiRect& r
   PopClipping();
 }
 
-static void nuiDrawRect(const nuiRect& out, nuiRenderArray& rArray)
+static void nuiDrawRect(const nuiRect& out, nuiRenderArray& rArray, float strokesize)
 {
   rArray.SetMode(GL_TRIANGLE_STRIP);
   rArray.Reserve(8);
   nuiRect in(out);
-  in.Grow(-NUI_INV_SCALE_FACTOR, -NUI_INV_SCALE_FACTOR);
+  in.Grow(-strokesize, -strokesize);
   
   rArray.SetVertex(out.Left(), out.Top()); rArray.PushVertex();
   rArray.SetVertex(in.Left(), in.Top()); rArray.PushVertex();
@@ -853,50 +909,18 @@ void nuiDrawContext::DrawRect(const nuiRect& rRect, nuiShapeMode Mode)
     // Draw the stroke in all cases:
     if (mode == GL_TRIANGLE_STRIP)
     {
-      nuiRenderArray* pStrokeArray = new nuiRenderArray(mode);
-      pStrokeArray->EnableArray(nuiRenderArray::eVertex, true);
-      pStrokeArray->EnableArray(nuiRenderArray::eColor, true);
-      pStrokeArray->Reserve(4);
-      
-      pStrokeArray->SetColor(mCurrentState.mStrokeColor);
-      pStrokeArray->SetVertex(rect.mLeft, rect.mTop);
-      pStrokeArray->PushVertex();
-      pStrokeArray->SetVertex(rect.mRight, rect.mTop);
-      pStrokeArray->PushVertex();
-      pStrokeArray->SetVertex(rect.mLeft, rect.mBottom);
-      pStrokeArray->PushVertex();
-
-      pStrokeArray->SetVertex(rect.mRight, rect.mBottom);
-      pStrokeArray->PushVertex();
-
-      DrawArray(pStrokeArray);
+      nuiColor back = mCurrentState.mFillColor;
+      mCurrentState.mFillColor = mCurrentState.mStrokeColor;
+      DrawRect(rRect, eFillShape);
+      mCurrentState.mFillColor = back;
+      return;
     }
     else
     {
       nuiRenderArray* pStrokeArray = new nuiRenderArray(mode);
-      if (NUI_SCALE_FACTOR != 1.0f)
-      {
-        nuiDrawRect(rRect, *pStrokeArray);
-      }
-      else
-      {
-        pStrokeArray->EnableArray(nuiRenderArray::eVertex, true);
-        pStrokeArray->EnableArray(nuiRenderArray::eColor, true);
-        pStrokeArray->Reserve(4);
-        
-        pStrokeArray->SetColor(mCurrentState.mStrokeColor);
-        pStrokeArray->SetVertex(rect.mLeft, rect.mTop);
-        pStrokeArray->PushVertex();
-        
-        pStrokeArray->SetVertex(rect.mRight, rect.mTop);
-        pStrokeArray->PushVertex();
-        
-        pStrokeArray->SetVertex(rect.mRight, rect.mBottom);
-        pStrokeArray->PushVertex();
-        
-        pStrokeArray->SetVertex(rect.mLeft, rect.mBottom);
-        pStrokeArray->PushVertex();
-      }
+      pStrokeArray->EnableArray(nuiRenderArray::eColor, true);
+      pStrokeArray->SetColor(mCurrentState.mStrokeColor);
+      nuiDrawRect(rRect, *pStrokeArray, mCurrentState.mLineWidth);
 
       DrawArray(pStrokeArray);
     }
@@ -908,6 +932,8 @@ void nuiDrawContext::DrawRect(const nuiRect& rRect, nuiShapeMode Mode)
       return;
 
     nuiRect rect(rRect);
+    float v = mCurrentState.mLineWidth;
+    rect.Grow(-v, -v);
     // Draw the filled part:
     nuiRenderArray* pFillArray = new nuiRenderArray(GL_TRIANGLE_STRIP);
     pFillArray->EnableArray(nuiRenderArray::eVertex, true);
@@ -915,16 +941,16 @@ void nuiDrawContext::DrawRect(const nuiRect& rRect, nuiShapeMode Mode)
     pFillArray->Reserve(4);
     
     pFillArray->SetColor(mCurrentState.mFillColor);
-    pFillArray->SetVertex(rect.mLeft+1, rect.mTop+1);
+    pFillArray->SetVertex(rect.mLeft, rect.mTop);
     pFillArray->PushVertex();
 
-    pFillArray->SetVertex(rect.mRight-1, rect.mTop+1);
+    pFillArray->SetVertex(rect.mRight, rect.mTop);
     pFillArray->PushVertex();
 
-    pFillArray->SetVertex(rect.mLeft+1, rect.mBottom-1);
+    pFillArray->SetVertex(rect.mLeft, rect.mBottom);
     pFillArray->PushVertex();
     
-    pFillArray->SetVertex(rect.mRight-1, rect.mBottom-1);
+    pFillArray->SetVertex(rect.mRight, rect.mBottom);
     pFillArray->PushVertex();
     
     DrawArray(pFillArray);
@@ -932,7 +958,6 @@ void nuiDrawContext::DrawRect(const nuiRect& rRect, nuiShapeMode Mode)
   else if (Mode == eFillShape)
   {
     nuiRect rect(rRect);
-    //rect.Move(0,-.5); // Adjust to have a correct position on ATI cards, this should work on nvidia too
     // Draw the filled rectangle:
     nuiRenderArray* pFillArray = new nuiRenderArray(GL_TRIANGLE_STRIP);
     pFillArray->EnableArray(nuiRenderArray::eVertex, true);
@@ -1160,7 +1185,7 @@ const nuiMatrix& nuiDrawContext::GetProjectionMatrix() const
 
 void nuiDrawContext::Set2DProjectionMatrix(const nuiRect& rRect)
 {
-  //printf("Set2DProjectionMatrix: %ls\n", rRect.GetValue().GetChars());
+  //printf("Set2DProjectionMatrix: %s\n", rRect.GetValue().GetChars());
   nuiMatrix m;
   m.Translate(-1.0f, 1.0f, 0.0f);
   m.Scale(2.0f/rRect.GetWidth(), -2.0f/rRect.GetHeight(), 1.0f);
@@ -1521,28 +1546,9 @@ void nuiDrawContext::DrawShade(const nuiRect& rSourceRect, const nuiRect& rShade
 nuiDrawContext *nuiDrawContext::CreateDrawContext(const nuiRect& rRect, nuiRenderer Renderer, nglContext* pContext)
 {
   nuiDrawContext* pC = new nuiDrawContext(rRect);
-  nuiPainter* pPainter = NULL;
-  switch (Renderer)
-  {
-#ifndef __NUI_NO_GL__
-  case eOpenGL:
-    pPainter = new nuiGLPainter(pContext, rRect);
-    break;
-#endif
-#ifndef __NUI_NO_D3D__
-  case eDirect3D:
-    pPainter = new nuiD3DPainter(pContext, rRect);
-    break;
-#endif
-#ifndef __NUI_NO_SOFTWARE__
-  case eSoftware:
-    pPainter = new nuiSoftwarePainter(rRect, pContext);
-    break;
-#endif
-  case eMeta:
-    pPainter = new nuiMetaPainter(rRect, pContext);
-    break;
-  }
+  nuiPainter* pPainter = pContext->GetPainter();
+  pPainter->SetSize(rRect.GetWidth(), rRect.GetHeight());
+  pC->SetMainPainter(pPainter);
   pC->SetPainter(pPainter);
 //  if (pContext)
 //    pContext->BeginSession();
@@ -1553,11 +1559,6 @@ nuiDrawContext *nuiDrawContext::CreateDrawContext(const nuiRect& rRect, nuiRende
 }
 
 
-void nuiDrawContext::SetSize(uint w, uint h)
-{
-  mpPainter->SetSize(w, h);
-}
-
 int nuiDrawContext::GetWidth() const
 {
   return (int)mWidth;
@@ -1567,3 +1568,34 @@ int nuiDrawContext::GetHeight() const
 {
   return (int)mHeight;
 }
+
+void nuiDrawContext::SetSurface(nuiSurface* pSurface)
+{
+  if (pSurface)
+  {
+    if (mpPainter != mpMainPainter)
+    {
+      NGL_ASSERT(mpSavedPainter == NULL);
+      mpSavedPainter = mpPainter;
+      mpPainter = mpMainPainter;
+    }
+    mpPainter->SetSurface(pSurface);
+  }
+  else
+  {
+    mpPainter->SetSurface(NULL);
+    if (mpSavedPainter != NULL)
+    {
+      mpPainter = mpSavedPainter;
+      mpSavedPainter = NULL;
+    }
+  }
+
+  mStateChanges++;
+}
+
+nuiSurface* nuiDrawContext::GetSurface() const
+{
+  return mpPainter->GetSurface();
+}
+

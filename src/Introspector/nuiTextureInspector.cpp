@@ -7,15 +7,6 @@
 
 
 #include "nui.h"
-#include "nuiTextureInspector.h"
-#include "nuiGrid.h"
-#include "nuiToggleButton.h"
-#include "nuiLabel.h"
-#include "nuiFont.h"
-#include "nuiIntrospector.h"
-#include "nuiGrid.h"
-#include "nuiText.h"
-#include "nuiColorDecoration.h"
 
 nuiTextureInspector::nuiTextureInspector()
 : mSink(this)
@@ -89,6 +80,7 @@ void nuiTextureInspector::UpdateTextures()
   pSplitter->AddChild(pCont);
   mpImage = new nuiImage();
   mpImage->SetPosition(nuiCenter);
+  //mpImage->SetDecoration("INTROSPECTOR_TEXTURE_BORDER");
   pCont->AddChild(mpImage);
   
   mSink.Connect(pList->SelectionChanged, &nuiTextureInspector::OnTextureSelection, (void*)pList);
@@ -133,7 +125,7 @@ void nuiTextureInspector::OnTextureSelection(const nuiEvent& rEvent)
   while (it_a != end_a)
   {
     nglString pname(it_a->first);
-    //printf("\tattr: %ls\n", pname.GetChars());
+    //printf("\tattr: %s\n", pname.GetChars());
     nuiAttribBase Base = it_a->second;
     nuiAttributeEditor* pEditor = Base.GetEditor();
     mpAttributeGrid->SetCell(0, i, new nuiLabel(pname + nglString(":")));

@@ -2,7 +2,6 @@
 
 using namespace std;
 
-#include "nglApplication.h"
 #include "nglApplication_UIKit.h"
 
 #include "../../Window/UIKit/nglWindow_UIKit.h"
@@ -42,6 +41,12 @@ void objCCallOnMemoryWarning();
 {
 //NGL_DEBUG( NGL_OUT(_T("[nglUIApplication sendEvent]\n")) );
   [super sendEvent: pEvent];
+}
+
+- (void) didReceiveMemoryWarning
+{
+  printf("[nglUIApplication didReceiveMemoryWarning]\n");
+  [super didReceiveMemoryWarning];
 }
 
 @end///< nglUIApplication
@@ -128,11 +133,11 @@ void objCCallOnMemoryWarning();
 
 }
 
-- (void) applicationDidEnterBackground:         (UIApplication*) pUIApplication
+- (void) applicationDidEnterBackground:       (UIApplication*) pUIApplication
 {
   NGL_DEBUG( NGL_OUT(_T("[nglUIApplicationDelegate applicationDidEnterBackground]\n")); )
   NGL_ASSERT(App);
-	
+
 	NSEnumerator *e = [[pUIApplication windows] objectEnumerator];
 	
 	id win;
@@ -143,7 +148,7 @@ void objCCallOnMemoryWarning();
 			nglWindow* pWindow = [win getNGLWindow];
 			
 			NGL_ASSERT(pWindow);
-			pWindow->CallOnDesactivation();			
+			pWindow->CallOnDesactivation();
 		}
 	}
 	
@@ -152,7 +157,7 @@ void objCCallOnMemoryWarning();
 
 - (void) applicationDidReceiveMemoryWarning:  (UIApplication*) pUIApplication
 {
-  NGL_DEBUG( NGL_OUT(_T("[nglUIApplicationDelegate applicationDidReceiveMemoryWarning]\n")); )
+  printf("[nglUIApplicationDelegate applicationDidReceiveMemoryWarning]\n");
 	NGL_ASSERT(App);
   objCCallOnMemoryWarning();
 }
@@ -232,13 +237,13 @@ void nglApplication::Quit (int Code)
 /* Startup
  */
 
-int nglApplication::Main(int argc, char** argv)
+int nglApplication::Main(int argc, const char** argv)
 {
   NSAutoreleasePool *pPool = [NSAutoreleasePool new];
 
   Init(argc, argv);
 
-  UIApplicationMain(argc, argv, @"nglUIApplication", @"nglUIApplicationDelegate");
+  UIApplicationMain(argc, const_cast<char**>(argv), @"nglUIApplication", @"nglUIApplicationDelegate");
 
   [pPool release];
 
@@ -246,7 +251,7 @@ int nglApplication::Main(int argc, char** argv)
 }
 
 
-bool nglApplication::Init(int ArgCnt, char** pArg)
+bool nglApplication::Init(int ArgCnt, const char** pArg)
 {
   int i;
 

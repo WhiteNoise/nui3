@@ -40,34 +40,28 @@ public:
   };
 
   /// Create a null quaternion (all elements set to zero)
-  nglQuaternion ()
+  nglQuaternion()
   {
-    Nullify();
+    Elt.x = 0.f;
+    Elt.y = 0.f;
+    Elt.z = 0.f;
+    Elt.w = 1.f;
   }
 
-  /// Create a quaternion from Euler angles in degrees (vector input)
-  nglQuaternion (const nglVector<T>& rVector)
+  nglQuaternion(T x, T y, T z, T w)
   {
-    T x, y, z;
+    Elt.x = x;
+    Elt.y = y;
+    Elt.z = z;
+    Elt.w = w;
+  }
 
-    x = (T) ( DEG2RAD(rVector[0]) / 2.f );
-    y = (T) ( DEG2RAD(rVector[1]) / 2.f );
-    z = (T) ( DEG2RAD(rVector[2]) / 2.f );
-
-    T sh = (T) -sin ( x ); 
-    T ch = (T)  cos ( x );
-    T sp = (T) -sin ( y ); 
-    T cp = (T)  cos ( y );
-    T sr = (T) -sin ( z ); 
-    T cr = (T)  cos ( z );
-
-    T cpch = cp * ch;
-    T spsh = sp * sh;
-
-    Elt.w = cr * cpch + sr * spsh;
-    Elt.x = sr * cpch - cr * spsh;
-    Elt.y = cr * sp * ch + sr * cp * sh;
-    Elt.z = cr * cp * sh - sr * sp * ch;
+  nglQuaternion(const nglQuaternion<T>& rQuat)
+  {
+    Elt.x = rQuat.Elt.x;
+    Elt.y = rQuat.Elt.y;
+    Elt.z = rQuat.Elt.z;
+    Elt.w = rQuat.Elt.w;
   }
 
   virtual ~nglQuaternion()
@@ -77,6 +71,7 @@ public:
   /// Set to zero (all elements to zero)
   void Nullify()
   {
+    //printf("quat::Nullify\n");
     Elt.x = 0.f;
     Elt.y = 0.f;
     Elt.z = 0.f;
@@ -86,10 +81,43 @@ public:
   /// Set to (multiplication) identity
   void SetIdentity()
   {
+    //printf("quat::SetId\n");
     Elt.x = 0.f;
     Elt.y = 0.f;
     Elt.z = 0.f;
     Elt.w = 1.f;
+  }
+
+  /// Invert the quaternion (= get the conjugate). This method only works if this quaternion is normalized (otherwise use InvertAny())
+  void Invert()
+  {
+    Elt.x = - Elt.x;
+    Elt.y = - Elt.y;
+    Elt.z = - Elt.z;
+    //Elt.w =   Elt.w;
+  }
+
+  T SquaredLength() const
+  {
+    return (Elt.w * Elt.w) + (Elt.x * Elt.x) + (Elt.y * Elt.y) + (Elt.z * Elt.z);
+  }
+
+  T Length() const
+  {
+    return std::sqrt(SquaredLength());
+  }
+
+  T Normalize()
+  {
+    T length = Length();
+    if (length < 1e-4f)
+      return 0.f;
+    T rcpLength = 1.f / length;
+    Elt.x *= rcpLength;
+    Elt.y *= rcpLength;
+    Elt.z *= rcpLength;
+    Elt.w *= rcpLength;
+    return length;
   }
 
   /*! Set to a rotation representation
@@ -100,7 +128,8 @@ public:
   */
   void SetRotation (const T Angle, const T X, const T Y, const T Z)
   {
-    T angle_rad = (T) (DEG2RAD(Angle) / 2.f);
+    //printf("quat::SetRot %f {%f, %f %f}\n", Angle, X, Y, Z);
+    T angle_rad = (T) (DEG2RAD(Angle) * .5f);
 
     T s = (T) sin ( angle_rad );
 
@@ -119,6 +148,48 @@ public:
     SetRotation (Angle, rAxis[0], rAxis[1], rAxis[2]);
   }
 
+  void SetRotation(const nglVector<T>& from, const nglVector<T>& to)
+  {
+    nglVector<T> H = from + to;
+    H.Normalize();
+
+    Elt.w = from * H;
+    Elt.x = from.Elt.y * H.Elt.z - from.Elt.z * H.Elt.y;
+    Elt.y = from.Elt.z * H.Elt.x - from.Elt.x * H.Elt.z;
+    Elt.z = from.Elt.x * H.Elt.y - from.Elt.y * H.Elt.x;
+  }
+
+	void AimZAxis( const nglVector<T>& from, const nglVector<T>& to )
+	{
+		nglVector<T> vAim = to - from;
+		vAim.Normalize();
+
+		Elt.x = vAim.Elt.y;
+		Elt.y = -vAim.Elt.x;
+		Elt.z = 0.0f;
+		Elt.w = 1.0f + vAim.Elt.z;
+
+		if ( Elt.x == 0.0f && Elt.y == 0.0f && Elt.z == 0.0f && Elt.w == 0.0f )
+    {
+      // If we can't normalize it, just set it
+			Elt.x = 0;
+      Elt.y = 1;
+      Elt.z = 0;
+      Elt.w = 0;
+		}
+    else
+    {
+			Normalize();
+		}
+	}
+
+  void LookAt(nglVector<T>& lookAt, nglVector<T>& upDirection)
+  {
+    nglMatrix<T> m;
+    m.LookAt(nglVector<T>(0, 0, 0, 1), lookAt, upDirection);
+    *this = m;
+  }
+  
   /*! Get rotation representation
     \param rAxis returns the rotation axis
     \return rotation angle
@@ -140,125 +211,228 @@ public:
     else
     {
       T m = 1.f / s;
-      rAxis[0] = -Elt.z * m;
-      rAxis[1] = -Elt.y * m;
-      rAxis[2] = -Elt.x * m;
+      rAxis[0] = Elt.x * m;
+      rAxis[1] = Elt.y * m;
+      rAxis[2] = Elt.z * m;
     }
 
     return angle;
   }
 
+  /// Create a quaternion from Euler angles in degrees
+  void SetEulerAngles(T x, T y, T z)
+  {
+    x = DEG2RAD(x);
+    y = DEG2RAD(y);
+    z = DEG2RAD(z);
+
+    T sh = (T) -sin ( x );
+    T ch = (T)  cos ( x );
+    T sp = (T) -sin ( y );
+    T cp = (T)  cos ( y );
+    T sr = (T) -sin ( z );
+    T cr = (T)  cos ( z );
+
+    T cpch = cp * ch;
+    T spsh = sp * sh;
+
+    Elt.w = cr * cpch + sr * spsh;
+    Elt.x = sr * cpch - cr * spsh;
+    Elt.y = cr * sp * ch + sr * cp * sh;
+    Elt.z = cr * cp * sh - sr * sp * ch;
+  }
+
+  void GetEulerAngles(T& x, T& y, T& z) const
+  {
+    T test = Elt.x * Elt.y + Elt.z * Elt.w;
+
+    if (test > 0.499)
+    { // singularity at north pole
+      x = RAD2DEG(2.0 * atan2(Elt.x, Elt.w));
+      y = RAD2DEG(M_PI / 2.0);
+      z = 0;
+      return;
+    }
+
+    if (test < -0.499)
+    { // singularity at south pole
+      x = RAD2DEG(-2 * atan2(Elt.x,Elt.w));
+      y = RAD2DEG(- M_PI/2);
+      z = 0;
+      return;
+    }
+    T sqx = Elt.x * Elt.x;
+    T sqy = Elt.y * Elt.y;
+    T sqz = Elt.z * Elt.z;
+    x = RAD2DEG(atan2(2 * Elt.y * Elt.w - 2 * Elt.x * Elt.z , 1 - 2 * sqy - 2 * sqz));
+    y = RAD2DEG(asin(2 * test));
+    z = RAD2DEG(atan2(2 * Elt.x * Elt.w - 2 * Elt.y * Elt.z , 1 - 2 * sqx - 2 * sqz));
+  }
+
+  
+  void SetSphericalRotation(T latitude, T longitude, T angle = 0)
+  {
+    latitude = DEG2RAD(latitude);
+    longitude = DEG2RAD(longitude);
+
+    T sin_a    = sin( angle / 2 );
+    T cos_a    = cos( angle / 2 );
+
+    T sin_lat  = sin( latitude );
+    T cos_lat  = cos( latitude );
+
+    T sin_long = sin( longitude );
+    T cos_long = cos( longitude );
+
+    Elt.x       = sin_a * cos_lat * sin_long;
+    Elt.y       = sin_a * sin_lat;
+    Elt.z       = sin_a * sin_lat * cos_long;
+    Elt.w       = cos_a;
+  }
+
+  void GetShericalRotation(T& latitude, T& longitude)
+  {
+    T cos_angle  = Elt.w;
+    T sin_angle  = sqrt( 1.0 - cos_angle * cos_angle );
+    T angle      = RAD2DEG(acos( cos_angle ) * 2);
+
+    if ( fabs( sin_angle ) < 0.0005 )
+      sin_angle = 1;
+
+    T tx = Elt.x / sin_angle;
+    T ty = Elt.y / sin_angle;
+    T tz = Elt.z / sin_angle;
+
+    latitude = -asin( ty );
+
+    if ( tx * tx + tz * tz < 0.0005 )
+      longitude   = 0;
+    else
+      longitude  = atan2( tx, tz );
+
+    latitude = RAD2DEG(latitude);
+    longitude = RAD2DEG(longitude);
+
+    while (longitude < 0)
+      longitude += 360.0;
+  }
+
+
   /// Multiplication
-  nglQuaternion<T> operator * (const nglQuaternion<T>& rQuat)
+  nglQuaternion<T> operator* (const nglQuaternion<T> &rq) const
   {
     nglQuaternion<T> result;
-    T t[8];
+    const float x = Elt.x;
+    const float y = Elt.y;
+    const float z = Elt.z;
+    const float w = Elt.w;
+    const float nx = rq.Elt.x;
+    const float ny = rq.Elt.y;
+    const float nz = rq.Elt.z;
+    const float nw = rq.Elt.w;
 
-    t[0] = (Elt.w + Elt.x) * (rQuat.Elt.w + rQuat.Elt.x);
-    t[1] = (Elt.z - Elt.y) * (rQuat.Elt.y - rQuat.Elt.z);
-    t[2] = (Elt.x - Elt.w) * (rQuat.Elt.y - rQuat.Elt.z);
-    t[3] = (Elt.y + Elt.z) * (rQuat.Elt.x - rQuat.Elt.w);
-    t[4] = (Elt.x + Elt.z) * (rQuat.Elt.x + rQuat.Elt.y);
-    t[5] = (Elt.x - Elt.z) * (rQuat.Elt.x - rQuat.Elt.y);
-    t[6] = (Elt.w + Elt.y) * (rQuat.Elt.w - rQuat.Elt.z);
-    t[7] = (Elt.w - Elt.y) * (rQuat.Elt.w + rQuat.Elt.z);
-
-    result.Elt.w =  t[1] + ((-t[4] - t[5] + t[6] + t[7]) * (T)0.5);
-    result.Elt.x =  t[0] - (( t[4] + t[5] + t[6] + t[7]) * (T)0.5);
-    result.Elt.y = -t[2] + (( t[4] - t[5] + t[6] - t[7]) * (T)0.5);
-    result.Elt.z = -t[3] + (( t[4] - t[5] - t[6] + t[7]) * (T)0.5);
+    result.Elt.x = w * nx + x * nw + y * nz - z * ny;
+    result.Elt.y = w * ny + y * nw + z * nx - x * nz;
+    result.Elt.z = w * nz + z * nw + x * ny - y * nx;
+    result.Elt.w = w * nw - x * nx - y * ny - z * nz;
 
     return result;
   }
 
   /// Conversion from an homogeneous matrix
-  nglQuaternion<T>& operator = (const nglMatrix<T>& rMatrix)
+  nglQuaternion<T>& operator =(const nglMatrix<T>& a)
   {
-    T trace = rMatrix(0,0) + rMatrix(1,1) + rMatrix(2,2);
-
-    if (trace > 0.f)
+    float trace = a(0,0) + a(1,1) + a(2,2); // I removed + 1.0f; see discussion with Ethan
+    if( trace > 0 )
     {
-      T s = (T) sqrt (trace + 1.f);
-
-      Elt.w = (T) (s / 2.f);
-      s = (T) (0.5f / s);
-      Elt.x = (rMatrix(1,2) - rMatrix(2,1)) * s;
-      Elt.y = (rMatrix(2,0) - rMatrix(0,2)) * s;
-      Elt.z = (rMatrix(0,1) - rMatrix(1,0)) * s;
+      T s = 0.5 / sqrt(trace + 1.0);
+      Elt.w = 0.25f / s;
+      Elt.x = ( a(2,1) - a(1,2) ) * s;
+      Elt.y = ( a(0,2) - a(2,0) ) * s;
+      Elt.z = ( a(1,0) - a(0,1) ) * s;
     }
-    else 
+    else
     {
-      uint i, j, k;
-      uint next[3] = {1, 2, 0};
-
-      i = 0;
-      if (rMatrix(1,1) > rMatrix(0,0)) i = 1;
-      if (rMatrix(2,2) > rMatrix(i,i)) i = 2;
-      j = next[i];
-      k = next[j];
-
-      T s = (T) (sqrt ((rMatrix(i,i) - (rMatrix(j,j) + rMatrix(k,k))) + 1.f));
-
-      Array[i] = (T) (s * 0.5f);
-      if (s != 0.f) s = (T) (0.5f / s);
-      Array[j] = (rMatrix(i,j) + rMatrix(j,i)) * s;
-      Array[k] = (rMatrix(i,k) + rMatrix(k,i)) * s;
-      Array[3] = (rMatrix(j,k) - rMatrix(k,j)) * s;
+      if ( a(0,0) > a(1,1) && a(0,0) > a(2,2) )
+      {
+        T s = 2.0f * sqrt( 1.0f + a(0,0) - a(1,1) - a(2,2));
+        Elt.w = (a(2,1) - a(1,2) ) / s;
+        Elt.x = 0.25f * s;
+        Elt.y = (a(0,1) + a(1,0) ) / s;
+        Elt.z = (a(0,2) + a(2,0) ) / s;
+      }
+      else if (a(1,1) > a(2,2))
+      {
+        T s = 2.0f * sqrt( 1.0f + a(1,1) - a(0,0) - a(2,2));
+        Elt.w = (a(0,2) - a(2,0) ) / s;
+        Elt.x = (a(0,1) + a(1,0) ) / s;
+        Elt.y = 0.25f * s;
+        Elt.z = (a(1,2) + a(2,1) ) / s;
+      }
+      else
+      {
+        T s = 2.0f * sqrt( 1.0f + a(2,2) - a(0,0) - a(1,1) );
+        Elt.w = (a(1,0) - a(0,1) ) / s;
+        Elt.x = (a(0,2) + a(2,0) ) / s;
+        Elt.y = (a(1,2) + a(2,1) ) / s;
+        Elt.z = 0.25f * s;
+      }
     }
-
-    return *this;
   }
 
   /// Conversion to matrix
-  operator nglMatrix<T> ()
+  operator nglMatrix<T> () const
   {
-    nglMatrix<T> result;
+    const T x = Elt.x;
+    const T y = Elt.y;
+    const T z = Elt.z;
+    const T w = Elt.w;
 
-    T two_xx = Elt.x * (Elt.x + Elt.x);
-    T two_xy = Elt.x * (Elt.y + Elt.y);
-    T two_xz = Elt.x * (Elt.z + Elt.z);
+    const T x2 = x * x;
+    const T y2 = y * y;
+    const T z2 = z * z;
+    const T xy = x * y;
+    const T xz = x * z;
+    const T yz = y * z;
+    const T wx = w * x;
+    const T wy = w * y;
+    const T wz = w * z;
 
-    T two_wx = Elt.w * (Elt.x + Elt.x);
-    T two_wy = Elt.w * (Elt.y + Elt.y);
-    T two_wz = Elt.w * (Elt.z + Elt.z);
+    T a[] = {
+      1.0f - 2.0f * (y2 + z2),
+      2.0f * (xy - wz),
+      2.0f * (xz + wy),
+      0.0f,
 
-    T two_yy = Elt.y * (Elt.y + Elt.y);
-    T two_yz = Elt.y * (Elt.z + Elt.z);
+      2.0f * (xy + wz),
+      1.0f - 2.0f * (x2 + z2),
+      2.0f * (yz - wx),
+      0.0f,
 
-    T two_zz = Elt.z * (Elt.z + Elt.z);
+      2.0f * (xz - wy),
+      2.0f * (yz + wx),
+      1.0f - 2.0f * (x2 + y2),
+      0.0f,
 
-    result.Array[0]= 1.f - (two_yy+two_zz);
-    result.Array[1]= two_xy - two_wz;
-    result.Array[2]= two_xz + two_wy;
-    result.Array[3]= 0.f;
+      0.0f,
+      0.0f,
+      0.0f,
+      1.0f
+    };
 
-    result.Array[4]= two_xy + two_wz;
-    result.Array[5]= 1.f - (two_xx + two_zz);
-    result.Array[6]= two_yz - two_wx;
-    result.Array[7]= 0.f;
-
-    result.Array[8]= two_xz - two_wy;
-    result.Array[9]= two_yz + two_wx;
-    result.Array[10]= 1.f - (two_xx + two_yy);
-    result.Array[11]= 0.f;
-
-    result.Array[12]= 0.f;
-    result.Array[13]= 0.f;
-    result.Array[14]= 0.f;
-    result.Array[15]= 1.f;
-
-    return result;
+    return nglMatrix<T>(a);
   }
 
   /// Conversion to vector (x, y and z quaternion components are pasted, w is zero)
-  operator nglVector<T> ()
+  operator nglVector<T> () const
   {
     return ::nglVector<T>(Elt.x, Elt.y, Elt.z, 0.f);
   }
 
   /// Inversion
-  void Invert()
+  void InvertAny()
   {
+    //printf("quat::Invert\n");
     T n;
 
     n = Elt.x * Elt.x + Elt.y * Elt.y + Elt.z * Elt.z + Elt.w * Elt.w;
@@ -270,8 +444,9 @@ public:
   }
 
   // SLERP interpolation from this instance to \a rTarget at position \a Pos
-  nglQuaternion<T> SlerpTo( const nglQuaternion& rTarget, T Pos)
+  nglQuaternion<T> SlerpTo( const nglQuaternion& rTarget, T Pos) const
   {
+    //printf("quat::SlerpTo\n");
     T sign, co, scale0, scale1;
     nglQuaternion<T> quat;
 
@@ -305,7 +480,144 @@ public:
     quat.Elt.w = scale0 * Elt.w + scale1 * ((sign >= (T) 0.) ? rTarget.Elt.w : -rTarget.Elt.w);
 
     return quat;
-  } 
+  }
+
+  nglQuaternion<T> NlerpTo(const nglQuaternion<T>& f, T blend)
+  {
+    const nglQuaternion& i(*this);
+    nglQuaternion<T> result;
+    T dot = i.Elt.w * f.Elt.w + i.Elt.x * f.Elt.x + i.Elt.y * f.Elt.y + i.Elt.z * f.Elt.z;
+    T blendI = 1.0f - blend;
+
+    if (dot < 0.0f)
+    {
+      nglQuaternion<T> tmpF;
+      tmpF.Elt.w = -f.Elt.w;
+      tmpF.Elt.x = -f.Elt.x;
+      tmpF.Elt.y = -f.Elt.y;
+      tmpF.Elt.z = -f.Elt.z;
+
+      result.Elt.w = blendI * i.Elt.w + blend * tmpF.Elt.w;
+      result.Elt.x = blendI * i.Elt.x + blend * tmpF.Elt.x;
+      result.Elt.y = blendI * i.Elt.y + blend * tmpF.Elt.y;
+      result.Elt.z = blendI * i.Elt.z + blend * tmpF.Elt.z;
+    }
+    else
+    {
+      result.Elt.w = blendI * i.Elt.w + blend * f.Elt.w;
+      result.Elt.x = blendI * i.Elt.x + blend * f.Elt.x;
+      result.Elt.y = blendI * i.Elt.y + blend * f.Elt.y;
+      result.Elt.z = blendI * i.Elt.z + blend * f.Elt.z;
+    }
+
+    result.Normalize();
+    return result;
+  }
+
+
+  bool GetValue(nglString& rDump) const
+  {
+    rDump.CFormat(_T("{ %f %f %f %f }"), (T)Array[0], (T)Array[1], (T)Array[2], (T)Array[3]);
+    return true;
+  }
+
+  bool SetValue(const nglString& rValue)
+  {
+    //printf("quat::SetValue(%s)\n", rValue.GetChars());
+    nglString val = rValue;
+
+    val.Trim();
+    val.TrimLeft(_T('{'));
+    val.TrimRight(_T('}'));
+
+    std::vector<nglString> tokens;
+    val.Tokenize(tokens, _T(' '));
+
+    for (uint i = 0; i < 4; i++)
+    {
+      Array[i] = (T)tokens[i].GetCDouble();
+    }
+
+    return tokens.size() == 4;
+  }
+
+  // Next 3 method stolen from http://nic-gamedev.blogspot.fr/2011/11/quaternion-math-getting-local-axis.html
+  nglVector3<T> GetForwardVector() const
+  {
+    const float w = Elt.w;
+    const float x = Elt.x;
+    const float y = Elt.y;
+    const float z = Elt.z;
+    return nglVector3<T>(  2 * (x * z + w * y),
+                           2 * (y * x - w * x),
+                           1 - 2 * (x * x + y * y));
+  }
+
+  nglVector3<T> GetUpVector() const
+  {
+    const float w = Elt.w;
+    const float x = Elt.x;
+    const float y = Elt.y;
+    const float z = Elt.z;
+    return nglVector3<T>(  2 * (x * y - w * z),
+                           1 - 2 * (x * x + z * z),
+                           2 * (y * z + w * x));
+  }
+
+  nglVector3<T> GetRightVector() const
+  {
+    const float w = Elt.w;
+    const float x = Elt.x;
+    const float y = Elt.y;
+    const float z = Elt.z;
+    return nglVector3<T>(  1 - 2 * (y * y + z * z),
+                           2 * (x * y + w * z),
+                           2 * (x * z - w * y));
+  }
+
+  void Transform(nglVector<T> &v) const
+  {
+    nglQuaternion<T> qv;
+    qv.Elt.w = 0;
+    qv.Elt.x = v[0];
+    qv.Elt.y = v[1];
+    qv.Elt.z = v[2];
+
+    nglQuaternion<T> conj = *this;
+    conj.Invert();
+    nglQuaternion<T> result = *this * qv * conj;
+
+    v[0] = result.Elt.x;
+    v[1] = result.Elt.y;
+    v[2] = result.Elt.z;
+  }
+  
+  void RotateAroundX(float angle)
+  {
+    RotateAround(angle, nglVector3f(1, 0, 0));
+  }
+
+  void RotateAroundY(float angle)
+  {
+    RotateAround(angle, nglVector3f(0, 1, 0));
+  }
+
+  void RotateAroundZ(float angle)
+  {
+    RotateAround(angle, nglVector3f(0, 0, 1));
+  }
+
+  void RotateAround(float angle, const nglVector3f& rAxis)
+  {
+    nglQuaternion<T> rotation;
+    nglVector3f v(rAxis);
+    v.Normalize();
+    rotation.SetRotation(angle, v);
+
+    *this = *this * rotation;
+  }
+  
+
 };
 
 

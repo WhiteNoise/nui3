@@ -139,10 +139,16 @@ private:
   long mHeight, mWidth, mRate, mBPP;
 
 #endif//_UIKIT_
-  
+
+private:
 friend class nglApplication;
 friend class nglWindow;
 };
+
+
+float nuiGetScaleFactor(); ///< return the current scale factor
+float nuiGetInvScaleFactor(); ///< return the inverse of the current scale factor
+
 
 #endif // !_NOGFX_
 #endif // __nglVideoMode_h__

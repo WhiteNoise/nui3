@@ -45,9 +45,8 @@ public:
 
   void SetCanDrop(bool can)                 { mCanDrop = can; }
   bool CanDrop()                            { return mCanDrop; }
-//protected:
-  
-public:
+
+protected:
   nglWindow*  mpWin;
   WindowRef   mWinRef;
 
@@ -59,10 +58,14 @@ public:
   
   EventRecord mEventRecord; // stupid but needed...
   DragRef     mDragRef;
-  RgnHandle   mDragRgn;
   DragTrackingHandlerUPP  mDragTrackingHandler;
   DragReceiveHandlerUPP   mDragReceiveHandler;
   DragSendDataUPP         mSendProc;
+
+  friend OSErr nglDragSendData(FlavorType theType, void * dragSendRefCon, DragItemRef theItemRef, DragRef theDrag);
+  friend OSErr nglDragReceiveHandler(WindowRef theWindow, void * handlerRefCon, DragRef theDrag);
+  friend OSErr nglDragTrackingHandler (DragTrackingMessage message, WindowRef theWindow, void * handlerRefCon, DragRef theDrag);
+  friend class nglWindow;
 };
 
 #endif//__nglDragCarbonDragAndDrop_h__

@@ -6,8 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiHoverDummy.h"
-#include "nuiXML.h"
 
 nuiHoverDummy::nuiHoverDummy(nuiWidgetPtr pHoverOn, nuiWidgetPtr pHoverOff)
 : nuiSimpleContainer()
@@ -19,33 +17,6 @@ nuiHoverDummy::nuiHoverDummy(nuiWidgetPtr pHoverOn, nuiWidgetPtr pHoverOff)
   for (i=0; i < 2; i++)
     if (mpHover[i])
       AddChild(mpHover[i]);
-}
-
-bool nuiHoverDummy::Load(const nuiXMLNode* pNode)
-{
-  nuiSimpleContainer::Load(pNode);
-  SetObjectClass(_T("nuiHoverDummy"));
-
-  int i;
-  for (i=0; i < 2; i++)
-    mpHover[i] = NULL;
-
-  mpHover[0] = GetChild(pNode->GetAttribute(_T("HoverOffChild")),false);
-  mpHover[1] = GetChild(pNode->GetAttribute(_T("HoverOnChild")),false);
-  
-  return true;
-}
-
-nuiXMLNode* nuiHoverDummy::Serialize(nuiXMLNode* pParentNode, bool Recursive) const
-{
-  nuiXMLNode* pNode = nuiSimpleContainer::Serialize(pParentNode, Recursive);
-
-  if (mpHover[0])
-    pNode->SetAttribute(_T("HoverOffChild"), mpHover[0]->GetObjectName());
-  if (mpHover[1])
-    pNode->SetAttribute(_T("HoverOnChild"),  mpHover[1]->GetObjectName());
-
-  return pNode;
 }
 
 nuiHoverDummy::~nuiHoverDummy()

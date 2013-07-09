@@ -9,12 +9,6 @@
 
 
 #include "nui.h"
-#include "nui.h"
-#include "nuiApplication.h"
-#include "nuiSlider.h"
-#include "nuiDrawContext.h"
-#include "nuiXML.h"
-#include "nuiTheme.h"
 
 #define SLIDER_IDEAL_WIDTH 12
 #define SLIDER_IDEAL_SIZE 100
@@ -57,45 +51,6 @@ mSliderSink(this)
   NUI_ADD_EVENT(InteractiveValueChanged);
 }
 
-bool nuiSlider::Load(const nuiXMLNode* pNode)
-{
-  nuiSimpleContainer::Load(pNode);
-  SetObjectClass(_T("nuiSlider"));
-  mClicked = false;
-  mThumbClicked = false;
-  
-  mAutoAdjustHandle = true;
-  
-  // FIXME: interpret other attributes...
-  mOrientation = nuiGetOrientation(pNode);
-  mSliderSink.Connect(mRange.Changed, &nuiSlider::DoInvalidate);
-  mSliderSink.Connect(mRange.ValueChanged, &nuiSlider::DoInvalidate);
-  
-  mpHandle = NULL;
-  mpBackground = NULL;
-  
-  mFineSensitivityRatio = mDefaultFineSensitivityRatio;
-  mFineSensitivityKey = mDefaultFineSensitivityKey;
-  
-  SetHandleOffset(0);
-  SetHandlePosMin(0);
-  SetHandlePosMax(100);
-  
-  // Look for children elements
-  long children = GetChildrenCount();
-  if (children >= 2)
-    mpHandle = GetChild(1);
-  if (children >= 1)
-    mpBackground = GetChild(0);
-  AdjustHandle();
-  mAutoAdjustHandle = nuiGetBool(pNode, _T("AutoAdjustHandle"), true);
-  
-  NUI_ADD_EVENT(ValueChanged);
-  NUI_ADD_EVENT(InteractiveValueChanged);
-  
-  return true;
-}
-
 void nuiSlider::InitAttributes()
 {
   AddAttribute(new nuiAttribute<float>(nglString(_T("HandleOffset")), nuiUnitPixels,
@@ -118,17 +73,6 @@ void nuiSlider::InitAttributes()
     nuiMakeDelegate(this, &nuiSlider::GetAutoAdjustHandle),
     nuiMakeDelegate(this, &nuiSlider::SetAutoAdjustHandle)));
 }
-
-nuiXMLNode* nuiSlider::Serialize(nuiXMLNode* pParentNode, bool Recursive) const
-{
-  nuiXMLNode* pNode = nuiWidget::Serialize(pParentNode,true);
-  if (!pNode) 
-    return NULL;
-  
-  pNode->SetAttribute(_T("Orientation"),mOrientation);
-  return pNode;
-}
-
 
 nuiSlider::~nuiSlider()
 {
@@ -478,7 +422,7 @@ void nuiSlider::AdjustHandle()
     {
       nuiRect r = mpHandle->GetIdealRect();
       nuiSize s = (mOrientation == nuiHorizontal) ? r.GetWidth(): r.GetHeight();
-      offset = mpHandle->HasProperty(tmp) ? mpHandle->GetProperty(tmp).GetFloat() : s/2;
+      offset = s/2;
       offset2 = s - offset;
       SetHandleOffset(offset);
     }
@@ -495,8 +439,8 @@ void nuiSlider::AdjustHandle()
       
       s = (mOrientation == nuiHorizontal) ? r.GetWidth() : r.GetHeight();
       
-      nuiSize Min = mpBackground->HasProperty("HandlePosMin") ? mpBackground->GetProperty("HandlePosMin").GetFloat() : offset;
-      nuiSize Max = mpBackground->HasProperty("HandlePosMax") ? mpBackground->GetProperty("HandlePosMax").GetFloat() : s - offset2;
+      nuiSize Min = offset;
+      nuiSize Max = s - offset2;
       
       mHandlePosMin = Min;
       mHandlePosMax = Max;

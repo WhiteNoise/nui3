@@ -6,10 +6,6 @@
  */
 
 #include "nui.h"
-#include "nuiAsyncIStream.h"
-#include "nglThread.h"
-#include "nuiCommand.h"
-#include "nuiHTTP.h"
 
 class nuiAsyncIStream::Handler : public nglThread, public nuiCommand
 {
@@ -120,7 +116,7 @@ public:
     // This is a directory, let's fake some HTML page:
     
     nglString dir;
-    dir.CFormat(_T("<p>Directory %ls:</p><br>\n"), p.GetChars());
+    dir.CFormat(_T("<p>Directory %s:</p><br>\n"), p.GetChars());
     
     dir.Add("<a href=\"").Add(p.GetParent().GetChars()).Add("\">Parent Folder</a><br>\n");
 
@@ -136,9 +132,9 @@ public:
       nglString l;
       nglPath c(*it);
       if (c.IsLeaf())
-        l.CFormat(_T("<a href=\"%ls\">%ls</a> %d bytes<br>\n"), c.GetChars(), c.GetNodeName().GetChars(), c.GetSize());
+        l.CFormat(_T("<a href=\"%s\">%s</a> %d bytes<br>\n"), c.GetChars(), c.GetNodeName().GetChars(), c.GetSize());
       else
-        l.CFormat(_T("<a href=\"%ls\">%ls</a> (folder)<br>\n"), c.GetChars(), c.GetNodeName().GetChars());
+        l.CFormat(_T("<a href=\"%s\">%s</a> (folder)<br>\n"), c.GetChars(), c.GetNodeName().GetChars());
       dir += l;
       count++;
       ++it;

@@ -6,9 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiTreeHandleDecoration.h"
-#include "nuiFrame.h"
-#include "nuiContour.h"
 
 
 
@@ -31,20 +28,6 @@ nuiTreeHandleDecoration::nuiTreeHandleDecoration(const nglString& rName, nuiColo
 
 nuiTreeHandleDecoration::~nuiTreeHandleDecoration()
 {
-}
-
-
-
-bool nuiTreeHandleDecoration::Load(const nuiXMLNode* pNode)
-{
-  // #FIXME TO DO
-  return false;
-}
-
-nuiXMLNode* nuiTreeHandleDecoration::Serialize(nuiXMLNode* pNode)
-{
-  // #FIXME TO DO
-  return NULL;
 }
 
 

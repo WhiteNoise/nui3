@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiCSV.h"
 
 #define NUICSV_SEPARATION_TAG _T("<nuicsv/>")
 #define NUICSV_COMMENT_TAG _T("<nuicsv_comment/>")
@@ -62,7 +61,7 @@ bool nuiCSV::Load(nglIStream* pStream, bool CheckNbColumns)
   // for each line from input stream
   while (pStream->ReadLine(line, NULL))
   {
-    //NGL_OUT(_T("%3d ReadLine: %ls\n"), numlines, line.GetChars());
+    //NGL_OUT(_T("%3d ReadLine: %s\n"), numlines, line.GetChars());
     numlines++;
     
     // first, handle the comment lines, if the comment option has been enabled

@@ -6,16 +6,12 @@
 */
 
 #include "nui.h"
-#include "nuiHTML.h"
-#include "nglIMemory.h"
-#include "nglOMemory.h"
-#include "nuiUnicode.h"
+#include "nuiWebCSS.h"
 
 #undef Bool
 #include "tidy.h"
 #include "buffio.h"
 
-#include "nuiWebCSS.h"
 
 //class nuiHTMLAttrib
 nuiHTMLAttrib::nuiHTMLAttrib(AttributeType type, const nglString& rName, const nglString& rValue)
@@ -130,7 +126,7 @@ void nuiHTMLNode::SetFromNode(const void* _tdoc, const void* _tnod, nglTextEncod
   if (tidyNodeGetValue(tdoc, tnod, &buf))
   {
     mText.Import((const char*)buf.bp, (int32)buf.size, encoding);
-    //NGL_OUT(_T("<%ls> %ls\n"), mName.GetChars(), mText.GetChars());
+    //NGL_OUT(_T("<%s> %s\n"), mName.GetChars(), mText.GetChars());
   }
   tidyBufFree(&buf);
   
@@ -264,8 +260,8 @@ void nuiHTMLNode::GetSimpleText(nglString& rString) const
   if (!mText.IsNull())
   {
     rString += mText;
-//    NGL_OUT(_T("text: %ls\n"), mText.GetChars());
-//    NGL_OUT(_T("tmp: %ls\n"), rString.GetChars());
+//    NGL_OUT(_T("text: %s\n"), mText.GetChars());
+//    NGL_OUT(_T("tmp: %s\n"), rString.GetChars());
   }
   
   uint32 count = GetNbChildren();
@@ -380,10 +376,10 @@ static nglString GetEncodingString(TidyNode tnod)
         // bleh...
       }
       nglString encoding(tidyAttrValue(attr_content));
-      //NGL_OUT(_T("content found in the tree: %ls"), encoding.GetChars());
+      //NGL_OUT(_T("content found in the tree: %s"), encoding.GetChars());
       int32 col = encoding.Find(_T("charset="));
       encoding = encoding.Extract(col + 8);
-      //NGL_OUT(_T("encoding found in the tree: %ls"), encoding.GetChars());
+      //NGL_OUT(_T("encoding found in the tree: %s"), encoding.GetChars());
       return encoding;
     }
   }
@@ -487,7 +483,7 @@ const nglString& nuiHTML::GetSourceURL() const
 void nuiHTML::SetSourceURL(const nglString& rURL)
 {
   mSourceURL = rURL;
-  printf("New source URL (0x%x): %ls\n", this, mSourceURL.GetChars());
+  printf("New source URL (0x%x): %s\n", this, mSourceURL.GetChars());
 }
 
 // Stolen from nglPath!

@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiBorderDecoration.h"
 
 nuiBorderDecoration::nuiBorderDecoration(const nglString& rName)
 : nuiDecoration(rName)
@@ -83,27 +82,6 @@ void nuiBorderDecoration::InitAttributes()
    nuiMakeDelegate(this, &nuiBorderDecoration::SetBorderMode)));
 }
 
-
-
-bool nuiBorderDecoration::Load(const nuiXMLNode* pNode)
-{
-  //#FIXME
-  return true;
-}
-
-nuiXMLNode* nuiBorderDecoration::Serialize(nuiXMLNode* pNode)
-{
-//#FIXME
-//  pNode->SetName(_T("nuiGradientDecoration"));
-//  pNode->SetAttribute(_T("GradientType"), (int)mGradientType);
-//  pNode->SetAttribute(_T("Color1"), mColor1.GetValue());
-//  pNode->SetAttribute(_T("Color2"), mColor2.GetValue());
-//  pNode->SetAttribute(_T("Color3"), mColor3.GetValue());
-//  pNode->SetAttribute(_T("Color4"), mColor4.GetValue());
-//  pNode->SetAttribute(_T("Overdraw"), mOverdraw);
-
-  return pNode;
-}
 
 // virtual
 void nuiBorderDecoration::Draw(nuiDrawContext* pContext, nuiWidget* pWidget, const nuiRect& rDestRect)

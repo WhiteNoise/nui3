@@ -6,19 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiIntrospector.h"
-#include "nuiSeparator.h"
-#include "nuiWidgetInspector.h"
-#include "nuiThreadInspector.h"
-#include "nuiFontInspector.h"
-#include "nuiDecorationInspector.h"
-#include "nuiTextureInspector.h"
-#include "nuiColorDecoration.h"
-#include "nuiGradientDecoration.h"
-#include "nuiMetaDecoration.h"
-#include "nuiTreeHandleDecoration.h"
-#include "nuiFontManager.h"
-#include "nuiObjectInspector.h"
 
 
 #define CELL_TOOLBAR 0
@@ -182,6 +169,7 @@ void nuiIntrospector::ShowObjectInspector(const nuiEvent& rEvent)
 
 void nuiIntrospector::InitDecorations()
 {
+  //nuiDefaultDecoration::Init();
   // window background
   new nuiColorDecoration(INTROSPECTOR_DECO_BKG, nuiRect(10,10,0,0), nuiColor(224,224,224));
   
@@ -222,12 +210,16 @@ void nuiIntrospector::InitDecorations()
   
   // client background
   new nuiColorDecoration(INTROSPECTOR_DECO_CLIENT_BKG, nuiRect(0,0,0,0), nuiColor(250,250,250), 1, nuiColor(190,190,190), eStrokeAndFillShape);
-  
+
+  nuiBorderDecoration* pTex = new nuiBorderDecoration("INTROSPECTOR_TEXTURE_BORDER");
+  pTex->SetStrokeColor(nuiColor(0,0,0));
+  pTex->SetStrokeSize(1);
+
   // folderpane's title
   nuiGradientDecoration* pFTitle
     = new nuiGradientDecoration
             (
-              INTROSPECTOR_DECO_FOLDERPANE_TITLE, 
+              INTROSPECTOR_DECO_FOLDERPANE_TITLE,
               nuiRect(2, 2, 0, 0),
               nuiColor(255,255,255),
               nuiColor(232,232,232),

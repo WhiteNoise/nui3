@@ -7,7 +7,6 @@
 
 
 #include "nui.h"
-#include "nuiSerializeContext.h"
 
 nuiSerializeContext::nuiSerializeContext(nuiXMLNode* pNode, nuiSerializeOperation Operation, bool recursive)
 : nuiObject()
@@ -23,8 +22,6 @@ nuiSerializeContext::nuiSerializeContext(const nuiSerializeContext& rContext)
   mpNode = rContext.mpNode;
   mRecursive = rContext.mRecursive;
   mOperation = rContext.mOperation;
-  
-  CopyProperties(rContext);
 }
 
 nuiSerializeContext::~nuiSerializeContext()

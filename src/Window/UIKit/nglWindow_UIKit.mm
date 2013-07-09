@@ -1,13 +1,5 @@
 #include "nui.h"
 
-#include "nglApplication.h"
-#include "nglVideoMode.h"
-#include "nglContext.h"
-#include "nglWindow.h"
-#include "nglKeyboard.h"
-#include "nuiMouseCursor.h"
-#include "nuiStopWatch.h"
-
 #include <QuartzCore/QuartzCore.h>
 
 
@@ -19,7 +11,6 @@
 
 #define NGL_WINDOW_FPS 60.0f
 
-extern float NUI_SCALE_FACTOR;
 
 //#include "nglImage.h"
 
@@ -102,8 +93,9 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
 }
 
 
-- (id) initWithFrame: (CGRect) rect andNGLWindow: (nglWindow*) pNGLWindow
+- (id) initWithFrame: (CGRect) rect andNGLWindow: (nglWindow*) pNGLWindow andContextInfo: (nglContextInfo*)pContextInfo
 {
+  mpContextInfo = pContextInfo;
 	mInited = false;
 	mInvalidated = true;
 	
@@ -116,11 +108,6 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
 	
 	
 	mAngle = -1;
-	
-	
-	
-
-	
  
 	//oldorientation = UIDeviceOrientationUnknown;
   UIDevice* pUIDev = [UIDevice currentDevice];	
@@ -135,7 +122,7 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   {
     NGL_ASSERT(!"initWithFrame: Could not initialize UIWindow");
   }
-  glView = [[EAGLView alloc] initWithFrame:rect replacing: nil];
+  glView = [[EAGLView alloc] initWithFrame:rect replacing: nil contextInfo: pContextInfo];
   [self addSubview:glView];
 	[self sendSubviewToBack:glView];
   
@@ -154,7 +141,8 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   {
     mInvalidationTimer = [NSTimer scheduledTimerWithTimeInterval:(1.0f / NGL_WINDOW_FPS) target:self selector:@selector(Paint) userInfo:nil repeats:YES];
   }
-  
+
+  mpNGLWindow->CallOnRescale(nuiGetScaleFactor());
   mpTimer = nuiAnimation::AcquireTimer();
   mpTimer->Stop();
 
@@ -170,10 +158,11 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   if (glView)
   {
     [glView removeFromSuperview];
-    [glView release];
     glView = nil;
   }
   //[self disconnect];
+
+  delete mpContextInfo;
   [super dealloc];
 }
 
@@ -265,7 +254,7 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   angle = mpNGLWindow->GetRotation();
   if (mAngle != angle)
   {
-    NSLog(@"new window angle: %f (old %f)\n", angle, (float)mAngle);
+    NSLog(@"new window angle: %f (old %f)\n", (float)angle, (float)mAngle);
     switch (angle)
     {
       case 0:
@@ -321,7 +310,7 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
     glViewOld = glView;
     self.frame = rect;
 		
-    glView = [[EAGLView alloc] initWithFrame:rect replacing: glViewOld];
+    glView = [[EAGLView alloc] initWithFrame:rect replacing: glViewOld contextInfo:mpContextInfo];
     [self addSubview:glView];
 		[self sendSubviewToBack:glView];
 
@@ -345,7 +334,7 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   glViewOld = glView;
   self.frame = rect;
   
-  glView = [[EAGLView alloc] initWithFrame:rect replacing: glViewOld];
+  glView = [[EAGLView alloc] initWithFrame:rect replacing: glViewOld contextInfo:mpContextInfo];
   [self addSubview:glView];
 	[self sendSubviewToBack:glView];
   //[glView startAnimation];
@@ -453,7 +442,6 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   if (glViewOld)
   {
     [glViewOld removeFromSuperview];
-    [glViewOld dealloc];
     glViewOld = nil;
   }
   //if (mInvalidated)
@@ -473,7 +461,12 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   
 	static double sOldTimestamp = 0.0;
   NSSet* pSet = [pEvent allTouches];
-  NGL_ASSERT(pSet);
+  if (!pSet)
+  {
+    NGL_ASSERT(pSet);
+    return;
+  }
+    
   NSArray* pArray = [pSet allObjects];
   NGL_ASSERT(pArray);
   NSUInteger count = [pArray count];
@@ -753,31 +746,27 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   return [CAEAGLLayer class];
 }
 
-extern float NUI_SCALE_FACTOR;
-extern float NUI_INV_SCALE_FACTOR;
-
 //The EAGL view is stored in the nib file. When it's unarchived it's sent -initWithCoder:
-- (id)initWithFrame:(CGRect)rect replacing:(EAGLView*) original
+- (id)initWithFrame:(CGRect)rect replacing:(EAGLView*) original  contextInfo: (nglContextInfo*)pContextInfo
 {
+  mpContextInfo = pContextInfo;
   NSLog(@"new EAGLView (%f,%f %fx%f)\n", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
   context = nil;
   backingWidth = 0;
   backingHeight = 0;
-  defaultFramebuffer = 0;
-  colorRenderbuffer = 0;
-  
+  defaultFrameBuffer = 0;
+  colorRenderBuffer = 0;
+  depthRenderBuffer = 0;
+
   rect.origin.x = 0;
   rect.origin.y = 0;
   if ((self = [super initWithFrame:rect]))
   {
-    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
+    if ([self respondsToSelector:@selector(contentScaleFactor)])
     {
       /* on iOS 4.0, use contentsScaleFactor */
-      NUI_SCALE_FACTOR = [UIScreen mainScreen].scale;
-      NUI_INV_SCALE_FACTOR = 1.0f / NUI_SCALE_FACTOR;
-      
-      self.contentScaleFactor = [UIScreen mainScreen].scale;
-        NSLog(@"Scale: %f\n", self.contentScaleFactor);
+      NSLog(@"Scale: %f\n", self.contentScaleFactor);
+      self.contentScaleFactor = nuiGetScaleFactor();
     }
     else
     {
@@ -789,11 +778,17 @@ extern float NUI_INV_SCALE_FACTOR;
     CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
     
     eaglLayer.opaque = TRUE;
-    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                    [NSNumber numberWithBool:TRUE], kEAGLDrawablePropertyRetainedBacking,
-                                    kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-                                    nil];
-    
+    if (pContextInfo->CopyOnSwap)
+      eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+                                      [NSNumber numberWithBool:TRUE], kEAGLDrawablePropertyRetainedBacking,
+                                      kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
+                                      nil];
+    else
+      eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+                                      kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
+                                      nil];
+
+
     EAGLSharegroup* group = nil;
     if (original != nil) 
 		{
@@ -802,11 +797,19 @@ extern float NUI_INV_SCALE_FACTOR;
 		}
     
 		//self.clearsContextBeforeDrawing = TRUE;
-		
+
+    EAGLRenderingAPI glAPI;
+    if (nuiMainWindow::GetRenderer() == eOpenGL)
+      glAPI = kEAGLRenderingAPIOpenGLES1;
+    else if (nuiMainWindow::GetRenderer() == eOpenGL2)
+      glAPI = kEAGLRenderingAPIOpenGLES2;
+
+    NGL_ASSERT(glAPI != NULL);
+
     if (group)
-      context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1 sharegroup: group];
+      context = [[EAGLContext alloc] initWithAPI:glAPI sharegroup: group];
     else
-      context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
+      context = [[EAGLContext alloc] initWithAPI:glAPI];
     
     if (!context || ![EAGLContext setCurrentContext:context])
     {
@@ -814,13 +817,6 @@ extern float NUI_INV_SCALE_FACTOR;
       return nil;
     }
         
-    // Create default framebuffer object. The backing will be allocated for the current layer in -resizeFromLayer
-    glGenFramebuffersOES(1, &defaultFramebuffer);
-    glGenRenderbuffersOES(1, &colorRenderbuffer);
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFramebuffer);
-    glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer);
-    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderbuffer);
-
     if (![self resizeFromLayer:eaglLayer])
     {
       NSLog(@"Unable to resizeFromLayer\n");
@@ -848,18 +844,24 @@ extern float NUI_INV_SCALE_FACTOR;
 - (void)dealloc
 {
   // Tear down GL
-  if (defaultFramebuffer)
+  if (defaultFrameBuffer)
   {
-    glDeleteFramebuffersOES(1, &defaultFramebuffer);
-    defaultFramebuffer = 0;
+    glDeleteFramebuffersOES(1, &defaultFrameBuffer);
+    defaultFrameBuffer = 0;
   }
   
-  if (colorRenderbuffer)
+  if (colorRenderBuffer)
   {
-    glDeleteRenderbuffersOES(1, &colorRenderbuffer);
-    colorRenderbuffer = 0;
+    glDeleteRenderbuffersOES(1, &colorRenderBuffer);
+    colorRenderBuffer = 0;
   }
-  
+
+  if (depthRenderBuffer)
+  {
+    glDeleteRenderbuffersOES(1, &depthRenderBuffer);
+    depthRenderBuffer = 0;
+  }
+
   // Tear down context
   if ([EAGLContext currentContext] == context)
     [EAGLContext setCurrentContext:nil];
@@ -877,21 +879,59 @@ extern float NUI_INV_SCALE_FACTOR;
 }
 
 - (BOOL)resizeFromLayer:(CAEAGLLayer *)layer
-{	
-  // Allocate color buffer backing based on the current layer size
-  glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFramebuffer);
-  glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer);
-  if ([context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:layer] == NO)
+{
+  if (!defaultFrameBuffer)
   {
-	  NSLog(@"Failed to call context:renderbuferStorage:");
-	  return NO;
+    // Create default framebuffer object. The backing will be allocated for the current layer in -resizeFromLayer
+    glGenFramebuffersOES(1, &defaultFrameBuffer);
+    glGenRenderbuffersOES(1, &colorRenderBuffer);
+
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFrameBuffer);
+    printf("glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFrameBuffer); (fb = %d)\n", defaultFrameBuffer);
+    glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderBuffer);
+    printf("glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderBuffer); (fb = %d)\n", colorRenderBuffer);
+
+    if ([context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:layer] == NO)
+    {
+      NSLog(@"Failed to call context:renderbuferStorage:");
+      return NO;
+    }
+    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderBuffer);
+
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
+
+    if (mpContextInfo->DepthBits)
+    {
+      glGenRenderbuffersOES(1, &depthRenderBuffer);
+      glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderBuffer);
+      glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT16_OES, backingWidth, backingHeight);
+      glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthRenderBuffer);
+      
+    }
   }
-  glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
-  glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
-  
-	// this line seemed to fix some render buffer creation errors, but I'm not sure if it's necessary.
-  //glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderbuffer);
-	
+  else
+  {
+
+    // Allocate color buffer backing based on the current layer size
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFrameBuffer);
+    glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderBuffer);
+    if (depthRenderBuffer)
+      glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderBuffer);
+
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
+
+    if ([context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:layer] == NO)
+    {
+      NSLog(@"Failed to call context:renderbuferStorage:");
+      return NO;
+    }
+
+    // this line seemed to fix some render buffer creation errors, but I'm not sure if it's necessary.
+    //glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderBuffer);
+  }
+
   if (glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES)
   {
     NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));
@@ -939,12 +979,13 @@ extern float NUI_INV_SCALE_FACTOR;
 - (void) BeginSession
 {
   [EAGLContext setCurrentContext:context];
-  glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFramebuffer);
+  glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFrameBuffer);
 }
 
 - (void) EndSession
 {
-  glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderbuffer);
+  glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderBuffer);
+  //glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderbuffer);
   [context presentRenderbuffer:GL_RENDERBUFFER_OES];
 }
 
@@ -1021,7 +1062,7 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
   
 
   // Create the actual window
-  nglUIWindow* pUIWindow = [[nglUIWindow alloc] initWithFrame: rect andNGLWindow: this];
+  nglUIWindow* pUIWindow = [[nglUIWindow alloc] initWithFrame: rect andNGLWindow: this andContextInfo: new nglContextInfo(rContext)];
 
   mOSInfo.mpUIWindow = pUIWindow;
   mpUIWindow = pUIWindow;
@@ -1036,7 +1077,7 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
   NGL_LOG(_T("window"), NGL_LOG_INFO, _T("trying to create GLES context"));
   rContext.Dump(NGL_LOG_INFO);
   
-  if (rContext.TargetAPI != eTargetAPI_OpenGL)
+  if ((rContext.TargetAPI != eTargetAPI_OpenGL) && (rContext.TargetAPI != eTargetAPI_OpenGL2))
   {
     // UIKit Implementation only supports OpenGLES renderer so far
     NGL_LOG(_T("window"), NGL_LOG_INFO, _T("bad renderer"));
@@ -1048,7 +1089,8 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
 	NSLog(@"currentFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
 	r = [UIScreen mainScreen].applicationFrame;
 	NSLog(@"applicationFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
-	
+
+	Build(rContext);
 	SetSize(w, h);
 	
 /* Ultra basic UIKit view integration on top of nuiWidgets

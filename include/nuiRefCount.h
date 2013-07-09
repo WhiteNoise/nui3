@@ -10,52 +10,49 @@
 class nuiRefCount
 {
 public:
-  nuiRefCount() : mTrace(false), mCount(0), mPermanent(false)
+  nuiRefCount() : mTrace(false), mRefCount(0), mPermanent(false)
   {
   }
 
   virtual ~nuiRefCount()           
   { 
-    //NGL_ASSERT(mCount == 0); 
+    //NGL_ASSERT(mRefCount == 0); 
   }
 
   uint32 Acquire() const   
   { 
     if (mTrace)
     {
-      NGL_OUT(_T("Acquire object 0x%x (%d)\n"), this, mCount + 1);
+      NGL_OUT(_T("Acquire object %p (%d)\n"), this, mRefCount + 1);
     }
     
-    
-    return ++mCount; 
+    mRefCount++;
+    return mRefCount;
   }
 
   uint32 Release() const
   { 
     if (mTrace)
     {
-      NGL_OUT(_T("Release object 0x%x (%d)\n"), this, mCount - 1);
+      NGL_OUT(_T("Release object %p (%d)\n"), this, mRefCount - 1);
     }
 
-    if(mCount > 0 )
+    
+    NGL_ASSERTR(mRefCount > 0, mRefCount);
+    mRefCount--;
+    if (mRefCount == 0)
     {
-        //NGL_ASSERTR(mCount > 0, mCount);
-        mCount--;
-        if (mCount == 0)
-        {
-          if (mTrace)
-          {
-            NGL_OUT(_T("Delete object 0x%x\n"), this);
-          }
-          
-          
-          const_cast<nuiRefCount*>(this)->OnFinalize();
-          delete this;
-          return 0;
-        }
-    }
+      if (mTrace)
+      {
+        NGL_OUT(_T("Delete object %p\n"), this);
+      }
       
-    return mCount;
+      
+      const_cast<nuiRefCount*>(this)->OnFinalize();
+      delete this;
+      return 0;
+    }
+    return mRefCount;
   }
 
   void SetTrace(bool set)
@@ -70,7 +67,7 @@ public:
   
   uint32 GetRefCount() const
   {
-    return mCount;
+    return mRefCount;
   }
 
   void SetPermanent(bool Permanent = true)
@@ -103,7 +100,35 @@ public:
 protected:
   mutable bool mTrace;
 private:
-  mutable uint32 mCount;
+  mutable uint32 mRefCount;
   bool mPermanent;
 };
+
+class NGL_API nuiRefGuard : nuiNonCopyable
+{
+public:
+  nuiRefGuard(const nuiRefCount* pRef)
+  {
+    mpRef = pRef;
+    mpRef->Acquire();
+  }
+  
+  nuiRefGuard(const nuiRefCount& rRef)
+  {
+    mpRef = &rRef;
+    mpRef->Acquire();
+  }
+  
+  
+  ~nuiRefGuard()
+  {
+    mpRef->Release();
+  }
+  
+private:
+  const nuiRefCount* mpRef;
+};
+
+
+#define nuiAutoRef nuiRefGuard nui_local_auto_ref(this);
 

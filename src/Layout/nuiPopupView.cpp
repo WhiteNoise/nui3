@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiPopupView.h"
 
 nuiPopupView::nuiPopupView(nuiWidget* pWidget, nuiSize X, nuiSize Y)
 {
@@ -26,7 +25,7 @@ nuiPopupView::nuiPopupView(nuiWidget* pWidget, nuiSize X, nuiSize Y)
 
   SetWantKeyboardFocus(true);
   
-  GetTopLevel()->CancelGrab();
+  //GetTopLevel()->CancelGrab();
 }
 
 nuiPopupView::~nuiPopupView()

@@ -6,8 +6,6 @@
  */
 
 #include "nui.h"
-#include "nuiSynthSound.h"
-#include "nuiSynthVoice.h"
 
 
 nuiSynthSound::nuiSynthSound(double sampleRate, double releaseTime)
@@ -22,7 +20,7 @@ nuiSynthSound::nuiSynthSound(double sampleRate, double releaseTime)
   if (mWaveTables.empty())
     InitTables();
   
-  mID.Format("%p%ls", this, nglString(SYNTH_SUFFIX).GetChars());
+  mID.Format("%p%s", this, nglString(SYNTH_SUFFIX).GetChars());
 }
 
 nuiSynthSound::~nuiSynthSound()
@@ -113,7 +111,7 @@ void nuiSynthSound::InitTables()
     int i;
     float incr;
     float p;
-    Type type = (Type)t;   
+    SignalType type = (SignalType)t;   
     switch (type) 
     {
         // Sinus

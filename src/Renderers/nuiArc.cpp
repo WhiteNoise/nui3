@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiArc.h"
 
 // nuiArc:
 nuiArc::nuiArc(const nuiPoint& rStartVertex, const nuiPoint& rStopVertex, float XRadius, float YRadius, float Angle, bool LargeArc, bool Sweep)
@@ -78,7 +77,6 @@ nuiXMLNode* nuiArc::Serialize(nuiXMLNode* pParentNode) const
   else
     pNode = new nuiXML(_T("nuiArc"));
 
-  //    pNode->SetAttribute(_T("Name"),GetProperty(_T("Name")));
   pNode->SetAttribute(_T("X0"),mStartVertex.Elt[0]);
   pNode->SetAttribute(_T("Y0"),mStartVertex.Elt[1]);
   if (mStartVertex.Elt[2] != 0.0f) pNode->SetAttribute(_T("Z0"), mStartVertex.Elt[2]);

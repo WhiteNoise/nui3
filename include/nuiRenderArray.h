@@ -32,12 +32,50 @@ public:
     GLfloat mX;
     GLfloat mY;
     GLfloat mZ;
+    GLfloat mW;
+
+    GLfloat mTX;
+    GLfloat mTY;
+
+    GLfloat mNX;
+    GLfloat mNY;
+    GLfloat mNZ;
+    GLfloat mNW;
+
     GLubyte mR;
     GLubyte mG;
     GLubyte mB;
     GLubyte mA;
-    GLfloat mTX;
-    GLfloat mTY;
+  };
+
+  enum StreamType
+  {
+    eFloat = GL_FLOAT,
+    eInt = GL_INT,
+    eByte = GL_UNSIGNED_BYTE,
+  };
+
+  class StreamDesc
+  {
+  public:
+    StreamDesc(int32 StreamID, int32 count_per_vertex, int32 vertex_count, const float* pData, bool CopyData, bool Normalize);
+    StreamDesc(int32 StreamID, int32 count_per_vertex, int32 vertex_count, const int32* pData, bool CopyData, bool Normalize);
+    StreamDesc(int32 StreamID, int32 count_per_vertex, int32 vertex_count, const uint8* pData, bool CopyData, bool Normalize);
+    ~StreamDesc();
+
+    int32 mStreamID;
+    StreamType mType;
+    int32 mCount;
+    bool mOwnData;
+    bool mNormalize;
+
+    union
+    {
+      const float* mpFloats;
+      const int32* mpInts;
+      const uint8* mpBytes;
+    } mData;
+
   };
 
   enum DataType
@@ -89,22 +127,23 @@ public:
   { 
     return mVertices[index];
   }
+
+  int32 AddStream(const StreamDesc& rDesc);
     
   void SetMode(GLenum mode); ///< GL_POINTS, GL_LINE_STRIP, GL_LINE_LOOP, GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES
   GLenum GetMode() const; ///< GL_POINTS, GL_LINE_STRIP, GL_LINE_LOOP, GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES
 
-  void SetIndexedMode(bool set);
-  bool GetIndexedMode() const;
-  
   void EnableArray(DataType tpe, bool Set = true);
   bool IsArrayEnabled(DataType tpe) const;
   
   bool Is3DMesh() const;
   void Set3DMesh(bool set);
-  
-  bool IsShape() const;
+    bool IsShape() const;
   void SetShape(bool set);
-  
+  bool IsStatic() const;
+  void SetStatic(bool set);
+
+
   uint32 GetSize() const;
   void Reserve(uint Count);
   void Resize(uint Count);
@@ -123,6 +162,10 @@ public:
   void SetColor(const nuiColor& rColor);
   void SetColor(uint32 Color);
   void SetTexCoords(float tx, float ty);
+  void SetTexCoords(const nglVector2f& rV);
+  void SetNormal(float x, float y, float z);
+  void SetNormal(const nuiVector& rVf);
+  void SetNormal(const nuiVector3& rV3f);
 
   void SetVertex(uint32 index, float x, float y, float z = 0.0f);
   void SetVertex(uint32 index, const nuiVector& rVf);
@@ -133,7 +176,10 @@ public:
   void SetColor(uint32 index, const nuiColor& rColor);
   void SetColor(uint32 index, uint32 Color);
   void SetTexCoords(uint32 index, float tx, float ty);
-  
+  void SetNormal(uint32 index, float x, float y, float z);
+  void SetNormal(uint32 index, const nuiVector& rVf);
+  void SetNormal(uint32 index, const nuiVector3& rV3f);
+
   void PushVertex();
   
   IndexArray& GetIndexArray(uint32 ArrayIndex);
@@ -145,13 +191,16 @@ public:
   void SetIndex(uint32 ArrayIndex, uint32 IndexInArray, uint32 VertexIndex);
 
   void GetBounds(float* bounds) const; ///< bounds must contain at least 6 floats to store the minums and maximums coordinates of this array
-  
+
+  int32 AddStream(int32 StreamID, int32 count_per_vertex, const float* pData, bool CopyData, bool Normalize = false);
+  int32 AddStream(int32 StreamID, int32 count_per_vertex, const int32* pData, bool CopyData, bool Normalize = false);
+  int32 AddStream(int32 StreamID, int32 count_per_vertex, const uint8* pData, bool CopyData, bool Normalize = false);
+
+  const StreamDesc& GetStream(int32 index) const;
+  int32 GetStreamCount() const;
+
   nglString Dump() const;
 private:
-  uint mVertexElements;
-  uint mColorElements;
-  uint mTexCoordElements;
-
   GLenum mMode;
   bool mEnabled[4];
   bool mStatic : 1;
@@ -162,6 +211,7 @@ private:
 
   Vertex mCurrentVertex;
   std::vector<Vertex> mVertices;
+  std::vector<StreamDesc*> mStreams;
   
   nuiRect mBounds;
 

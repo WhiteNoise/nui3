@@ -7,7 +7,6 @@
 
 
 #include "nui.h"
-#include "nuiHBox.h"
 
 nuiHBox::nuiHBox(uint32 nbcells)
 : nuiBox(nbcells, 1)
@@ -69,7 +68,7 @@ bool nuiHBox::SetCell(uint32 cell, nuiWidget* pWidget, nuiPosition position)
 nuiLabel* nuiHBox::SetCell(uint32 cell, const nglString& rLabel, const nglString& rObjectName, nuiPosition position)
 {
   nuiLabel* pLabel = new nuiLabel(rLabel);
-  if (rObjectName != nglString::Null)
+  if (!rObjectName.IsNull())
     pLabel->SetObjectName(rObjectName);
   bool res = nuiGrid::SetCell(cell, 0, pLabel, position);
   if (!res)
@@ -277,7 +276,7 @@ void nuiHBox::AddCell(nuiWidget* pWidget, nuiPosition position)
 nuiLabel* nuiHBox::AddCell(const nglString& rLabel, const nglString& rObjectName, nuiPosition position)
 {
   nuiLabel* pLabel = new nuiLabel(rLabel);
-  if (rObjectName != nglString::Null)
+  if (!rObjectName.IsNull())
     pLabel->SetObjectName(rObjectName);
   nuiHBox::AddCell(pLabel, position);
   

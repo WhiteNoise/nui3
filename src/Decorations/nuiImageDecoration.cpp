@@ -6,8 +6,6 @@
  */
 
 #include "nui.h"
-#include "nuiDrawContext.h"
-#include "nuiImageDecoration.h"
 
 nuiImageDecoration::nuiImageDecoration(const nglString& rName)
 : nuiDecoration(rName),
@@ -47,8 +45,6 @@ nuiImageDecoration::nuiImageDecoration(const nglString& rName, const nglPath& rT
     InitAttributes();
 	
   mpTexture = nuiTexture::GetTexture(rTexturePath);
-  if (mpTexture)
-    SetProperty(_T("Texture"), rTexturePath.GetPathName());
 }
 
 
@@ -92,22 +88,6 @@ void nuiImageDecoration::InitAttributes()
 nuiImageDecoration::~nuiImageDecoration()
 {
   mpTexture->Release();
-}
-
-bool nuiImageDecoration::Load(const nuiXMLNode* pNode)
-{
-  mClientRect.SetValue(nuiGetString(pNode, _T("ClientRect"), _T("{0,0,0,0}")));
-  mpTexture = nuiTexture::GetTexture(nglPath(nuiGetString(pNode, _T("Texture"), nglString::Empty)));
-  return true;
-}
-
-nuiXMLNode* nuiImageDecoration::Serialize(nuiXMLNode* pNode)
-{
-  pNode->SetName(_T("nuiImageDecoration"));
-  pNode->SetAttribute(_T("ClientRect"), mClientRect.GetValue());
-  
-  pNode->SetAttribute(_T("Texture"), GetTexturePath());
-  return pNode;
 }
 
 bool nuiImageDecoration::GetRepeatX() const
@@ -171,20 +151,16 @@ void nuiImageDecoration::SetPosition(nuiPosition pos)
 
 nglPath nuiImageDecoration::GetTexturePath() const
 {
-  if (HasProperty(_T("Texture")))
-    return GetProperty(_T("Texture"));
-  
   return mpTexture->GetSource();
 }
 
 void nuiImageDecoration::SetTexturePath(nglPath path)
 {
-  SetProperty(_T("Texture"), path.GetPathName());
   nuiTexture* pOld = mpTexture;
   mpTexture = nuiTexture::GetTexture(path);
   if (!mpTexture || !mpTexture->IsValid())
   {
-    NGL_OUT(_T("nuiImageDecoration::SetTexturePath warning : could not load graphic resource '%ls'\n"), path.GetChars());
+    NGL_OUT(_T("nuiImageDecoration::SetTexturePath warning : could not load graphic resource '%s'\n"), path.GetChars());
     return;
   }
   
@@ -212,7 +188,7 @@ void nuiImageDecoration::SetColor(const nuiColor& rColor)
 
 void nuiImageDecoration::Draw(nuiDrawContext* pContext, nuiWidget* pWidget, const nuiRect& rDestRect)
 {
-  if (!mpTexture || !mpTexture->GetImage() || !mpTexture->GetImage()->GetPixelSize())
+  if (!mpTexture)
     return;
   
   pContext->PushState();
@@ -275,8 +251,8 @@ nuiSize nuiImageDecoration::GetBorder(nuiPosition position, const nuiWidget* pWi
   if (!mBorderEnabled)
     return 0;
   
-  nuiSize w = 1.0, h = 1.0;
-  mpTexture->TextureToImageCoord(w, h);
+  float w = mpTexture->GetWidth();
+  float h = mpTexture->GetHeight();
   switch (position)
   {
     case nuiLeft:

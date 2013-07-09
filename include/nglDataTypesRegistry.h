@@ -14,8 +14,6 @@
 #define __nglDataTypesRegistry_h__
 
 //#include "nui.h"
-#include "nglKernel.h"
-#include "nglString.h"
 
 #ifdef _WIN32_
 typedef UINT        nglNativeObjectType;
@@ -27,6 +25,9 @@ typedef uint        nglNativeObjectType;
 typedef uint        nglNativeObjectType;
 #endif
 #ifdef _UIKIT_
+typedef uint        nglNativeObjectType;
+#endif
+#ifdef _ANDROID_
 typedef uint        nglNativeObjectType;
 #endif
 #ifdef _CARBON_

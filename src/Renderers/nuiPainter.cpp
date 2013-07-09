@@ -6,15 +6,14 @@
 */
 
 #include "nui.h"
-#include "nuiPainter.h"
 
 ///////////////////////////////////
 // nuiPainter implementation:
-nuiPainter::nuiPainter(const nuiRect& rRect, nglContext* pContext) 
+nuiPainter::nuiPainter(nglContext* pContext)
 {
   ResetStats();
-  mWidth = ToNearest(rRect.GetWidth());
-  mHeight = ToNearest(rRect.GetHeight());
+  mWidth = 0;
+  mHeight = 0;
   mMatrixStack.push(nuiMatrix());
   mProjectionMatrixStack.push(nuiMatrix());
   mProjectionViewportStack.push(nuiRect());
@@ -31,11 +30,6 @@ nuiPainter::~nuiPainter()
 {
   // Empty the clip stack:
   mpClippingStack = std::stack<nuiClipper>();
-
-  while (!mpSurfaceStack.empty())
-  {
-    PopSurface();
-  }
 }
 
 void nuiPainter::StartRendering()
@@ -272,26 +266,16 @@ void nuiPainter::SetSurface(nuiSurface* pSurface)
   mpSurface = pSurface;
 }
 
-void nuiPainter::PushSurface()
+nuiSurface* nuiPainter::GetSurface() const
 {
-  if (mpSurface)
-    mpSurface->Acquire();
-  mpSurfaceStack.push(mpSurface);
-}
-
-void nuiPainter::PopSurface()
-{
-  nuiSurface* pSurface = mpSurfaceStack.top();
-  mpSurfaceStack.pop();
-  SetSurface(pSurface);
-  if (pSurface)
-    pSurface->Release();
+  return mpSurface;
 }
 
 
 void nuiPainter::GetSize(uint32& rX, uint32& rY) const
 {
-  rX = mWidth; rY = mHeight;
+  rX = mWidth;
+  rY = mHeight;
 }
 
 const nuiRenderState& nuiPainter::GetState() const
@@ -342,56 +326,5 @@ int32 nuiPainter::GetCurrentHeight() const
 void nuiPainter::AddBreakPoint()
 {
   // do nothing by default, this is only used to debug defered rendering (i.e. nuiMetaPainter).
-}
-
-
-// class nuiTextureCache
-nuiTextureCache::nuiTextureCache()
-{
-  nuiTexture::AddCache(this);
-}
-
-nuiTextureCache::~nuiTextureCache()
-{
-  nuiTexture::DelCache(this);
-}
-
-void nuiTextureCache::CreateTexture(nuiTexture* pTexture)
-{  
-}
-
-void nuiTextureCache::DestroyTexture(nuiTexture* pTexture)
-{  
-}
-
-void nuiTextureCache::InvalidateTexture(nuiTexture* pTexture, bool ForceReload)
-{  
-}
-
-
-nuiTextureCacheSet nuiTexture::mTextureCaches;
-
-
-// nuiSurfaceCache
-nuiSurfaceCache::nuiSurfaceCache()
-{
-  nuiSurface::AddCache(this);
-}
-
-nuiSurfaceCache::~nuiSurfaceCache()
-{
-  nuiSurface::DelCache(this);
-}
-
-void nuiSurfaceCache::CreateSurface(nuiSurface* pSurface)
-{  
-}
-
-void nuiSurfaceCache::DestroySurface(nuiSurface* pSurface)
-{  
-}
-
-void nuiSurfaceCache::InvalidateSurface(nuiSurface* pSurface, bool ForceReload)
-{  
 }
 

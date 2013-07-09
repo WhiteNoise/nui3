@@ -7,14 +7,6 @@
 
 
 #include "nui.h"
-#include "nuiDecorationInspector.h"
-#include "nuiGrid.h"
-#include "nuiToggleButton.h"
-#include "nuiLabel.h"
-#include "nuiFont.h"
-#include "nuiIntrospector.h"
-#include "nuiGrid.h"
-#include "nuiText.h"
 
 nuiDecorationInspector::nuiDecorationInspector()
 : mSink(this)
@@ -145,7 +137,7 @@ void nuiDecorationInspector::OnDecoSelection(const nuiEvent& rEvent)
   while (it_a != end_a)
   {
     nglString pname(it_a->first);
-    //printf("\tattr: %ls\n", pname.GetChars());
+    //printf("\tattr: %s\n", pname.GetChars());
     nuiAttribBase Base = it_a->second;
     nuiAttributeEditor* pEditor = Base.GetEditor();
     mpAttributeGrid->SetCell(0, i, new nuiLabel(pname + nglString(":")));
@@ -209,7 +201,7 @@ void nuiDecorationInspector::DumpDecl()
   {
     nglString decl = pDeco->GetCSSDeclaration();
     mpCSSLabel->SetText(decl);
-    NGL_OUT(_T("Decoration Declaration:\n%ls\n"), decl.GetChars());
+    NGL_OUT(_T("Decoration Declaration:\n%s\n"), decl.GetChars());
   }
 }
 

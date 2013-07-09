@@ -8,10 +8,6 @@
 
 
 #include "nui.h"
-#include "nui.h"
-#include "nuiApplication.h"
-#include "nuiTitledPane.h"
-#include "nuiDrawContext.h"
 
 
 nuiTitledPane::nuiTitledPane(nuiWidget* pTitleWidget)
@@ -54,21 +50,6 @@ bool nuiTitledPane::AddChild(nuiWidgetPtr pChild)
   SetContents(pChild);
   return false;
 }
-
-
-bool nuiTitledPane::Load(const nuiXMLNode* pNode)
-{
-  return nuiVBox::Load(pNode);
-}
-
-
-
-
-nuiXMLNode* nuiTitledPane::Serialize(nuiXMLNode* pParentNode, bool Recursive) const
-{
-	return nuiVBox::Serialize(pParentNode, Recursive);
-}
-
 
 
 nuiTitledPane::~nuiTitledPane()

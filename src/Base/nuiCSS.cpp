@@ -6,20 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiCSS.h"
-#include "nglIStream.h"
-#include "nglOStream.h"
-
-#include "nuiFrame.h"
-#include "nuiMetaDecoration.h"
-#include "nuiStateDecoration.h"
-#include "nuiBorderDecoration.h"
-#include "nuiColorDecoration.h"
-#include "nuiGradientDecoration.h"
-#include "nuiImageDecoration.h"
-#include "nuiTreeHandleDecoration.h"
-#include "nuiMetaDecoration.h"
-#include "nuiFontManager.h"
 
 
 ///////////////////////////////
@@ -41,7 +27,7 @@ nuiCSSAction_SetAttribute::~nuiCSSAction_SetAttribute()
 
 void nuiCSSAction_SetAttribute::ApplyAction(nuiObject* pObject)
 {
-  //NGL_OUT(_T("CSS Action on class %ls attrib[%ls] <- '%ls'\n"), pObject->GetObjectClass().GetChars(), mAttribute.GetChars(), mValue.GetChars());
+  //NGL_OUT(_T("CSS Action on class %s attrib[%s] <- '%s'\n"), pObject->GetObjectClass().GetChars(), mAttribute.GetChars(), mValue.GetChars());
   
   nuiAttribBase Attribute = pObject->GetAttribute(mAttribute);  
   if (Attribute.IsValid())
@@ -59,34 +45,11 @@ void nuiCSSAction_SetAttribute::ApplyAction(nuiObject* pObject)
     else
       Attribute.FromString(mIndex0, mIndex1, v);
   }
-}
-
-/////////////////////////////////
-nuiCSSAction_SetProperty::nuiCSSAction_SetProperty(const nglString& rProperty, const nglString& rValue)
-{
-  mProperty = rProperty;
-  mValue = rValue;
-  mValueIsGlobal = rValue[0] == '$';
-  if (mValueIsGlobal)
-    mValue.DeleteLeft(1);
-}
-
-nuiCSSAction_SetProperty::~nuiCSSAction_SetProperty()
-{
-  
-}
-
-void nuiCSSAction_SetProperty::ApplyAction(nuiObject* pObject)
-{
-  //NGL_OUT(_T("CSS Action on class %ls proeprty[%ls] <- '%ls'\n"), pWidget->GetObjectClass().GetChars(), mAttribute.GetChars(), mValue.GetChars());
-  nglString v;
-  if (!mValueIsGlobal)
-    v = mValue;
   else
-    v = nuiObject::GetGlobalProperty(mValue);
-  pObject->SetProperty(mProperty, mValue);
+  {
+    pObject->SetProperty(mAttribute, mValue);
+  }
 }
-
 
 /*
  Target syntax for the nui3 CSS language:
@@ -319,8 +282,15 @@ public:
       return false;
     }
     
-    while (GetChar() && mChar != _T('\"'))
+    if (!GetChar())
     {
+      rResult.Copy(&mAccumulator[0], mAccumulator.size());
+      return false;
+    }
+
+    while (mChar != _T('\"'))
+    {
+      bool skip = false;
       if (mChar == _T('\\'))
       {
         if (!GetChar())
@@ -329,15 +299,57 @@ public:
           return false;
         }
         
-        if (mChar != _T('\"'))
+        if (mChar == _T('u') || mChar == _T('U'))
+        {
+          if (!GetChar())
+          {
+            rResult.Copy(&mAccumulator[0], mAccumulator.size());
+            return false;
+          }
+          
+          nglString hex;
+          while (nglIsHexDigit(mChar))
+          {
+            hex += mChar;
+
+            if (!GetChar())
+            {
+              rResult.Copy(&mAccumulator[0], mAccumulator.size());
+              return false;
+            }
+          }
+          
+          nglUChar hexnum = hex.GetCInt(16);
+          hex.Wipe();
+          hex.Append(hexnum);
+          for (int i = 0; i < hex.GetLength(); i++)
+            mAccumulator.push_back(hex[i]);
+          hex.Wipe();
+          skip = true;
+
+          if (mChar != _T('\"'))
+          {
+            rResult.Copy(&mAccumulator[0], mAccumulator.size());
+            return false;
+          }
+        }
+        else if (mChar == _T('\"'))
         {
           rResult.Copy(&mAccumulator[0], mAccumulator.size());
-          return false;
+          return true;
         }
         
       }
 
-      mAccumulator.push_back(mChar);
+      if (!skip)
+      {
+        mAccumulator.push_back(mChar);
+        if (!GetChar())
+        {
+          rResult.Copy(&mAccumulator[0], mAccumulator.size());
+          return false;
+        }
+      }
     }
 
     GetChar();
@@ -365,7 +377,7 @@ public:
     return !rResult.IsEmpty();
   }
   
-  bool GetValue(nglString& rResult, bool AllowBlank = false)
+  bool GetValue(nglString& rResult, bool AllowBlank = false, nglUChar separator = 0)
   {
     mAccumulator.clear();
     if (!SkipBlank())
@@ -374,7 +386,7 @@ public:
       return false;
     }
     
-    while ((AllowBlank && IsBlank(mChar)) || IsValidInValue(mChar))
+    while (((AllowBlank && IsBlank(mChar)) || IsValidInValue(mChar)) && (mChar != separator))
     {
       mAccumulator.push_back(mChar);
       if (!GetChar())
@@ -498,6 +510,8 @@ public:
       case _T(')'):
       case _T('.'):
       case _T(','):
+      case _T('/'):
+      case _T(' '):
         return true;
         break;
       default:  
@@ -666,7 +680,7 @@ public:
       }
       else
       {
-        if (!GetValue(value, true/*AllowBlank*/))
+        if (!GetValue(value, true/*AllowBlank*/, ';'))
           return false;
       }
       
@@ -797,7 +811,7 @@ public:
       // check file
       if (!includePath.Exists())
       {
-        NGL_OUT(_T("Could not find CSS source file '%ls'\n"), includePath.GetChars());
+        NGL_OUT(_T("Could not find CSS source file '%s'\n"), includePath.GetChars());
         return false;
       }
       
@@ -805,11 +819,11 @@ public:
       nglIStream* pF = includePath.OpenRead();
       if (!pF)
       {
-        NGL_OUT(_T("Unable to open CSS source file '%ls'\n"), includePath.GetChars());
+        NGL_OUT(_T("Unable to open CSS source file '%s'\n"), includePath.GetChars());
         return false;
       }
 
-      //NGL_OUT(_T("CSS Include: '%ls'\n"), includePath.GetChars());
+      //NGL_OUT(_T("CSS Include: '%s'\n"), includePath.GetChars());
       // launch included file parsing
       nglFileOffset s = pF->Available();
       std::vector<uint8> cache;
@@ -823,7 +837,7 @@ public:
       if (!lexer.Load())
       {
         nglString tmp;
-        tmp.CFormat(_T("Error (file '%ls') line %d (%d): %ls"), includePath.GetChars(), lexer.GetLine(), lexer.GetColumn(), lexer.GetErrorStr().GetChars() );
+        tmp.CFormat(_T("Error (file '%s') line %d (%d): %s"), includePath.GetChars(), lexer.GetLine(), lexer.GetColumn(), lexer.GetErrorStr().GetChars() );
         SetError(tmp);
         return false;
       }
@@ -950,7 +964,7 @@ public:
     }
     else
     {
-      res = GetValue(rvalue, true);
+      res = GetValue(rvalue, true, ';');
     }
     
     if (!res)
@@ -1029,7 +1043,7 @@ public:
         if (!CreateColor(name))
         {
           nglString str;
-          str.CFormat(_T("Unable to parse a color with name '%ls'"), name.GetChars());
+          str.CFormat(_T("Unable to parse a color with name '%s'"), name.GetChars());
           SetError(str);
           return NULL;
         }
@@ -1039,7 +1053,7 @@ public:
         if (!CreateVariable(name))
         {
           nglString str;
-          str.CFormat(_T("Unable to parse a variable with name '%ls'"), name.GetChars());
+          str.CFormat(_T("Unable to parse a variable with name '%s'"), name.GetChars());
           SetError(str);
           return NULL;
         }
@@ -1049,7 +1063,7 @@ public:
         if (!ReadTextureAtlas(name))
         {
           nglString str;
-          str.CFormat(_T("Unable to parse an atlas definition for %ls"), name.GetChars());
+          str.CFormat(_T("Unable to parse an atlas definition for %s"), name.GetChars());
           SetError(str);
           return NULL;
         }
@@ -1076,7 +1090,7 @@ public:
     if (!pObj)
     {
       nglString str;
-      str.CFormat(_T("Unable to create an object of type '%ls' and name '%ls'"), type.GetChars(), name.GetChars());
+      str.CFormat(_T("Unable to create an object of type '%s' and name '%s'"), type.GetChars(), name.GetChars());
       SetError(str);
       return NULL;
     }
@@ -1178,7 +1192,7 @@ public:
       
       if (mChar == _T(')'))
         break;
-    } while (mChar == _T(';'));
+    } while (mChar == _T(';') || mChar == _T(','));
       
     if (!GetChar() && !SkipBlank())
     {
@@ -1638,9 +1652,7 @@ public:
           }
         }
         
-        if (op == _T('='))
-          pMatcher = new nuiWidgetPropertyMatcher(property, str, true, false);
-        else if (op == _T(':'))
+        if (op == _T('=') || op == _T(':'))
           pMatcher = new nuiWidgetAttributeMatcher(property, str, true, false);
         else if (op == _T('$'))
           pMatcher = new nuiGlobalVariableMatcher(property, str);
@@ -1811,17 +1823,12 @@ public:
     if (!ReadAction(symbol, rvalue, op, i0, i1))
       return false;
     
-    if (op == _T(':'))
+    if (op == ':' ||  op == '=')
     {
       nuiCSSAction_SetAttribute* pAction = new nuiCSSAction_SetAttribute(symbol, rvalue, i0, i1);
       mActions.push_back(pAction);
     }
-    else if (op == _T('='))
-    {
-      nuiCSSAction_SetProperty* pAction = new nuiCSSAction_SetProperty(symbol, rvalue);
-      mActions.push_back(pAction);
-    }
-    
+
     return true;
   }
 
@@ -1949,7 +1956,7 @@ public:
     }
     else
     {
-      res = GetValue(rvalue, true);
+      res = GetValue(rvalue, true, ';');
     }
     
     if (!res)
@@ -2121,7 +2128,8 @@ bool nuiCSS::Load(nglIStream& rStream, const nglPath& rSourcePath)
   cssLexer lexer(&mem, *this, rSourcePath);
   if (!lexer.Load())
   {
-    mErrorString.CFormat(_T("Error line %d (%d): %ls"), lexer.GetLine(), lexer.GetColumn(), lexer.GetErrorStr().GetChars() );
+    mErrorString.CFormat(_T("Error line %d (%d): %s"), lexer.GetLine(), lexer.GetColumn(), lexer.GetErrorStr().GetChars() );
+    NGL_OUT(_T("Error loading css:\n%s\n"), mErrorString.GetChars());
     return false;
   }
   //NGL_OUT(_T("Loaded %d css rules\n"), GetRulesCount());

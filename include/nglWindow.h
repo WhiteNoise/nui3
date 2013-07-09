@@ -428,6 +428,15 @@ window = new nglWindow (context, info, NULL);
   */
   //@}
 
+  /** @name Flags */
+  //@{
+  const Flags& GetFlags() const { return mFlags; }
+  /*!<
+   \return Window specific informations (eg. resizable attr, etc ...).
+   */
+  //@}
+  
+  
   /** @name Mouse */
   //@{
   nglMouseInfo::Mode GetMouseMode() const;
@@ -777,6 +786,7 @@ public:
   bool CallOnMouseMove  (nglMouseInfo& rInfo);
   bool CallOnMultiEventsFinished (nglMouseInfo& rInfo);
   bool CallOnRotation(uint Angle);
+  void CallOnRescale(float NewScale);
 
 #ifdef _X11_
 public:
@@ -874,6 +884,11 @@ private:
   GLuint mDepthBuffer;
   nglContextInfo mContextInfo;
   StateChange mState;
+  bool mDragging;
+  nglDragAndDrop* mpDragged;
+public:
+  bool IsDragging() { return mDragging; }
+  nglDragAndDrop* GetDraggedObject() { return mpDragged; }
 #endif
 
 #ifdef _COCOA_
@@ -885,6 +900,10 @@ private:
   void* mpNSWindow;
   nglContextInfo mContextInfo;
   StateChange mState;
+  nglDragAndDrop* mpDragged;
+public:
+  void SetDraggedObject(nglDragAndDrop* pDragged) { mpDragged = pDragged; }
+  nglDragAndDrop* GetDraggedObject() { return mpDragged; }
 #endif
   
 #ifdef _WIN32_

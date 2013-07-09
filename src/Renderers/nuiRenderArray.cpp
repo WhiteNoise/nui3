@@ -6,9 +6,8 @@
 */
 
 #include "nui.h"
-#include "nglMath.h"
-#include "nuiRenderArray.h"
-#include "nuiColor.h"
+
+
 
 /// class nuiRenderArray
 nuiRenderArray::nuiRenderArray(uint32 mode, bool Static, bool _3dmesh, bool _shape)
@@ -26,23 +25,24 @@ nuiRenderArray::nuiRenderArray(uint32 mode, bool Static, bool _3dmesh, bool _sha
   m3DMesh = _3dmesh;
   mShape = _shape;
 
-  mVertexElements = 2;
-  mColorElements = 4;
-  mTexCoordElements = 2;
-
   mpCacheHandle = NULL;
   mpCacheManager = NULL;
 
   mCurrentVertex.mX = 0.0f;
   mCurrentVertex.mY = 0.0f;
   mCurrentVertex.mZ = 0.0f;
+  mCurrentVertex.mW = 1.0f;
   mCurrentVertex.mTX = 0.0f;
   mCurrentVertex.mTY = 0.0f;
   mCurrentVertex.mR = 0;
   mCurrentVertex.mG = 0;
   mCurrentVertex.mB = 0;
   mCurrentVertex.mA = 255;
-  
+  mCurrentVertex.mNX = 0;
+  mCurrentVertex.mNY = 0;
+  mCurrentVertex.mNZ = 1;
+  mCurrentVertex.mNW = 0;
+
 }
 
 nuiRenderArray::nuiRenderArray(const nuiRenderArray& rArray)
@@ -56,10 +56,6 @@ nuiRenderArray::nuiRenderArray(const nuiRenderArray& rArray)
   mMode = rArray.mMode;
   m3DMesh = rArray.m3DMesh;
   mShape = rArray.mShape;
-
-  mVertexElements = rArray.mVertexElements;
-  mColorElements = rArray.mColorElements;
-  mTexCoordElements = rArray.mTexCoordElements;
 
   mpCacheHandle = NULL;
   mpCacheManager = NULL;
@@ -100,16 +96,23 @@ bool nuiRenderArray::IsArrayEnabled(DataType tpe) const
 void nuiRenderArray::PushVertex()
 {
   NGL_ASSERT(mCurrentVertex.mX != std::numeric_limits<float>::infinity());
-  NGL_ASSERT(!isnan(mCurrentVertex.mX));
+  NGL_ASSERT(!std::isnan(mCurrentVertex.mX));
   NGL_ASSERT(mCurrentVertex.mY != std::numeric_limits<float>::infinity());
-  NGL_ASSERT(!isnan(mCurrentVertex.mY));
+  NGL_ASSERT(!std::isnan(mCurrentVertex.mY));
   NGL_ASSERT(mCurrentVertex.mZ != std::numeric_limits<float>::infinity());
-  NGL_ASSERT(!isnan(mCurrentVertex.mZ));
+  NGL_ASSERT(!std::isnan(mCurrentVertex.mZ));
 
   NGL_ASSERT(mCurrentVertex.mTX != std::numeric_limits<float>::infinity());
-  NGL_ASSERT(!isnan(mCurrentVertex.mTX));
+  NGL_ASSERT(!std::isnan(mCurrentVertex.mTX));
   NGL_ASSERT(mCurrentVertex.mTY != std::numeric_limits<float>::infinity());
-  NGL_ASSERT(!isnan(mCurrentVertex.mTY));
+  NGL_ASSERT(!std::isnan(mCurrentVertex.mTY));
+
+  NGL_ASSERT(mCurrentVertex.mNX != std::numeric_limits<float>::infinity());
+  NGL_ASSERT(!std::isnan(mCurrentVertex.mNX));
+  NGL_ASSERT(mCurrentVertex.mNY != std::numeric_limits<float>::infinity());
+  NGL_ASSERT(!std::isnan(mCurrentVertex.mNY));
+  NGL_ASSERT(mCurrentVertex.mNZ != std::numeric_limits<float>::infinity());
+  NGL_ASSERT(!std::isnan(mCurrentVertex.mNZ));
 
   // Grow the bounding rect:
   UpdateBounds(mCurrentVertex.mX, mCurrentVertex.mY, mCurrentVertex.mZ);
@@ -200,10 +203,10 @@ void nuiRenderArray::SetColor(float r, float g, float b, float a)
   NGL_ASSERT(b >= 0.0);
   NGL_ASSERT(a <= 1.0);
   NGL_ASSERT(a >= 0.0);
-  NGL_ASSERT(!isnan(r));
-  NGL_ASSERT(!isnan(g));
-  NGL_ASSERT(!isnan(b));
-  NGL_ASSERT(!isnan(a));
+  NGL_ASSERT(!std::isnan(r));
+  NGL_ASSERT(!std::isnan(g));
+  NGL_ASSERT(!std::isnan(b));
+  NGL_ASSERT(!std::isnan(a));
 
   mCurrentVertex.mR = (uint8)ToBelow(r * 255.0f);
   mCurrentVertex.mG = (uint8)ToBelow(g * 255.0f);
@@ -237,6 +240,32 @@ void nuiRenderArray::SetTexCoords(float tx, float ty)
   mCurrentVertex.mTY = ty;
 }
 
+void nuiRenderArray::SetTexCoords(const nglVector2f& rV)
+{
+  SetTexCoords(rV[0], rV[1]);
+}
+
+void nuiRenderArray::SetNormal(float x, float y, float z)
+{
+  mCurrentVertex.mNX = x;
+  mCurrentVertex.mNY = y;
+  mCurrentVertex.mNZ = z;
+}
+
+void nuiRenderArray::SetNormal(const nuiVector& rVf)
+{
+  mCurrentVertex.mNX = rVf[0];
+  mCurrentVertex.mNY = rVf[1];
+  mCurrentVertex.mNZ = rVf[2];
+}
+
+void nuiRenderArray::SetNormal(const nuiVector3& rV3f)
+{
+  mCurrentVertex.mNX = rV3f[0];
+  mCurrentVertex.mNY = rV3f[1];
+  mCurrentVertex.mNZ = rV3f[2];
+}
+
 bool nuiRenderArray::Is3DMesh() const
 {
   return m3DMesh;
@@ -257,6 +286,17 @@ void nuiRenderArray::SetShape(bool set)
   mShape = set;
 }
 
+bool nuiRenderArray::IsStatic() const
+{
+  return mStatic;
+}
+
+void nuiRenderArray::SetStatic(bool set)
+{
+  mStatic = set;
+}
+
+
 //////////////
 // Indexed accessors:
 void nuiRenderArray::SetVertex(uint32 index, float x, float y, float z)
@@ -266,6 +306,7 @@ void nuiRenderArray::SetVertex(uint32 index, float x, float y, float z)
   mVertices[index].mX = x;
   mVertices[index].mY = y;
   mVertices[index].mZ = z;
+  mVertices[index].mW = 1;
 }
 
 void nuiRenderArray::SetVertex(uint32 index, const nuiVector& rVf)
@@ -274,6 +315,7 @@ void nuiRenderArray::SetVertex(uint32 index, const nuiVector& rVf)
   mVertices[index].mX = rVf[0];
   mVertices[index].mY = rVf[1];
   mVertices[index].mZ = rVf[2];
+  mVertices[index].mW = rVf[3];
 }
 
 void nuiRenderArray::SetVertex(uint32 index, const nuiVector3& rV3f)
@@ -282,6 +324,7 @@ void nuiRenderArray::SetVertex(uint32 index, const nuiVector3& rV3f)
   mVertices[index].mX = rV3f[0];
   mVertices[index].mY = rV3f[1];
   mVertices[index].mZ = rV3f[2];
+  mVertices[index].mW = 1;
 }
 
 void nuiRenderArray::SetVertex(uint32 index, const nuiVector2& rV2f)
@@ -290,6 +333,7 @@ void nuiRenderArray::SetVertex(uint32 index, const nuiVector2& rV2f)
   mVertices[index].mX = rV2f[0];
   mVertices[index].mY = rV2f[1];
   mVertices[index].mZ = 0;
+  mVertices[index].mW = 1;
 }
 
 void nuiRenderArray::SetColor(uint32 index, float r, float g, float b, float a)
@@ -302,10 +346,10 @@ void nuiRenderArray::SetColor(uint32 index, float r, float g, float b, float a)
   NGL_ASSERT(b >= 0.0);
   NGL_ASSERT(a <= 1.0);
   NGL_ASSERT(a >= 0.0);
-  NGL_ASSERT(!isnan(r));
-  NGL_ASSERT(!isnan(g));
-  NGL_ASSERT(!isnan(b));
-  NGL_ASSERT(!isnan(a));
+  NGL_ASSERT(!std::isnan(r));
+  NGL_ASSERT(!std::isnan(g));
+  NGL_ASSERT(!std::isnan(b));
+  NGL_ASSERT(!std::isnan(a));
   
   mVertices[index].mR = (uint8)ToBelow(r * 255.0f);
   mVertices[index].mG = (uint8)ToBelow(g * 255.0f);
@@ -338,6 +382,31 @@ void nuiRenderArray::SetTexCoords(uint32 index, float tx, float ty)
   mVertices[index].mTX = tx;
   mVertices[index].mTY = ty;
 }
+
+void nuiRenderArray::SetNormal(uint32 index, float x, float y, float z)
+{
+  mVertices[index].mNX = x;
+  mVertices[index].mNY = y;
+  mVertices[index].mNZ = z;
+  mVertices[index].mNW = 0;
+}
+
+void nuiRenderArray::SetNormal(uint32 index, const nuiVector& rVf)
+{
+  mVertices[index].mNX = rVf[0];
+  mVertices[index].mNY = rVf[1];
+  mVertices[index].mNZ = rVf[2];
+  mVertices[index].mNW = 0;
+}
+
+void nuiRenderArray::SetNormal(uint32 index, const nuiVector3& rV3f)
+{
+  mVertices[index].mNX = rV3f[0];
+  mVertices[index].mNY = rV3f[1];
+  mVertices[index].mNZ = rV3f[2];
+  mVertices[index].mNW = 0;
+}
+
 
 //////////////////////////
 // Indexed rendering
@@ -429,10 +498,120 @@ nglString nuiRenderArray::Dump() const
   {
     nglString f;
     f.CFormat(_T("%d:  %3f %3f - %3f %3f (%3f %3f)"), i, mVertices[i].mX, mVertices[i].mY, mVertices[i].mTX, mVertices[i].mTY, mVertices[i].mTX * 2, mVertices[i].mTY * 2);
-    NGL_OUT(_T("%ls\n"), f.GetChars());
+    NGL_OUT(_T("%s\n"), f.GetChars());
   }
   
   NGL_OUT(_T("\n"));
   return str;
 }
+
+////////////
+//class StreamDesc
+nuiRenderArray::StreamDesc::StreamDesc(int32 StreamID, int32 count_per_vertex, int32 vertex_count, const float* pData, bool CopyData, bool Normalize)
+{
+  mStreamID = StreamID;
+  mType = eFloat;
+  mCount = count_per_vertex;
+  mOwnData = CopyData;
+  mNormalize = Normalize;
+
+  if (CopyData)
+  {
+    int32 s = vertex_count * count_per_vertex;
+    mData.mpFloats = new float[s];
+    memcpy(const_cast<float*>(mData.mpFloats), pData, sizeof(float) * s);
+  }
+  else
+  {
+    mData.mpFloats = pData;
+  }
+}
+
+nuiRenderArray::StreamDesc::StreamDesc(int32 StreamID, int32 count_per_vertex, int32 vertex_count, const int32* pData, bool CopyData, bool Normalize)
+{
+  mStreamID = StreamID;
+  mType = eInt;
+  mCount = count_per_vertex;
+  mOwnData = CopyData;
+  mNormalize = Normalize;
+
+  if (CopyData)
+  {
+    int32 s = vertex_count * count_per_vertex;
+    mData.mpInts = new int32[s];
+    memcpy(const_cast<int32*>(mData.mpInts), pData, sizeof(int32) * s);
+  }
+  else
+  {
+    mData.mpInts = pData;
+  }
+}
+
+nuiRenderArray::StreamDesc::StreamDesc(int32 StreamID, int32 count_per_vertex, int32 vertex_count, const uint8* pData, bool CopyData, bool Normalize)
+{
+  mStreamID = StreamID;
+  mType = eByte;
+  mCount = count_per_vertex;
+  mOwnData = CopyData;
+  mNormalize = Normalize;
+
+  if (CopyData)
+  {
+    int32 s = vertex_count * count_per_vertex;
+    mData.mpBytes = new uint8[s];
+    memcpy(const_cast<uint8*>(mData.mpBytes), pData, sizeof(int32) * s);
+  }
+  else
+  {
+    mData.mpBytes = pData;
+  }
+}
+
+nuiRenderArray::StreamDesc::~StreamDesc()
+{
+  if (mOwnData)
+  {
+    switch (mType)
+    {
+      case eFloat:
+        delete[] mData.mpFloats;
+        break;
+      case eInt:
+        delete[] mData.mpInts;
+        break;
+      case eByte:
+        delete[] mData.mpBytes;
+        break;
+    }
+  }
+  mData.mpBytes = NULL;
+}
+
+
+int32 nuiRenderArray::AddStream(int32 StreamID, int32 count_per_vertex, const float* pData, bool CopyData, bool Normalize)
+{
+  mStreams.push_back(new StreamDesc(StreamID, count_per_vertex, GetSize(), pData, CopyData, Normalize));
+}
+
+int32 nuiRenderArray::AddStream(int32 StreamID, int32 count_per_vertex, const int32* pData, bool CopyData, bool Normalize)
+{
+  mStreams.push_back(new StreamDesc(StreamID, count_per_vertex, GetSize(), pData, CopyData, Normalize));
+}
+
+int32 nuiRenderArray::AddStream(int32 StreamID, int32 count_per_vertex, const uint8* pData, bool CopyData, bool Normalize)
+{
+  mStreams.push_back(new StreamDesc(StreamID, count_per_vertex, GetSize(), pData, CopyData, Normalize));
+}
+
+const nuiRenderArray::StreamDesc& nuiRenderArray::GetStream(int32 index) const
+{
+  NGL_ASSERT(mStreams.size() > index);
+  return *mStreams[index];
+}
+
+int32 nuiRenderArray::GetStreamCount() const
+{
+  return mStreams.size();
+}
+
 

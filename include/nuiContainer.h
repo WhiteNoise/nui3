@@ -68,20 +68,12 @@ public:
   /** @name Life */
   //@{
   nuiContainer(); ///< Create an nuiObject and give him his parent.
-  virtual bool Load(const nuiXMLNode* pNode); ///< Create an nuiObject from an XML description.
   virtual ~nuiContainer(); 
   //@}
 
   virtual bool SetObjectClass(const nglString& rName);
   virtual void SetObjectName(const nglString& rName);
   
-  /** @name Serialization */
-  //@{
-  virtual nuiXMLNode* Serialize(nuiXMLNode* pParentNode, bool Recursive = false) const;
-	virtual	void SerializeChildren(nuiXMLNode* pParentNode, bool Recursive = false) const; // top level children serialization
-	virtual	nuiXMLNode* SerializeAttributes(nuiXMLNode* pParentNode, bool Recursive = false) const;
-  //@}
-
   /** @name Object relation management */
   //@{
   virtual nuiWidgetPtr GetChild(int index); ///< Returns the child which has the given index (first child = 0). Return NULL in case of faillure.
@@ -89,7 +81,7 @@ public:
   virtual void GetChildren(nuiSize X, nuiSize Y, nuiWidgetList& rChildren, bool DeepSearch = false); /// Return all the children under the pixel (X, Y) in this container. 
   
   nuiWidgetPtr GetChildIf(nuiSize X, nuiSize Y, TestWidgetFunctor* pFunctor); ///< Returns the child that satisfies the given functor object and that is under the pixel (X,Y) in this object or this if there is no such child. X and Y are given in the coordinate system of the parent object. rFunctor is a std::unary_functor<nuiWidgetPtr, bool> object defined by the user.
-  virtual nuiWidgetPtr GetChild(const nglString& rName, bool deepsearch = true); ///< Find a child by its name property. Try to resolve path names like /window/fixed/toto or ../../tata if deepsearch is true
+  virtual nuiWidgetPtr GetChild(const nglString& rName, bool ResolveNameAsPath = true); ///< Find a child by its name property. Try to resolve path names like /window/fixed/toto or ../../tata if deepsearch is true
   nuiWidgetPtr SearchForChild(const nglString& rName, bool recurse = true);  ///< Find a child by its name property, recurse the search in the subchildren if asked politely. 
   virtual bool Clear() = 0; ///< Clear all children. By default the children are deleted unless Delete == false.
   nuiContainerPtr GetRoot() const;

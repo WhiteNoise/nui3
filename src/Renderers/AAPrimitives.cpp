@@ -13,7 +13,6 @@
 
 #ifndef __NUI_NO_AA__
 
-#include "nglMath.h"
 #include "AAPrimitives.h"
 
 #ifndef CLAMP
@@ -66,7 +65,7 @@ static inline uint32 lerpRGBA(const uint32 d, const uint32 s, const float t)
 
 
 #ifndef glError
-#if defined DEBUG && !(defined _UIKIT_)
+#if defined DEBUG && !(defined _UIKIT_) && !(defined _ANDROID_)
 #define glError() { GLenum err = glGetError(); if (GL_NO_ERROR != err) NGL_OUT(_T("glError: %s caught at %s:%u\n"), (char *)gluErrorString(err), __FILE__, __LINE__); }
 #else
 #define glError()
@@ -171,12 +170,14 @@ void glAAInit()
 
   glAASetContext();
 
+  /*
   glEnableClientState(GL_COLOR_ARRAY);
   glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), &glAA_VAR[0].rgba);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), &glAA_VAR[0].tx);
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(2, GL_FLOAT, sizeof(Vertex), &glAA_VAR[0].x);
+   */
 
   // setup defaults
   glAA_old_mode = (GLenum)-1;
@@ -311,7 +312,7 @@ void glAAGenerateAATex(float Falloff, float alias)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         // Clamp the max mip level to 2x2 (1 px with 1 px border all around...)
-#ifndef _UIKIT_
+#if (!defined _UIKIT_) && (!defined _ANDROID_)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, l2psz);
 #endif
       }
@@ -319,7 +320,7 @@ void glAAGenerateAATex(float Falloff, float alias)
       glBindTexture(GL_TEXTURE_2D, glAA_texture);
 
       // Generate the entire mip pyramid slowly in software
-#ifndef _UIKIT_
+#if (!defined _UIKIT_) && (!defined _ANDROID_)
       gluBuild2DMipmaps(GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, pdb, pdb, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, texture);
 #else
       glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, pdb, pdb, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, texture);

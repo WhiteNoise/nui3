@@ -7,7 +7,6 @@
 
 
 #include "nui.h"
-#include "nuiMetaDecoration.h"
 
 
 nuiMetaDecoration::nuiMetaDecoration(const nglString& rName)
@@ -33,21 +32,6 @@ void nuiMetaDecoration::InitAttributes()
     nuiAttribute<const nglString&>::GetterDelegate(this, &nuiMetaDecoration::GetDecoration),
     nuiAttribute<const nglString&>::SetterDelegate(this, &nuiMetaDecoration::AddDecoration)));
   
-}
-
-
-
-  
-bool nuiMetaDecoration::Load(const nuiXMLNode* pNode)
-{
-  // do nothing
-  return false;
-}
-
-nuiXMLNode* nuiMetaDecoration::Serialize(nuiXMLNode* pNode)
-{
-  // do nothing
-  return NULL;
 }
 
   

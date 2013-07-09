@@ -6,11 +6,6 @@
 */
 
 #include "nui.h"
-#include "nui.h"
-#include "nuiApplication.h"
-#include "nuiUserArea.h"
-#include "nuiXML.h"
-#include "nuiDrawContext.h"
 
 
 nuiUserArea::nuiUserArea()
@@ -21,19 +16,6 @@ nuiUserArea::nuiUserArea()
   mPrepareGLContext = false;
   
   NUI_ADD_EVENT(UserDraw);
-}
-
-bool nuiUserArea::Load(const nuiXMLNode* pNode)
-{
-  nuiWidget::Load(pNode);
-  SetObjectClass(_T("nuiUserArea"));
-
-  mInterceptMouse = nuiGetBool ( pNode, _T("InterceptMouse"), false);
-  mPrepareGLContext = nuiGetBool ( pNode, _T("PrepareGLContext"), false);
-  
-  NUI_ADD_EVENT(UserDraw);
-  
-  return true;
 }
 
 nuiUserArea::~nuiUserArea()

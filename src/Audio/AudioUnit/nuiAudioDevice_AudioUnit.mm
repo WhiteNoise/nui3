@@ -6,9 +6,7 @@
  */
 
 #include "nuiAudioDevice.h"
-#include "nglThread.h"
 #include "nuiAudioDevice_AudioUnit.h"
-#include "nuiAudioConvert.h"
 
 
 #define kOutputBus	(0)
@@ -110,8 +108,8 @@ nuiAudioDevice_AudioUnit::nuiAudioDevice_AudioUnit()
   
   EnumSampleRates();
   EnumBufferSizes();
- // if (!HasAudioInput())
-    //mInputChannels.push_back(_T("Input"));
+  if (!HasAudioInput())
+    mInputChannels.push_back(_T("Input"));
   mOutputChannels.push_back(_T("Output"));
 }
 
@@ -208,8 +206,8 @@ void nuiAudioDevice_AudioUnit::resumePlayback()
 
 void nuiAudioDevice_AudioUnit::Process(uint uNumFrames, AudioBufferList* ioData)
 {
-  //printf(("nuiAudioDevice_AudioUnit::Process uNumFrames %d   (%d) %lu %lu\n"),uNumFrames, ioData->mNumberBuffers, ioData->mBuffers[0].mNumberChannels, ioData->mBuffers[1].mNumberChannels );
-    
+  NGL_OUT(_T("nuiAudioDevice_AudioUnit::Process uNumFrames %d   (%d) %d %d\n"),uNumFrames, ioData->mNumberBuffers, ioData->mBuffers[0].mNumberChannels, ioData->mBuffers[1].mNumberChannels );
+/*
     if(mBufferSize < uNumFrames)
     {
         for (uint32 i = 0; i < mOutputBuffers.size(); i++)
@@ -218,6 +216,7 @@ void nuiAudioDevice_AudioUnit::Process(uint uNumFrames, AudioBufferList* ioData)
             mOutputBuffers[i] = (float*)malloc(uNumFrames * sizeof(float));
         }
     }
+*/
   
   mAudioProcessFn(mInputBuffers, mOutputBuffers, uNumFrames);
 /*
@@ -248,7 +247,7 @@ void nuiAudioDevice_AudioUnit::Process(uint uNumFrames, AudioBufferList* ioData)
       int32* dst1 = (int32*)ioData->mBuffers[1].mData;
       const float* ptr0 = mOutputBuffers[0];
       const float* ptr1 = mOutputBuffers[1];
-      for (uint32 s = 0; s < uNumFrames; s++)
+      for (int32 s = 0; s < uNumFrames; s++)
       {
         const float sl = nuiClamp(*ptr0, -1.0f, 1.0f);
         const float sr = nuiClamp(*ptr1, -1.0f, 1.0f);
@@ -273,7 +272,7 @@ void nuiAudioDevice_AudioUnit::Process(uint uNumFrames, AudioBufferList* ioData)
       const float* ptr1 = mOutputBuffers[1];
       
       const int32 mult = ((1 << 15) - 1);
-      for (uint32 s = 0; s < uNumFrames; s++)
+      for (int32 s = 0; s < uNumFrames; s++)
       {
         const float sl = nuiClamp(*ptr0, -1.0f, 1.0f);
         const float sr = nuiClamp(*ptr1, -1.0f, 1.0f);
@@ -308,7 +307,7 @@ void nuiAudioDevice_AudioUnit::ProcessInput(AudioUnitRenderActionFlags* ioAction
     const float mult = 1.0 / ((1 << 15) - 1);
     const int16* src0 = (int16*)ioData->mBuffers[0].mData;
     float* dst0 = const_cast<float*>(&mInputBuffers[0][0]);
-    for (uint32 s = 0; s < inNumberFrames; s++)
+    for (int32 s = 0; s < inNumberFrames; s++)
     {
       const float sl = *src0;
       
@@ -325,7 +324,7 @@ void nuiAudioDevice_AudioUnit::ProcessInput(AudioUnitRenderActionFlags* ioAction
 //      const float* ptr1 = mOutputBuffers[1];
 //      
 //      const int32 mult = ((1 << 15) - 1);
-//      for (uint32 s = 0; s < uNumFrames; s++)
+//      for (int32 s = 0; s < uNumFrames; s++)
 //      {
 //        const float sl = *ptr0;
 //        const float sr = *ptr1;
@@ -345,7 +344,7 @@ void nuiAudioDevice_AudioUnit::ProcessInput(AudioUnitRenderActionFlags* ioAction
 
 
 
-bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::vector<uint32>& rOutputChannels, double SampleRate, uint32 BufferSize, nuiAudioProcessFn pProcessFunction)
+bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vector<int32>& rOutputChannels, double SampleRate, int32 BufferSize, nuiAudioProcessFn pProcessFunction)
 {
     NGL_OUT(_T("Audio unit open"));
   OSStatus err;
@@ -361,69 +360,47 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::ve
   mOutputBuffers.resize(mActiveOutputChannels.size(), NULL);
   // init buffers
   for (uint32 i = 0; i < mOutputBuffers.size(); i++)
+    mOutputBuffers[i] = (float*)malloc(mBufferSize * sizeof(float));
+  
   {
-    mOutputBuffers[i] = (float*)malloc(2048.0f * sizeof(float));
-  }
-
+    UInt32 size = sizeof (UInt32);
+    UInt32 value = kAudioSessionOverrideAudioRoute_None;
+    AudioSessionSetProperty(kAudioSessionProperty_OverrideAudioRoute, size, &value);  
+    
+    AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, audioRouteChangeListenerCallback, this);
     
     
     // Set the category
-    UInt32 uCategory = kAudioSessionCategory_MediaPlayback;
-    //if (HasAudioInput())
-       //uCategory = kAudioSessionCategory_PlayAndRecord;
+    UInt32 uCategory = kAudioSessionCategory_LiveAudio;
+    if (HasAudioInput())
+      uCategory = kAudioSessionCategory_PlayAndRecord;
     
     err = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(UInt32), &uCategory);
-    	if (err != noErr)
-      {
-        NGL_ASSERT(0);
-        return false;
-      } 		
-      
-      UInt32 allowMixing = true; 
-      err = AudioSessionSetProperty( 
-                                    kAudioSessionProperty_OverrideCategoryMixWithOthers, 
-                                    sizeof(allowMixing),&allowMixing 
-                                    ); 
-      //UInt32 shouldDuck = false; 
-      //err = AudioSessionSetProperty( 
-      //                              kAudioSessionProperty_OtherMixableAudioShouldDuck, 
-      //                              sizeof(shouldDuck),&shouldDuck 
-      //                              ); 
-      
-      UInt32 getAudioCategory = sizeof(uCategory);
-      AudioSessionGetProperty(kAudioSessionProperty_AudioCategory, &getAudioCategory, &getAudioCategory);
-
-      
-      UInt32 size = sizeof (UInt32);
-      UInt32 value = kAudioSessionOverrideAudioRoute_None;
-      AudioSessionSetProperty(kAudioSessionProperty_OverrideAudioRoute, size, &value);  
-      
-      AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, audioRouteChangeListenerCallback, this);
-
+    //	if (err != noErr)
+    //  {
+    //    NGL_ASSERT(0);
+    //    return false;
+    //  } 		
+  }
   
 
 	
 	// Set the buffer size
 	Float32 fBufferSize = (float)mBufferSize / mSampleRate;	//256frames @ 44.1khz
 	err = AudioSessionSetProperty(kAudioSessionProperty_PreferredHardwareIOBufferDuration, sizeof(Float32), &fBufferSize);
-	if (err != noErr)
-  {
-    NGL_ASSERT(0);
-    return false;
-  }	
-    
-
-    
-    
+//	if (err != noErr)
+//  {
+//    NGL_ASSERT(0);
+//    return false;
+//  }	
 	
 	// Set active
 	err = AudioSessionSetActive(true);
-	if (err != noErr)
-  {
-    NGL_ASSERT(0);
-    return false;
-  }
-    
+//	if (err != noErr)
+//  {
+//    NGL_ASSERT(0);
+//    return false;
+//  }
 	
 	// Initialize the audio unit
 	mAudioUnit = 0;
@@ -458,20 +435,19 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::ve
 	//find out about the device's format (but I can save you the suspense:
 	//integer | non-interleaved | packed | little endian | 32 bits (8.24 fixed)
 	AudioStreamBasicDescription out_fmt_desc = {0};
-	size = sizeof(out_fmt_desc);
-/*	
-	err = AudioUnitGetProperty(mAudioUnit, 
-                             kAudioUnitProperty_StreamFormat, 
-                             kAudioUnitScope_Output, 
-                             0, &out_fmt_desc, &size);
-	if( err != noErr )
-  {
-    NGL_ASSERT(0);
-    return false;
-  }
-*/
+	uint32 size = sizeof(out_fmt_desc);
 	
-  uint32 s = 2; //sizeof(AudioUnitSampleType);
+//	err = AudioUnitGetProperty(mAudioUnit, 
+//                             kAudioUnitProperty_StreamFormat, 
+//                             kAudioUnitScope_Output, 
+//                             0, &out_fmt_desc, &size);
+//	if( err != noErr )
+//  {
+//    NGL_ASSERT(0);
+//    return false;
+//  }
+	
+  int32 s = 2; //sizeof(AudioUnitSampleType);
   out_fmt_desc.mFormatID = kAudioFormatLinearPCM;
     
     out_fmt_desc.mSampleRate = SampleRate;
@@ -479,22 +455,19 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::ve
   if (s == 4)
     out_fmt_desc.mFormatFlags = kLinearPCMFormatFlagIsFloat;
   else if (s == 2)
-      out_fmt_desc.mFormatFlags = kAudioFormatFlagsCanonical;
+    out_fmt_desc.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
   else
   {
     NGL_ASSERT(0);
   }
 
 
-    out_fmt_desc.mChannelsPerFrame = 2;
-    out_fmt_desc.mFramesPerPacket = 1;
-    out_fmt_desc.mBitsPerChannel = 8 * s;
-    if (true)
-        out_fmt_desc.mBytesPerPacket = out_fmt_desc.mBytesPerFrame = 2 * s;
-    else {
-        out_fmt_desc.mBytesPerPacket = out_fmt_desc.mBytesPerFrame = s;
-        out_fmt_desc.mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
-    }
+  out_fmt_desc.mSampleRate = mSampleRate;
+  out_fmt_desc.mFramesPerPacket = 1;
+  out_fmt_desc.mChannelsPerFrame = rOutputChannels.size();
+  out_fmt_desc.mBytesPerPacket = s * rOutputChannels.size();
+  out_fmt_desc.mBytesPerFrame = s * rOutputChannels.size();
+  out_fmt_desc.mBitsPerChannel = s * 8;
  
   
   UInt32 flag = 1;
@@ -506,7 +479,9 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::ve
   
   //kAudioUnitErr_Initialized
 
-  err = AudioUnitSetProperty(mAudioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, kOutputBus, &out_fmt_desc, sizeof(out_fmt_desc));
+  size = sizeof (AudioStreamBasicDescription);
+  err = AudioUnitSetProperty(mAudioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, kOutputBus, &out_fmt_desc, size);
+
   if (err != noErr)
   {
     NGL_ASSERT(0);
@@ -543,7 +518,7 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::ve
   //    return false;
   //  }
 	
-  /*
+
   ///////////////////////////// INPUT:
   if (!rInputChannels.empty())
   {
@@ -562,7 +537,7 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::ve
     //    return false;
     //  }
     
-    uint32 s = 2; //sizeof(AudioUnitSampleType);
+    int32 s = 2; //sizeof(AudioUnitSampleType);
     in_fmt_desc.mFormatID = kAudioFormatLinearPCM;
     if (s == 4)
       in_fmt_desc.mFormatFlags = kLinearPCMFormatFlagIsFloat;
@@ -616,8 +591,8 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::ve
     
     mpIData->mNumberBuffers = 1;
     AudioBuffer& rBuf(*(mpIData->mBuffers));
-    uint32 ins = rInputChannels.size();
-    uint32 c = BufferSize * ins * in_fmt_desc.mBytesPerFrame;
+    int32 ins = rInputChannels.size();
+    int32 c = BufferSize * ins * in_fmt_desc.mBytesPerFrame;
     //printf("Audio inputs: %d - bytes: %d\n", ins, c);
     rBuf.mNumberChannels = ins;
     rBuf.mDataByteSize = c;
@@ -653,7 +628,7 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::ve
 			return false;		
 		}	
   }
-    */
+
     
     //UInt32 maxFPS = 4096; 
     //AudioUnitSetProperty(mAudioUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFPS, sizeof (maxFPS));
@@ -663,7 +638,7 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::ve
 	// uses.  In the current iPhone OS devices, it's always 24
 	
 	err = AudioUnitInitialize(mAudioUnit);
-
+  
   uint32 count = 4;
   while (err == -12983 && count--)
   {
@@ -725,7 +700,7 @@ void nuiAudioDevice_AudioUnit::EnumBufferSizes()
   mBufferSizes.push_back(32768);
 }
 
-nglString nuiAudioDevice_AudioUnit::GetChannelName(bool IsInput, uint32 index) const
+nglString nuiAudioDevice_AudioUnit::GetChannelName(bool IsInput, int32 index) const
 {
   if (IsInput)
     return mInputChannels[index];
@@ -755,13 +730,13 @@ nuiAudioDeviceAPI_AudioUnit::~nuiAudioDeviceAPI_AudioUnit()
 }
 
 
-uint32 nuiAudioDeviceAPI_AudioUnit::GetDeviceCount() const
+int32 nuiAudioDeviceAPI_AudioUnit::GetDeviceCount() const
 {
   return 1;
 }
 
 
-nuiAudioDevice* nuiAudioDeviceAPI_AudioUnit::GetDevice(uint32 index)
+nuiAudioDevice* nuiAudioDeviceAPI_AudioUnit::GetDevice(int32 index)
 {
   if (index == 0)
     return new nuiAudioDevice_AudioUnit();
@@ -775,7 +750,7 @@ nuiAudioDevice* nuiAudioDeviceAPI_AudioUnit::GetDevice(const nglString& rDeviceN
   return NULL;
 }
 
-nglString nuiAudioDeviceAPI_AudioUnit::GetDeviceName(uint32 index) const
+nglString nuiAudioDeviceAPI_AudioUnit::GetDeviceName(int32 index) const
 {
   if (index == 0)
     return nglString(_T("Output"));

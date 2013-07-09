@@ -60,8 +60,6 @@ public:
 
   /** @name Serialization */
   //@{
-  virtual bool Load(const nuiXMLNode* pNode); ///< Create an nuiObject from an XML description.
-  virtual nuiXMLNode* Serialize(nuiXMLNode* pParentNode, bool Recursive = false) const;
   nglString Dump(); ///< serialize the object and dump the result in a output string
   //@}
 
@@ -107,6 +105,27 @@ public:
   void SetBorder(nuiSize X, nuiSize Y); ///< Sets the empty space around the widget itself
   void GetBorder(nuiSize& rXLeft, nuiSize& rXRight, nuiSize& rYTop, nuiSize& rYBottom);
   void SetBorder(nuiSize XLeft, nuiSize XRight, nuiSize YTop, nuiSize YBottom); ///< Sets the empty space around the widget itself
+  void SetBorderLeft(nuiSize border);
+  void SetBorderTop(nuiSize border);
+  void SetBorderRight(nuiSize border);
+  void SetBorderBottom(nuiSize border);
+  nuiSize GetBorderLeft() const;
+  nuiSize GetBorderTop() const;
+  nuiSize GetBorderRight() const;
+  nuiSize GetBorderBottom() const;
+  nuiSize GetActualBorderLeft() const;
+  nuiSize GetActualBorderTop() const;
+  nuiSize GetActualBorderRight() const;
+  nuiSize GetActualBorderBottom() const;
+  
+  void SetOverDrawLeft(nuiSize border);
+  void SetOverDrawTop(nuiSize border);
+  void SetOverDrawRight(nuiSize border);
+  void SetOverDrawBottom(nuiSize border);
+  nuiSize GetOverDrawLeft() const;
+  nuiSize GetOverDrawTop() const;
+  nuiSize GetOverDrawRight() const;
+  nuiSize GetOverDrawBottom() const;
 
   virtual void SetVisibleRect(const nuiRect& rRect); ///< This sets the rectangle that will actually be displayed in the parent widget (for example in case this widget is inside a nuiScrollView, only a part of it may be visible at once). The rectangle is local to the widget rect.
   void SilentSetVisibleRect(const nuiRect& rRect); ///< This method change the visible rect of the widget without invalidating it. It is useful if you need to change the visible rect from a parent's SetRect method: you allready know that you will need to redraw it. See SetVisibleRect for more information.
@@ -120,7 +139,9 @@ public:
   virtual const nuiRect& GetIdealRect(); ///< Return the ideal area used by this Object. If the layout of this object has changed CalIdealRect will be called and mIdealRect will contain the ideal rectangle. If the user specified a user size then mIdealRect will be overwritten with mUserRect. 
   virtual const nuiRect& GetRect() const; ///< Return the current area used by this Object.
   virtual nuiRect GetBorderedRect() const; ///< Return the current area used by this Object including its border
-  
+  nuiRect GetBorderedRect(const nuiRect& rRect) const;
+  nuiRect GetBorderLessRect(const nuiRect& rRect) const;
+
   void SetUserWidth(nuiSize s);
   nuiSize GetUserWidth();
   void SetUserHeight(nuiSize s);
@@ -252,6 +273,7 @@ public:
   /** @name Other Incomming events */
   //@{
   virtual void OnSetFocus(nuiWidgetPtr pWidget); ///< Advise the objet of a change of focus object. pWidget can be null.
+  virtual void Built(); ///< This method is called right after a widget has been created by the CSS engine and all the CSS inits have been applied.
   //@}
 
   /** @name Misc. & incoming events management */
@@ -444,7 +466,8 @@ public:
   
   //@}
 
-  virtual nuiWidgetPtr GetChild(const nglString& rName, bool DeepSearch) { return NULL; } ///< Dummy implementation of the GetChild Method for easy widget/Container interaction.
+  virtual nuiWidgetPtr GetChild(const nglString& rName, bool ResolveNameAsPath) { return NULL; } ///< Dummy implementation of the GetChild Method for easy widget/Container interaction.
+  virtual nuiWidgetPtr SearchForChild(const nglString& rName, bool DeepSearch) { return NULL; } ///< Dummy implementation of the GetChild Method for easy widget/Container interaction.
   virtual void ConnectTopLevel(); ///< This method is called when the widget is connected to the Top Level. Overload it to perform specific actions in a widget.
   virtual void DisconnectTopLevel(); ///< This method is called when the widget is disconnected from the Top Level. Overload it to perform specific actions in a widget.
 
@@ -521,7 +544,7 @@ public:
 
   /** @name Decorations */
   //@{
-  void InitDefaultDecorations();
+  static void ClearDefaultDecorations();
   static void SetDefaultDecoration(int32 objectClassIndex, nuiDecorationDelegate dlg);
   virtual void SetDecoration(const nglString& rName);
   virtual void SetDecoration(nuiDecoration* pDecoration, nuiDecorationMode Mode = eDecorationOverdraw, bool AlreadyAcquired=false);
@@ -575,7 +598,6 @@ protected:
   nuiRect mIdealRect; ///< The ideal bounding box of the nuiObject (in coordinates of its parent) position should be at the origin.
   nuiRect mUserRect; ///< The bounding box of the nuiObject if set by the user (in coordinates of its parent).
   nuiRect mHotRect; ///< The currently important interactive part of the widget. Containers try to keep this rect in view when possible. For exemple set it as the cursor rectangle in a text edit widget. Is you text edit is contained in a scroll view, the scroll view will try to follow the cursor.
-  nglString mDecorationName;
 
   nuiSurface* mpSurface;
   void UpdateSurface(const nuiRect& rRect);
@@ -622,7 +644,6 @@ protected:
   LayoutConstraint mConstraint;
 
   void ApplyCSSForStateChange(uint32 MatchersTag); ///< This method will match this widget's state with the CSS and apply the changes needed to display it correctly
-  void OnPropertyChanged(const nglString& rName, const nglString& rValue);
 
   virtual void DrawFocus(nuiDrawContext* pContext, bool FrontOrBack); ///< Draw a decoration to show that the widget has the keyboard focus. The focus is drawn on top of the regular decoration if it exists.
   void DispatchFocus(nuiWidgetPtr pWidget); ///< Advise the objet of a change of focus object. pWidget can be null.
@@ -677,7 +698,6 @@ protected:
   int32 mInTransition;
   
   void InitDefaultValues();
-  void InitProperties(); ///< Init the property bindings.
   void Init(); ///< Initialise the basic parameters of the class.
 
   nuiMetaPainter* mpRenderCache;
@@ -713,30 +733,8 @@ protected:
   nuiDecorationMode mFocusDecorationMode;
   
   static std::vector<nuiDecorationDelegate> mDefaultDecorations;
-  static void ExitDefaultDecorations();
 
 
-  void SetBorderLeft(nuiSize border);
-  void SetBorderTop(nuiSize border);
-  void SetBorderRight(nuiSize border);
-  void SetBorderBottom(nuiSize border);
-  nuiSize GetBorderLeft() const;
-  nuiSize GetBorderTop() const;
-  nuiSize GetBorderRight() const;
-  nuiSize GetBorderBottom() const;
-  nuiSize GetActualBorderLeft() const;
-  nuiSize GetActualBorderTop() const;
-  nuiSize GetActualBorderRight() const;
-  nuiSize GetActualBorderBottom() const;
-
-  void SetOverDrawLeft(nuiSize border);
-  void SetOverDrawTop(nuiSize border);
-  void SetOverDrawRight(nuiSize border);
-  void SetOverDrawBottom(nuiSize border);
-  nuiSize GetOverDrawLeft() const;
-  nuiSize GetOverDrawTop() const;
-  nuiSize GetOverDrawRight() const;
-  nuiSize GetOverDrawBottom() const;
 
   void AutoHide(const nuiEvent& rEvent); ///< This methods calls SetVisible(false) right after the HIDE animation stopped
   void AutoInvalidate(const nuiEvent& rEvent); ///< This methods calls Invalidate()

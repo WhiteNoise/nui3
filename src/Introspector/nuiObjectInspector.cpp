@@ -7,15 +7,6 @@
 
 
 #include "nui.h"
-#include "nuiObjectInspector.h"
-#include "nuiGrid.h"
-#include "nuiToggleButton.h"
-#include "nuiLabel.h"
-#include "nuiFont.h"
-#include "nuiIntrospector.h"
-#include "nuiGrid.h"
-#include "nuiText.h"
-#include "nuiColorDecoration.h"
 
 nuiObjectInspector::nuiObjectInspector()
 : mSink(this)
@@ -123,7 +114,7 @@ void nuiObjectInspector::OnObjectSelection(const nuiEvent& rEvent)
   while (it_a != end_a)
   {
     nglString pname(it_a->first);
-    //printf("\tattr: %ls\n", pname.GetChars());
+    //printf("\tattr: %s\n", pname.GetChars());
     //nuiAttribBase Base = it_a->second;
     //nuiAttributeEditor* pEditor = Base.GetEditor();
     mpAttributeGrid->SetCell(0, i, new nuiLabel(pname + nglString(":")));

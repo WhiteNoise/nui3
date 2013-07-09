@@ -6,97 +6,13 @@
 */
 
 #include "nui.h"
-#include "nui.h"
-#include "nuiBuilder.h"
-#include "nuiXML.h"
-
-#include "nuiObject.h"
-
-#include "nuiMainWindow.h"
-#include "nuiWindow.h"
-#include "nuiText.h"
-#include "nuiEditText.h"
-#include "nuiEditLine.h"
-#include "nuiButton.h"
-#include "nuiToggleButton.h"
-#include "nuiRadioButton.h"
-#include "nuiSplitter.h"
-#include "nuiPopupMenu.h"
-#include "nuiList.h"
-#include "nuiLabel.h"
-#include "nuiScrollBar.h"
-#include "nuiFixed.h"
-#include "nuiPositioner.h"
-#include "nuiUserArea.h"
-#include "nuiImage.h"
-#include "nuiSplineEdit.h"
-#include "nuiStateDummy.h"
-#include "nuiHoverDummy.h"
-#include "nuiMesh.h"
-#include "nuiSVGView.h"
-#include "nuiScrollView.h"
-#include "nuiZoomView.h"
-#include "nuiTabBar.h"
-#include "nuiTreeView.h"
-#include "nuiColumnTreeView.h"
-#include "nuiSlider.h"
-#include "nuiPane.h"
-#include "nuiProgressBar.h"
-#include "nuiGrid.h"
-#include "nuiHBox.h"
-#include "nuiVBox.h"
-#include "nuiFolderPane.h"
-#include "nuiTitledPane.h"
-#include "nuiFormatedLabel.h"
-#include "nuiKnob.h"
-
-#include "nuiDialogSelectDirectory.h"
-#include "nuiDialogSelectFile.h"
-#include "nuiDialogSelectFile.h"
-
-#include "nuiAnimView.h"
-#include "nuiBackgroundPane.h"
-//#include "nuiDialog.h"
-#include "nuiFlowView.h"
-#include "nuiImageSequence.h"
-#include "nuiMatrixView.h"
-#include "nuiModalContainer.h"
-#include "nuiOffscreenView.h"
-#include "nuiPopupView.h"
-#include "nuiScrollBox.h"
-#include "nuiShadeContainer.h"
-#include "nuiTabView.h"
-#include "nuiColorSelector.h"
-#include "nuiComboBox.h"
-#include "nuiComposite.h"
-#include "nuiCoverFlow.h"
-#include "nuiFileList.h"
-#include "nuiFileSelector.h"
-#include "nuiFileTree.h"
-#include "nuiFontBrowser.h"
-#include "nuiFrameView.h"
-#include "nuiHotKeyEditor.h"
-#include "nuiOffscreenView.h"
-#include "nuiImageDropZone.h"
-#include "nuiRectView.h"
-#include "nuiShapeView.h"
-#include "nuiZoomBar.h"
-#include "nuiRSSView.h"
-#include "nuiHugeImage.h"
-#include "nuiHyperLink.h"
-#include "nuiLabelAttribute.h"
-#include "nuiLabelRenamer.h"
-#include "nuiHTMLView.h"
-#include "nuiScrollingLabel.h"
-#include "nuiSpinnerLabel.h"
-
 
 using namespace std;
 
 //////////////////// Builder class:
 nuiBuilder::nuiBuilder()
 {
-  Init();
+  //Init();
 }
 
 nuiBuilder::~nuiBuilder()
@@ -120,7 +36,6 @@ void nuiBuilder::Init()
   NUI_ADD_WIDGET_CREATOR(nuiList,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiScrollBar,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiFixed,"Container");
-  NUI_ADD_WIDGET_CREATOR(nuiPositioner,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiMainWindow,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiStateDummy,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiHoverDummy,"Container");
@@ -144,7 +59,6 @@ void nuiBuilder::Init()
   NUI_ADD_WIDGET_CREATOR(nuiToggleButton,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiRadioButton,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiImage,"Widget");
-  NUI_ADD_WIDGET_CREATOR(nuiSplineEdit,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiSVGView,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiTab,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiProgressBar,"Widget");
@@ -157,7 +71,7 @@ void nuiBuilder::Init()
   NUI_ADD_WIDGET_CREATOR(nuiAnimView, "Container");
   NUI_ADD_WIDGET_CREATOR(nuiBackgroundPane, "Container");
   //NUI_ADD_WIDGET_CREATOR(nuiDialog, "Dialog");
-  //NUI_ADD_WIDGET_CREATOR(nuiFlowView, "Container");
+  NUI_ADD_WIDGET_CREATOR(nuiFlowView, "Container");
   //NUI_ADD_WIDGET_CREATOR(nuiImageSequence, "Container");
   NUI_ADD_WIDGET_CREATOR(nuiMatrixView, "Container");
   NUI_ADD_WIDGET_CREATOR(nuiModalContainer, "Container");
@@ -165,11 +79,10 @@ void nuiBuilder::Init()
   //NUI_ADD_WIDGET_CREATOR(nuiPopupView, "Container");
   //NUI_ADD_WIDGET_CREATOR(nuiScrollBox, "Container");
   //NUI_ADD_WIDGET_CREATOR(nuiShadeContainer, "Container");
-  //NUI_ADD_WIDGET_CREATOR(nuiTabView, "Container");
+  NUI_ADD_WIDGET_CREATOR(nuiTabView, "Container");
   NUI_ADD_WIDGET_CREATOR(nuiTitledPane, "Container");
   NUI_ADD_WIDGET_CREATOR(nuiColorSelector, "Container");
   NUI_ADD_WIDGET_CREATOR(nuiComboBox, "Widget");
-  NUI_ADD_WIDGET_CREATOR(nuiComposite, "Container");
   NUI_ADD_WIDGET_CREATOR(nuiCoverFlow, "Container");
   NUI_ADD_WIDGET_CREATOR(nuiFileList, "Widget");
   //NUI_ADD_WIDGET_CREATOR(nuiFileSelector, "Widget");
@@ -190,8 +103,14 @@ void nuiBuilder::Init()
   NUI_ADD_WIDGET_CREATOR(nuiScrollingLabel, "Widget");
   NUI_ADD_WIDGET_CREATOR(nuiSpinnerLabel, "Widget");
 
+  NUI_ADD_WIDGET_CREATOR(nuiNavigationBar, "Widget");
+  NUI_ADD_WIDGET_CREATOR(nuiNavigationController, "Widget");
+  NUI_ADD_WIDGET_CREATOR(nuiNavigationButton, "Widget");
+  NUI_ADD_WIDGET_CREATOR(nuiViewController, "Widget");
+
+  NUI_ADD_WIDGET_CREATOR(nuiLayout, "Container");
+
 #ifndef _OPENGL_ES_
-  NUI_ADD_WIDGET_CREATOR(nuiMesh,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiUserArea,"Widget");
 #endif
 }
@@ -215,7 +134,7 @@ void nuiBuilder::Uninit()
 
 void nuiBuilder::SetHandler(const nglString& ClassName, const nglString& ClassGroup, nuiCreateWidgetFn pHandler)
 {
-  //wprintf(_T("Adding Widget handler: %ls\n"), ClassName.GetChars());
+  //wprintf(_T("Adding Widget handler: %s\n"), ClassName.GetChars());
   NGL_ASSERT(mBuilderMap.find(ClassName) == mBuilderMap.end());
   NGL_ASSERT(mCreatorMap.find(ClassName) == mCreatorMap.end());
   nuiWidgetDesc desc(ClassName, ClassGroup, pHandler);
@@ -272,15 +191,6 @@ nuiWidget* nuiBuilder::CreateWidget(const nglString& rClassName, const std::map<
 nuiWidget* nuiCreateWidget(const nglString& rClassName)
 {
   return nuiBuilder::Get().CreateWidget(rClassName);
-}
-
-nuiWidget* nuiCreateWidget(const nuiXMLNode* pNode)
-{
-  nuiWidgetPtr pWidget = nuiBuilder::Get().CreateWidget(pNode->GetName());
-  if (!pWidget)
-		return NULL;
-  pWidget->Load(pNode);
-	return pWidget;
 }
 
 nuiBuilder nuiBuilder::mBuilder;
@@ -342,6 +252,11 @@ nuiWidgetCreator::~nuiWidgetCreator()
 
 const nglString& nuiWidgetCreator::LookUp(const std::map<nglString, nglString>& rParamDictionary, const nglString& rString) const
 {
+  if (!rString.IsEmpty() && rString[0] == '$')
+  {
+    const nglString& res = nuiObject::GetGlobalProperty(rString.Extract(1));
+    return res;
+  }
   const std::map<nglString, nglString>::const_iterator it = rParamDictionary.find(rString);
   if (it != rParamDictionary.end())
     return it->second;
@@ -358,12 +273,12 @@ nuiWidget* nuiWidgetCreator::Create(const std::map<nglString, nglString>& rParam
   std::map<nglString, nglString> ParamDictionary(mDefaultDictionary);
   ParamDictionary.insert(rParamDictionary.begin(), rParamDictionary.end());
   
-//  NGL_LOG(_T("nuiWidgetCreator"), NGL_LOG_DEBUG, _T("\nBuild %ls / %ls\n"), mClassName.GetChars(), mObjectName.GetChars());
+//  NGL_LOG(_T("nuiWidgetCreator"), NGL_LOG_DEBUG, _T("\nBuild %s / %s\n"), mClassName.GetChars(), mObjectName.GetChars());
 //  std::map<nglString, nglString>::iterator it = ParamDictionary.begin();
 //  std::map<nglString, nglString>::iterator end = ParamDictionary.end();
 //  while (it != end)
 //  {
-//    NGL_LOG(_T("nuiWidgetCreator"), NGL_LOG_DEBUG, _T("\t%ls - %ls\n"), it->first.GetChars(), it->second.GetChars());
+//    NGL_LOG(_T("nuiWidgetCreator"), NGL_LOG_DEBUG, _T("\t%s - %s\n"), it->first.GetChars(), it->second.GetChars());
 //    ++it;
 //  }
   
@@ -373,7 +288,7 @@ nuiWidget* nuiWidgetCreator::Create(const std::map<nglString, nglString>& rParam
   nuiWidget* pWidget = pBuilder->CreateWidget(classname, ParamDictionary);
   if (!pWidget)
   {
-    NGL_LOG(_T("nuiWidgetCreator"), NGL_LOG_ERROR, _T("Error while creating a %ls named %ls (translated to %ls - %ls"), 
+    NGL_LOG(_T("nuiWidgetCreator"), NGL_LOG_ERROR, _T("Error while creating a %s named %s (translated to %s - %s"), 
             mClassName.GetChars(), mObjectName.GetChars(),
             classname.GetChars(), objectname.GetChars());
     return NULL;
@@ -382,6 +297,7 @@ nuiWidget* nuiWidgetCreator::Create(const std::map<nglString, nglString>& rParam
   if (!objectname.IsEmpty())
     pWidget->SetObjectName(objectname);
   
+  nuiTabView* pTabView = dynamic_cast<nuiTabView*> (pWidget);
   nuiSimpleContainer* pContainer = dynamic_cast<nuiSimpleContainer*> (pWidget);
   nuiBox* pBox = dynamic_cast<nuiBox*> (pWidget);
   nuiGrid* pGrid = dynamic_cast<nuiGrid*> (pWidget);
@@ -399,6 +315,19 @@ nuiWidget* nuiWidgetCreator::Create(const std::map<nglString, nglString>& rParam
         case nuiWidgetCreatorOperation::eAddChild:
           if (pBox)
             pBox->AddCell(pChild);
+          else if (pTabView)
+          {
+            if (pChild->HasProperty("TabWidget"))
+            {
+              pTabView->AddTab(pBuilder->CreateWidget(pChild->GetProperty("TabWidget"), rParamDictionary), pChild);
+            }
+            else if (pChild->HasProperty("TabName"))
+            {
+              pTabView->AddTab(pChild->GetProperty("TabName"), pChild);
+            }
+            else
+              pTabView->AddTab(pChild->GetObjectName(), pChild);
+          }
           else if (pContainer)
             pContainer->AddChild(pChild);
           break;
@@ -453,6 +382,9 @@ nuiWidget* nuiWidgetCreator::Create(const std::map<nglString, nglString>& rParam
       
     }
   }
+
+  if (pWidget)
+    pWidget->Built();
   return pWidget;
 }
 

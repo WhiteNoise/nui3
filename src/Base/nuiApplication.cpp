@@ -6,8 +6,6 @@
  */
 
 #include "nui.h"
-#include "nuiApplication.h"
-#include "nuiSpiderMonkey.h"
 
 nuiApplication::nuiApplication()
 {
@@ -36,5 +34,7 @@ nuiScriptEngine* nuiApplication::GetScriptEngine() const
 
 void nuiApplication::EnableDefaultScriptEngine()
 {
+#ifndef _ANDROID_
   mpScriptEngine = new nuiSpiderMonkey();
+#endif
 }

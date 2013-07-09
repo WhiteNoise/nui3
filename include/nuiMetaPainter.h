@@ -21,14 +21,14 @@ typedef std::vector<uint8> nuiRenderCache;
 class NUI_API nuiMetaPainter : public nuiPainter
 {
 public:
-  nuiMetaPainter(const nuiRect& rRect, nglContext* pContext = NULL);
+  nuiMetaPainter(nglContext* pContext = NULL);
   virtual ~nuiMetaPainter();
 
   virtual void SetSize(uint32 sizex, uint32 sizey);
   virtual void StartRendering();
   virtual void SetState(const nuiRenderState& rState, bool ForceApply = false);
   virtual void DrawArray(nuiRenderArray* pArray);
-  virtual void ClearColor();
+  virtual void Clear(bool color, bool depth, bool stencil);
   virtual void BeginSession();
   virtual void EndSession();
   virtual void LoadMatrix(const nuiMatrix& rMatrix);
@@ -74,7 +74,10 @@ public:
   
   void SetDrawChildrenImmediat(bool set);
   bool GetDrawChildrenImmediat() const;
-  
+
+  virtual void DestroySurface(nuiSurface* pSurface);
+  virtual void ResizeSurface(nuiSurface* pSurface, int32 width, int32 height);
+
 #ifdef _DEBUG_
   void DBGSetReferenceObject(const nuiObject* pRef);
 #endif
@@ -86,7 +89,7 @@ protected:
     eStartRendering,
     eSetState,
     eDrawArray,
-    eClearColor,
+    eClear,
     eBeginSession,
     eEndSession,
     eLoadMatrix,

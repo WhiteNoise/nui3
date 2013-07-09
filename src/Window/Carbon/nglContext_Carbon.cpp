@@ -6,8 +6,6 @@
 */
 
 #include "nui.h"
-#include "nglKernel.h"
-#include "nglContext.h"
 #include "ngl_carbon.h"
 
 /*
@@ -47,9 +45,12 @@ const nglChar* gpContextErrorTable[] =
 nglContext::nglContext()
 {
   mpBundleRefOpenGL = NULL;
+  mpPainter = NULL;
   mFullscreen = false;
   mValidBackBufferRequestedNotGranted = false;
   mCtx = NULL;
+  mScale = 1.0f;
+  mScaleInv = 1.0f;
 }
 
 nglContext::~nglContext()
@@ -108,7 +109,7 @@ static void DumpFormat(AGLPixelFormat Format)
 bool nglContext::Build(WindowRef Win, const nglContextInfo& rInfo, const nglContext* pShared, bool Fullscreen)
 {
   mTargetAPI = rInfo.TargetAPI;
-  if (mTargetAPI != eTargetAPI_OpenGL)
+  if (mTargetAPI != eTargetAPI_OpenGL || mTargetAPI != eTargetAPI_OpenGL2)
     return false;
   
 #ifndef __NOGLCONTEXT__
@@ -275,6 +276,7 @@ bool nglContext::Build(WindowRef Win, const nglContextInfo& rInfo, const nglCont
   GLint vsync = rInfo.VerticalSync ? 1 : 0;
   aglSetInteger(mCtx, AGL_SWAP_INTERVAL, &vsync);
   
+  InitPainter();
   MakeCurrent(Win);
 #endif
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -288,7 +290,8 @@ bool nglContext::BuildOpenGLFromExisting(WindowRef Win, AGLContext Ctx)
   mFullscreen = false;
 
   mCtx = Ctx;
-    
+
+  InitPainter();
   MakeCurrent(Win);
   return true;
 }

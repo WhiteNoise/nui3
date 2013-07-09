@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiEditLine.h"
 
 using namespace std;
 
@@ -16,14 +15,6 @@ nuiEditLine::nuiEditLine(const nglString& rText)
   if (SetObjectClass(_T("nuiEditLine")))
     InitAttributes();
   mMaxDisplayedChar = 0;
-}
-
-bool nuiEditLine::Load(const nuiXMLNode* pNode)
-{
-  nuiEditText::Load(pNode);
-  SetObjectClass(_T("nuiEditLine"));
-  mMaxDisplayedChar = 0;
-  return true;
 }
 
 void nuiEditLine::InitAttributes()

@@ -1,13 +1,5 @@
 #include "nui.h"
 
-#include "nglApplication.h"
-#include "nglVideoMode.h"
-#include "nglContext.h"
-#include "nglWindow.h"
-#include "nglKeyboard.h"
-#include "nuiMouseCursor.h"
-#include "nuiStopWatch.h"
-
 #include <QuartzCore/QuartzCore.h>
 
 
@@ -50,7 +42,7 @@ const nglChar* gpWindowErrorTable[] =
 
 
 ////////// Keyboard:
-int ngl_scode_table[0x80] = 
+nglKeyCode ngl_scode_table[0x80] = 
 {
   /*  0 */ NK_A, NK_S, NK_D, NK_F, NK_H, NK_G, NK_Z, NK_X, NK_C, NK_V,
   /* 10 */ NK_GRAVE, NK_B, NK_Q, NK_W, NK_E, NK_R, NK_Y, NK_T, NK_1, NK_2,
@@ -182,27 +174,58 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   return oglContext;
 }
 
-- (NSSize) windowWillResize: (NSWindow*) win toSize: (NSSize) size
+- (void) windowDidResize: (NSNotification *)notification
 {
-  printf("windowWillResize %f x %f\n", size.width, size.height);
+  //printf("windowWillResize %f x %f\n", size.width, size.height);
   // inform the context that the view has been resized
+  NSWindow* win = [notification object];
   NSRect rect = {0};
-  rect.size = size;
+  rect = [win frame];
   [win resize: [win contentRectForFrameRect: rect].size];
-  return size;
 }
 
 -(void)windowWillClose:(NSNotification *)note
 {
-  [[NSApplication sharedApplication] terminate:self];
+  //[[NSApplication sharedApplication] terminate:self];
+  [super close];//mpNGLWindow->CallOnDestruction();
 }
 
+static float gScaleFactor = 0.0f;
+static float gInvScaleFactor = 0.0f;
+
+float nuiGetScaleFactor()
+{
+  if (gScaleFactor == 0)
+  {
+    gScaleFactor = [[NSScreen mainScreen] backingScaleFactor];
+  }
+
+  return gScaleFactor;
+}
+
+float nuiGetInvScaleFactor()
+{
+  if (gInvScaleFactor == 0)
+  {
+    gInvScaleFactor = 1.0f / nuiGetScaleFactor();
+  }
+
+  return gInvScaleFactor;
+}
+
+
+
 /* default initializer for descendents of NSView */
-- (id)initWithFrame:(NSRect)frame {
-  
+- (id)initWithFrame:(NSRect)frame andSharedContext:(NSOpenGLContext*)contextToShare
+{
   self = [super initWithFrame:frame];
   if(self == nil)
     return nil;
+
+  if ( [self respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:) ] )
+  {
+    [self setWantsBestResolutionOpenGLSurface: YES];
+  }
 
   // create and activate the context object which maintains the OpenGL state
   NSOpenGLPixelFormatAttribute attribs[] =
@@ -216,13 +239,16 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   };
   NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
   
-  oglContext = [[NSOpenGLContext alloc] initWithFormat: format shareContext: nil];
+  oglContext = [[NSOpenGLContext alloc] initWithFormat: format shareContext: contextToShare];
   GLint v = 1;
   [oglContext setValues:&v forParameter:NSOpenGLCPSwapInterval];
   [oglContext setView:self];
   [oglContext makeCurrentContext];
+  
   return self;
 }
+
+
 
 - (void)lockFocus
 {
@@ -278,6 +304,14 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
     [super flagsChanged: theEvent];
 }
 
+- (void)viewDidChangeBackingProperties
+{
+  [super viewDidChangeBackingProperties];
+  nglNSWindow* wnd = (nglNSWindow*)[self window];
+  [wnd getNGLWindow]->CallOnRescale([wnd backingScaleFactor]);
+}
+
+
 @end
 
 
@@ -294,7 +328,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
 //}
 
 
-- (id) initWithFrame: (NSRect) rect andNGLWindow: (nglWindow*) pNGLWindow
+- (id) initWithFrame: (NSRect) rect andNGLWindow: (nglWindow*) pNGLWindow andSharedContext:(NSOpenGLContext*)sharedContext
 {
   mModifiers = 0;
 
@@ -317,18 +351,18 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
     NGL_ASSERT(!"initWithFrame: Could not initialize NSWindow");
   }
 
-  [self setTitle:@"Testing Simple Cocoa Application"];
   [self setAcceptsMouseMovedEvents:TRUE];
   
   NSRect glrect = {0};
   glrect.size.width = 320;
   glrect.size.height = 240;
   
-  customGLView* pView = [[[customGLView alloc] initWithFrame: glrect] autorelease];
+  customGLView* pView = [[[customGLView alloc] initWithFrame: glrect andSharedContext:sharedContext] autorelease];
   [self setContentView: pView];
   [self setDelegate: pView];
   
-  
+  mpNGLWindow->CallOnRescale([self backingScaleFactor]);
+
   //[self makeKeyAndOrderFront:nil];
   
 //NGL_OUT(_T("[nglNSWindow initWithFrame]\n"));
@@ -497,13 +531,13 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
 
   if (x > 0)
   {
-    info.Buttons = nglMouseInfo::ButtonWheelRight;
+    info.Buttons = nglMouseInfo::ButtonWheelLeft;
     mpNGLWindow->CallOnMouseClick(info);
     mpNGLWindow->CallOnMouseUnclick(info);
   }
   else if (x < 0)
   {
-    info.Buttons = nglMouseInfo::ButtonWheelLeft;
+    info.Buttons = nglMouseInfo::ButtonWheelRight;
     mpNGLWindow->CallOnMouseClick(info);
     mpNGLWindow->CallOnMouseUnclick(info);
   }
@@ -568,7 +602,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   NSString *rawchars = [theEvent charactersIgnoringModifiers];
   nglString c((CFStringRef)chars);
   nglString rc((CFStringRef)rawchars);
-  //printf("Key Down: '%ls' / '%ls'.\n", c.GetChars(), rc.GetChars());
+  //printf("Key Down: '%s' / '%s'.\n", c.GetChars(), rc.GetChars());
   if ( [rawchars length] == 1 )
   {
     unichar keyChar = [chars characterAtIndex:0];
@@ -592,7 +626,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   NSString *rawchars = [theEvent charactersIgnoringModifiers];
   nglString c((CFStringRef)chars);
   nglString rc((CFStringRef)rawchars);
-  //printf("Key Up: '%ls' / '%ls'.\n", c.GetChars(), rc.GetChars());
+  //printf("Key Up: '%s' / '%s'.\n", c.GetChars(), rc.GetChars());
   if ( [rawchars length] == 1 )
   {
     unichar keyChar = [chars characterAtIndex:0];
@@ -651,6 +685,17 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   return res;
 }
 
+- (void)close
+{
+  if (mpNGLWindow)
+    mpNGLWindow->CallOnClose();
+}
+
+- (void)Unregister
+{
+  mpNGLWindow = NULL;
+}
+
 //////////
 - (void)resize: (NSSize) size
 {
@@ -679,14 +724,14 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
 
 - (void)doPaint
 {
-  printf("doPaint 0x%x\n", mpNGLWindow);
+  //printf("doPaint 0x%x\n", mpNGLWindow);
   
   mpNGLWindow->CallOnPaint();
 }
 
 - (void) invalidate
 {
-  printf("invalidate\n");
+  //printf("invalidate\n");
   mInvalidated = true;
 }
 
@@ -782,20 +827,26 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
       break;
   }
   
-
+  NSOpenGLContext* ctx = nil;
+  if (pShared)
+  {
+    nglNSWindow* pSharedWindow = (nglNSWindow*)((nglWindow*)pShared)->mpNSWindow;
+    ctx = [[pSharedWindow contentView] getContext];
+  }
   // Create the actual window
-  nglNSWindow* pNSWindow = [[nglNSWindow alloc] initWithFrame:rect andNGLWindow: this];
+  nglNSWindow* pNSWindow = [[nglNSWindow alloc] initWithFrame:rect andNGLWindow: this andSharedContext:ctx];
 
   mOSInfo.mpNSWindow = pNSWindow;
   mpNSWindow = pNSWindow;
 
+  SetTitle(rInfo.Title);
 
   //[pNSWindow makeKeyAndVisible];
   
   NGL_LOG(_T("window"), NGL_LOG_INFO, _T("trying to create GLES context"));
   rContext.Dump(NGL_LOG_INFO);
   
-  if (rContext.TargetAPI != eTargetAPI_OpenGL)
+  if (rContext.TargetAPI != eTargetAPI_OpenGL && rContext.TargetAPI != eTargetAPI_OpenGL2)
   {
     // UIKit Implementation only supports OpenGLES renderer so far
     NGL_LOG(_T("window"), NGL_LOG_INFO, _T("bad renderer"));
@@ -804,12 +855,15 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
   }
 	
 	NSRect r = [(nglNSWindow*)mpNSWindow frame];
-	printf("currentFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
+	//printf("currentFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
 	r = [NSScreen mainScreen].visibleFrame;
-	printf("applicationFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
+	//printf("applicationFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
 	
-	SetSize(rect.size.width, rect.size.height);
-  
+  Build(rContext);
+
+  mWidth = rect.size.width;
+  mHeight = rect.size.height;
+
 //  [pNSWindow UpdateOrientation];
   
 /* Ultra basic UIKit view integration on top of nuiWidgets
@@ -820,10 +874,13 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
   NSURLRequest* pReq = [[NSURLRequest alloc] initWithURL: pURL];
   [pWebView loadRequest: pReq];
  */
+
+
 }
 
 nglWindow::~nglWindow()
 {
+  [mpNSWindow Unregister];
   Unregister();
 }
 
@@ -996,7 +1053,7 @@ bool nglWindow::MakeCurrent() const
 
 void nglWindow::Invalidate()
 {
-  printf("nglWindow::Invalidate()\n");
+  //printf("nglWindow::Invalidate()\n");
   [(nglNSWindow*)mpNSWindow invalidate];
 }
 

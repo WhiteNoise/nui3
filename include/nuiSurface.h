@@ -13,7 +13,7 @@ class nuiTexture;
 typedef std::map<nglString, nuiSurface*, nglString::LessFunctor> nuiSurfaceMap;
 typedef std::set<nuiSurfaceCache*> nuiSurfaceCacheSet;
 
-class NUI_API nuiSurface : public nuiObject, public nuiDrawContext
+class NUI_API nuiSurface : public nuiObject
 {
 public:
   static nuiSurface* GetSurface (const nglString& rName, bool Acquired); ///< Get a surface from its ID
@@ -27,11 +27,11 @@ public:
 
   nglImagePixelFormat GetPixelFormat() const;
   
-  void SetDepth(bool Enable);
-  bool GetDepth() const;
+  void SetDepth(int32 bits);
+  int32 GetDepth() const;
 
-  void SetStencil(bool Enable);  
-  bool GetStencil() const;
+  void SetStencil(int32 bits);
+  int32 GetStencil() const;
 
   bool GetRenderToTexture() const;
 
@@ -40,14 +40,10 @@ public:
   void SetPermanent(bool Permanent = true);
   bool IsPermanent();
 
-  void Wipe(); ///< Completely reset the surface and all associated operations
+  void Resize(int32 width, int32 height);
   
-  bool IsDirty() const;
-  void SetDirty(bool set = true);
-  
-  nuiMetaPainter* GetSurfacePainter() const;
-  void Realize(nuiDrawContext* pDestinationPainter);
-
+  void AddPainter(nuiPainter* pPainter);
+  void DelPainter(nuiPainter* pPainter);
 protected:
   nuiSurface(const nglString& rName, int32 Width, int32 Height, nglImagePixelFormat PixelFormat = eImagePixelRGBA);
   virtual ~nuiSurface();
@@ -58,19 +54,20 @@ private:
   int32 mWidth;
   int32 mHeight;
   
-  bool mDepth;
-  bool mStencil;
+  int32 mDepth;
+  int32 mStencil;
   bool mRenderToTexture;
 
   nglImagePixelFormat mPixelFormat;
   
   nuiTexture* mpTexture;
-  nuiMetaPainter* mpSurfacePainter;
-
+  
   static nuiSurfaceMap mpSurfaces;
   static nuiSurfaceCacheSet mpSurfaceCaches;
   
   bool mDirty;
+
+  std::set<nuiPainter*> mPainters;
 };
 
 #endif//__nuiSurface_h__

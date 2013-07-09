@@ -19,7 +19,7 @@ and in NGL user application code.
 
 
 #define USE_WCHAR
-//#define __NUI_NO_SOFTWARE__
+#define __NUI_NO_SOFTWARE__
 
 
 /*
@@ -39,7 +39,7 @@ and in NGL user application code.
 #if defined (_WIN32) || defined (WIN32)
 #  ifndef _WIN32_
 #    define _WIN32_
-#define _WIN32_WINNT 0x0502
+#    define _WIN32_WINNT 0x0502
 #  endif
 #  ifdef _DEBUG
 //#    define _CRTDBG_MAP_ALLOC // Use the CRT debug mallocs & new
@@ -66,9 +66,13 @@ and in NGL user application code.
 #define _CYGWIN_
 #endif
 
+#ifdef _MINUI3_
+#define _UNIX_
+#endif
+
 /* Mac world
  */
-#ifdef __APPLE__
+#if (defined __APPLE__) && (!defined _MINUI3_)
   #define _MACOSX_
 
 // Include conditionals
@@ -76,6 +80,7 @@ and in NGL user application code.
 
 	// Using UIKit for iPhone and iPhone simulator
 	#if (TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE)
+//#error "Shouldn't go there (TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE)"
     #define NUI_IOS
     #define _UIKIT_
     #define _CORE_FOUNDATION_
@@ -83,6 +88,7 @@ and in NGL user application code.
     #include <CoreFoundation/CoreFoundation.h>
 
   #elif (defined _COCOA_)
+//#error "Should go there!!! (defined _COCOA_)"
     #define _CORE_FOUNDATION_
     #define __MACHO__
     #define __NGL_MACHO__
@@ -107,25 +113,7 @@ and in NGL user application code.
   #endif // __GNUC__
 #endif
 
-#ifdef __MWERKS__
-  #ifdef macintosh
-    #define _CARBON_
-  #endif
-#endif
-
-#ifdef __MWERKS__
-  #if TARGET_API_MAC_OS8
-    #define __NGL_CLASSIC__
-  #elif TARGET_API_MAC_CARBON
-    #if  TARGET_API_MAC_OSX
-      #define __NGL_MACHO__
-    #else
-      #define __NGL_CFM__
-    #endif
-  #endif
-#else
   #define __NGL_MACHO__
-#endif
 
 
 /*
@@ -203,7 +191,7 @@ and in NGL user application code.
   #pragma comment( lib, "wsock32.lib" )
 
   #define _WINSOCKAPI_  // Prevent inclusion of winsock.h in windows.h
-  #define NODRAWTEXT // Prevent inclusion of DrawText defines in windows.h. 
+  #define NODRAWTEXT // Prevent inclusion of DrawText defines in windows.h.
 
   #ifndef _WIN32_WINNT
     #define _WIN32_WINNT _WIN32_WINNT_WS03
@@ -224,7 +212,7 @@ and in NGL user application code.
   #pragma warning (disable: 4201) // Prevent the "parameter not used" warning
   #pragma warning (disable: 4711) // Prevent the "selected for automatic inline expansion" warning
   #endif
-  
+
   #ifdef _MAYAPLUGIN_ // Maya includes try to redefine the bool type
     #define _BOOL
   #endif
@@ -252,12 +240,12 @@ and in NGL user application code.
 
 /* Unices
  */
-#if defined(_LINUX_) || defined(_FREEBSD_) || defined(_CYGWIN_) || defined(_DARWIN_) 
+#if defined(_LINUX_) || defined(_FREEBSD_) || defined(_CYGWIN_) || defined(_DARWIN_) || defined (_ANDROID_)
 #define _UNIX_
 #endif
 
 #ifdef _UNIX_
-	#if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_)) 
+	#if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_))
 	  # define _DEBUG_
 	#endif
   #ifndef _GNU_SOURCE
@@ -276,20 +264,19 @@ and in NGL user application code.
   typedef u_int32_t uint32;
   typedef u_int64_t uint64;
 
-  #ifndef _NOGFX_
+  #if (!defined _NOGFX_) && (!defined _MINUI3_) && (!defined _ANDROID_)
   #define _X11_
   #endif
 #endif // _UNIX_
-
 
 /*
  MacOS/UIKit
  */
 #ifdef _UIKIT_
-  #if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_)) 
+  #if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_))
     #define _DEBUG_
   #endif
-  
+
   #ifndef __cplusplus
 //  #if defined(_OBJC_)
 		#include <UIKit/UIKit.h>
@@ -309,14 +296,14 @@ and in NGL user application code.
   typedef u_int64_t uint64;
 
 	#define NGL_API
-  
+
 #endif//_UIKIT_
 
 /*
  MacOS/Cocoa
  */
 #ifdef _COCOA_
-  #if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_)) 
+  #if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_))
   #define _DEBUG_
   #endif
 
@@ -325,7 +312,7 @@ and in NGL user application code.
   #include <Cocoa/Cocoa.h>
   #include <CoreGraphics/CoreGraphics.h>
   #endif
-  
+
   #include <ApplicationServices/ApplicationServices.h>
 
   #include <stdlib.h>
@@ -342,7 +329,7 @@ and in NGL user application code.
   typedef u_int64_t uint64;
 
 
-  #define NGL_API __attribute__((visibility("hidden"))) 
+  #define NGL_API __attribute__((visibility("hidden")))
 
 #endif //_COCOA_
 
@@ -351,36 +338,14 @@ and in NGL user application code.
  MacOS/Carbon
  */
 #ifdef _CARBON_
-  #if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_)) 
+  #if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_))
   # define _DEBUG_
   #endif
 
   #define __PRINTCORE__
   #define __PMAPPLICATION__
   #define __PMAPPLICATION_DEPRECATED__
-  #ifdef __MWERKS__
-    // Codewarrior has another view of how the headers should be organised
-    #if macintosh == 0
-      #ifndef __CFM_CLASSIC__
-        #include <Carbon/Carbon.h>
-      #endif
-      #include <stdlib.h>
-      #include <sys/types.h>
-
-      // This is ugly but the is a name conflict in codewarrior in between BSD and MSL headers
-      #define int32_t ::int32_t
-    #else
-      #include <Carbon.h>
-    #endif
-    #include "alloca.h"
-    // Let's tell the compiler we know what we are doing:
-    #pragma warn_hidevirtual off
-  #else
-    #define __PRINTCORE__
-    #define __PMAPPLICATION__
-    #define __PMAPPLICATION_DEPRECATED__
-    #include <Carbon/Carbon.h>
-  #endif // __MWERKS__
+  #include <Carbon/Carbon.h>
   #include <stdlib.h>
   #include <stddef.h>
 
@@ -397,15 +362,11 @@ and in NGL user application code.
     typedef u_int64_t uint64;
   #endif
 
-  #ifdef __MWERKS__
-    #define PATH_MAX 1024
-  #endif
-
-//  #define NGL_API __attribute__((visibility("hidden"))) 
+//  #define NGL_API __attribute__((visibility("hidden")))
   #define NGL_API
 #endif // _CARBON_
 
-  
+
 /*
  * Common stuff for all platforms
  */
@@ -441,11 +402,13 @@ allow it).
   #undef _T
 #endif
 
-typedef wchar_t nglChar;
+typedef char nglChar;
+typedef wchar_t nglUChar;
 /*!< Portable char type
   See nglString for more info
 */
-#define _T(x) L##x
+//#define _T(x) L##x
+#define _T(x) x
 /*!< Portable string declaration macro
   Use for literals to support both <i>char</i> and <i>wide char</i> modes :
   \code
@@ -488,7 +451,37 @@ typedef wchar_t nglChar;
 
 #   define __NUI_NO_GLES__
 
-#  ifdef _UIKIT_
+# ifdef _ANDROID_
+
+#    define _OPENGL_ES_
+// Make our GLES Painter available, and disable other Painters...
+#    define  __NUI_NO_GLES__
+#    define __NUI_NO_SOFTWARE__
+#    define __NUI_NO_D3D__
+#    undef __NUI_NO_GL__
+
+    // Disable Anti-Aliasing
+    //#    define __NUI_NO_AA__
+
+#   include <EGL/egl.h>
+#   include <GLES/gl.h>
+#   include <GLES/glext.h>
+
+#   include <GLES2/gl2.h>
+#   include <GLES2/gl2ext.h>
+#   include <GLES2/gl2platform.h>
+
+    // Fake GLU for OpenGLES
+    typedef double GLdouble;
+    typedef double GLclampd;
+/* TessWinding */
+#   define GLU_TESS_WINDING_ODD               100130
+#   define GLU_TESS_WINDING_NONZERO           100131
+#   define GLU_TESS_WINDING_POSITIVE          100132
+#   define GLU_TESS_WINDING_NEGATIVE          100133
+#   define GLU_TESS_WINDING_ABS_GEQ_TWO       100134
+
+#  elif defined _UIKIT_
 #    define _OPENGL_ES_
 // Make our GLES Painter available, and disable other Painters...
 #    define  __NUI_NO_GLES__
@@ -505,6 +498,8 @@ typedef wchar_t nglChar;
 #    endif
 #    include <OpenGLES/ES1/gl.h>
 #    include <OpenGLES/ES1/glext.h>
+#    include <OpenGLES/ES2/gl.h>
+#    include <OpenGLES/ES2/glext.h>
 
 // Fake GLU for OpenGLES
     typedef double GLdouble;
@@ -520,7 +515,6 @@ typedef wchar_t nglChar;
 #    define _OPENGL_
 // Make our GL and Software Painters available, and disable other Painters...
 #    undef __NUI_NO_GLES__
-#    undef __NUI_NO_SOFTWARE__
 #    define __NUI_NO_D3D__
 #    undef __NUI_NO_GL__
 
@@ -549,9 +543,22 @@ typedef wchar_t nglChar;
 #      include <OpenGL/OpenGL.h>
 #      include "nui_GL/glext.h"
 #    endif
-#  else
-#    include <GL/gl.h>
-#    include <GL/glu.h>
+
+#  elif defined _ANDROID_
+#   include <GLES/gl.h>
+#   include <GL/glu.h>
+#   include <GLES/glext.h>
+#   include <GLES/glew.h>
+
+// Dummy BGR flags. Beware! GLES on Android doesn't seem to handle BGR!!!
+#   define GL_BGR  0x80E0
+#   define GL_BGRA 0x80E1
+
+
+#  elif !defined _MINUI3_
+
+#    include <OpenGL/gl.h>
+//#    include <GL/glu.h>
 #    include "nui_GL/glext.h"
 #  endif
 #  ifdef _WIN32_
@@ -563,7 +570,6 @@ typedef wchar_t nglChar;
 #    include "nui_GL/wglext.h"
 #    include <d3d9.h>
 #  endif
-#endif // _NOGFX_
 
 /* Glue for lagging OpenGL implementations (taken from glext.h revision 24)
  */
@@ -571,7 +577,7 @@ typedef wchar_t nglChar;
 /* GL type for program/shader text */
 typedef char GLchar;
 #endif
-#if !(defined GL_VERSION_1_5) && (!defined GL_OES_VERSION_1_1)
+#if (!defined GL_VERSION_1_5) && (!defined GL_OES_VERSION_1_1) && (!defined _ANDROID_)
 typedef ptrdiff_t GLintptr;
 typedef ptrdiff_t GLsizeiptr;
 #endif
@@ -596,6 +602,8 @@ typedef unsigned int GLhandleARB;  /* shader object handle */
 #ifndef APIENTRY
   #define APIENTRY
 #endif
+
+#endif // _NOGFX_
 
 // Do we need to define STDEXT to the standard std namespace? Only VC7.1 currently needs this.
 #ifndef STDEXT
@@ -634,6 +642,14 @@ typedef unsigned int GLhandleARB;  /* shader object handle */
 #else
 #define NGL_CONFIG_H <ngl_config.tux.h>
 #endif
+
+#ifdef _ANDROID_
+#include "android/log.h"
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "nui", __VA_ARGS__))
+#else
+#define LOGI
+#endif
+
 
 #include "ngl_all.h"
 

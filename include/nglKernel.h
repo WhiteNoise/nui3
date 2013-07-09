@@ -33,20 +33,27 @@ the NGL_APP_CREATE macro for instance.
 
 /* Default verbose level
 */
+
+#if (defined _UNIX_) || (defined _MINUI3_) || (defined _COCOA_) || (defined _CARBON_)
+void nglDumpStackTrace();
+#endif
+
 #ifdef _DEBUG_
 // The mac (and GCC?) has brain dead assert system that does NOTHING.
 # ifdef _CARBON_
 #   define __ASSERT_SYS(test) { if (!(test)) Debugger(); }
 # elif defined(_WIN32_)
-#ifdef __NUI64__
-#  define __ASSERT_SYS(test) { assert(test); }
-#else
-#  define __ASSERT_SYS(test) { if (!(test)) { __asm { int 3 } }; }
-#endif
-#else
-#  define __ASSERT_SYS(test) assert(test);
+#   ifdef __NUI64__
+#     define __ASSERT_SYS(test) { assert(test); }
+#   else
+#     define __ASSERT_SYS(test) { if (!(test)) { __asm { int 3 } }; }
+#   endif
+# elif defined(_LINUX_)
+#   define __ASSERT_SYS(test) if (!(test)) { nglDumpStackTrace(); exit(-1); }
+# else
+#   define __ASSERT_SYS(test) { assert(test); }
 # endif
-# define NGL_LOG_DEFAULT NGL_LOG_INFO
+# define NGL_LOG_DEFAULT NGL_LOG_ERROR
 #else
 #  define __ASSERT_SYS(test)
 #  define NGL_LOG_DEFAULT NGL_LOG_ERROR
@@ -57,10 +64,10 @@ the NGL_APP_CREATE macro for instance.
 #define __TFILE__ __T(__FILE__)
 
 #define __NGL_ASSERT(test) \
-  if (!(test)) { NGL_OUT(_T("%ls(%d): ") _T(#test) _T(" failed\n"), __TFILE__, __LINE__); __ASSERT_SYS(test) }
+  if (!(test)) { NGL_OUT(_T("%s(%d): ") _T(#test) _T(" failed\n"), __TFILE__, __LINE__); __ASSERT_SYS(test) }
 
 #define __NGL_ASSERTR(test, result) \
-  if (!(test)) { NGL_OUT(_T("%ls(%d): ") _T(#test) _T(" failed\n"), __TFILE__, __LINE__); __ASSERT_SYS(test) return result; }
+  if (!(test)) { NGL_OUT(_T("%s(%d): ") _T(#test) _T(" failed\n"), __TFILE__, __LINE__); __ASSERT_SYS(test) return result; }
 
 /* ASSERT(R) facility
 */
@@ -90,10 +97,16 @@ the NGL_APP_CREATE macro for instance.
 #include "nglPath.h"
 #include "nglTimer.h"
 
+#ifndef _MINUI3_
 #include "nglClipBoard.h"
 #include "nglDataTypesRegistry.h"
+#endif
 
 class nglDeviceInfo;
+
+#ifdef _ANDROID_
+struct android_app;
+#endif
 
 //! Kernel, application abstraction base class
 /*!
@@ -222,6 +235,7 @@ public:
   */
   //@}
 
+#ifndef _MINUI3_
   /** @name Clipboard */
   //@{
   virtual nglClipBoard &GetClipBoard();
@@ -242,6 +256,7 @@ public:
   //@{
   virtual nglDataTypesRegistry& GetDataTypesRegistry();
   //@}
+#endif
 
   /** @name User callbacks */
   //@{
@@ -281,32 +296,32 @@ public:
 
   virtual void OnMemoryWarning();
   /*!<
-   This method is called when the system is running out of memory. You can try inform the user or try to free memory automatically. You can also ignore it and risk a crash 
+   This method is called when the system is running out of memory. You can try inform the user or try to free memory automatically. You can also ignore it and risk a crash
    */
-  
-	virtual void OnWillExit();	
+
+	virtual void OnWillExit();
   /*!<
    Called right before the application will be terminated by iPhone OS multitasking.
    */
   //@}
-  
+
   virtual void OnActivation();
   /*!<
    Called right before the application will be reactivated by the iPhone OS multitasking.
    */
   //@}
-  
-  
+
+
   virtual void OnDeactivation();
   /*!<
    Called right before the application will be deactivated by the iPhone OS multitasking.
    */
   //@}
-  
+
   bool IsActive() const; ///< Returns true is the application is in the active state (mainly for iOS multitasking).
-  
+
   void NonBlockingHeartBeat(); ///< Keep the application event loop alive without waiting for new events. (i.e. only process the events that are already in the queue).
-  
+
   static void SetCrashReportEmail(const nglString& rEmail);
 
   // Notification manager proxy:
@@ -317,6 +332,10 @@ public:
 
     virtual void OpenDocuments(std::list<nglPath>& paths);
     
+
+#if (defined _UNIX_) || (defined _MINUI3_) || (defined _COCOA_) || (defined _CARBON_)
+  void             CatchSignal (int Signal, void (*pHandler)(int));
+#endif
 protected:
   // Life cycle
   nglKernel();
@@ -328,7 +347,7 @@ protected:
 
   void ProcessMessages(const nuiEvent& rEvent);
   nuiEventSink<nglKernel> mKernelEventSink;
-  
+
   void SetName (const nglString& rName);
   void SetPath (const nglPath& rPath);
   void ParseCmdLine (char* pCmdLine);
@@ -342,12 +361,12 @@ protected:
   void CallOnMemoryWarning();
   void CallOnActivation();
   void CallOnDeactivation();
-  
+
   bool mActive;
-  
+
   // From nglError
   virtual const nglChar* OnError (uint& rError) const;
-  
+
   nuiNotificationManager* mpNotificationManager;
   void OnMessageQueueTick(const nuiEvent& rEvent);
 
@@ -360,7 +379,9 @@ private:
   nglLog*       mpLog;
   nglConsole*   mpCon;
 
+#ifndef _MINUI3_
   nglClipBoard  mClipboard;
+#endif
 
   bool          mOwnCon;
   ExitFuncList  mExitFuncs;
@@ -368,7 +389,9 @@ private:
   nglString     mName;
   ArgList       mArgs;
 
+#ifndef _MINUI3_
   nglDataTypesRegistry mDataTypesRegistry;
+#endif
 
   nglKernel(const nglKernel&)
   : mKernelEventSink(this)
@@ -376,10 +399,11 @@ private:
   } // Undefined copy constructor
 
   friend bool nuiInit(void* OSHandle, class nuiKernel* pKernel);
+  friend bool nuiInitMinimal(void* OSHandle, class nuiKernel* pKernel);
   friend bool nuiUninit();
 
-	
-  
+
+
 #ifdef _WIN32_
 protected:
   friend class nglConsole;
@@ -425,29 +449,32 @@ public:
   virtual void  AddTimer (nglTimer* pTimer);
   virtual void  DelTimer (nglTimer* pTimer);
 
+#ifndef _MINUI3_
   /* To avoid complex design, we consider the windowing support API
    * as part of the core kernel API.
    */
   virtual void* GetDisplay();
   virtual void  AddWindow (class nglWindow* pWin);
   virtual void  DelWindow (class nglWindow* pWin);
-  
+#endif
+
 protected:
   bool             SysInit();
   virtual void     OnEvent(uint Flags); // From nglEvent
-  
+
+#ifndef _MINUI3_
   friend class nglWindow;
   /* This is needed under Linux because the events are processed using
    * a member of nglApplication, so only nglApplication is able to process
-   * events. nglWindows modalState functions are just plain calls to these ones. 
-   */ 
+   * events. nglWindows modalState functions are just plain calls to these ones.
+   */
   virtual void  EnterModalState();
   virtual void  ExitModalState();
-  
+
   bool             mModalState;
+#endif
 
 private:
-  void             CatchSignal (int Signal, void (*pHandler)(int));
   static void      OnSignal (int Signal);
 #endif // _UNIX_
 
@@ -475,7 +502,7 @@ protected:
   friend void objCCallOnActivation();
   friend void objCCallOnDeactivation();
   friend void objCCallOnMemoryWarning();
-  
+
   void* mpUIApplication;
 
 public:
@@ -486,22 +513,31 @@ public:
 #ifdef _COCOA_
 protected:
   //#FIXME: Volume Handling
-  
+
   bool SysInit();
-  
+
   friend void objCCallOnInit(void* pNSApplication);
   friend void objCCallOnExit(int Code);
   friend void objCCallOnWillExit();
-  	
+
   void* mpNSApplication;
-  
-  friend void objCCallOnInitWithURL(void* pUIApplication, const nglString &url);  
-  
+
+  friend void objCCallOnInitWithURL(void* pUIApplication, const nglString &url);
+
 public:
 	void * GetNSApplication() { return mpNSApplication; }
-  
+
 #endif//_UIKIT_
-  
+
+#ifdef _ANDROID_
+public:
+  android_app* GetAndroidApp();
+protected:
+  bool SysInit(android_app* app);
+private:
+  android_app* mpAndroidApp;
+#endif
+
 };
 
 
@@ -516,7 +552,7 @@ public:
 #define NGL_OUTV App->GetConsole().Outputv
 
 // NGL_LOG(_T("net"), NGL_LOG_INFO, "i=%d\n", i)
-#define NGL_LOG  App->GetLog().Log
+#define NGL_LOG  /*{NGL_OUT("%s %d", __FILE__, __LINE__);} */App->GetLog().Log
 #define NGL_LOGV App->GetLog().Logv
 
 //! From C++ Coding Standards

@@ -6,7 +6,6 @@
  */
 
 #include "nui.h"
-#include "nuiAttributeAnimation.h"
 
 //class nuiAttributeAnimation : public nuiAnimation
 nuiAttributeAnimationBase::nuiAttributeAnimationBase()
@@ -252,7 +251,7 @@ void nuiColorAttributeAnimation::OnFrame()
   
   nuiColor col(r, g, b, a);
 
-//  NGL_OUT(_T("ColorAnim: pos[%.4f] %ls\n"), pos, col.GetValue().GetChars());
+//  NGL_OUT(_T("ColorAnim: pos[%.4f] %s\n"), pos, col.GetValue().GetChars());
 
   nuiAttribBase attrib(mpTarget->GetAttribute(mTarget));
   NGL_ASSERT(attrib.IsValid());
@@ -396,7 +395,7 @@ void nuiRectAttributeAnimation::OnFrame()
   if (mAutoRound)
     rect.RoundToNearest();
   
-  //NGL_OUT(_T("rect anim: %ls\n"), rect.GetValue().GetChars());
+  //NGL_OUT(_T("rect anim: %s\n"), rect.GetValue().GetChars());
   nuiAttribBase attrib(mpTarget->GetAttribute(mTarget));
   
   nuiAttrib<nuiRect> rect_attrib(attrib);
@@ -568,7 +567,7 @@ void nuiMatrixAttributeAnimation::OnFrame()
 
   nglString frameValueStr;
   frameValue.GetValue(frameValueStr);
-//  NGL_OUT(_T("MatrixAnim: pos[%.4f] %ls\n"), pos, frameValueStr.GetChars());
+//  NGL_OUT(_T("MatrixAnim: pos[%.4f] %s\n"), pos, frameValueStr.GetChars());
   
   nuiAttribBase attrib(mpTarget->GetAttribute(mTarget));
   NGL_ASSERT(attrib.IsValid());

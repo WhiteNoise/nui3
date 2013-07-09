@@ -31,30 +31,6 @@
 
 class nuiSurface;
 
-class nuiSurfaceCache
-{
-public:
-  nuiSurfaceCache();
-  virtual ~nuiSurfaceCache();
-  
-  virtual void CreateSurface(nuiSurface* pSurface);
-  virtual void DestroySurface(nuiSurface* pSurface);
-  virtual void InvalidateSurface(nuiSurface* pSurface, bool ForceReload);
-};
-
-
-class nuiTextureCache
-{
-public:
-  nuiTextureCache();
-  virtual ~nuiTextureCache();
-  
-  virtual void CreateTexture(nuiTexture* pTexture);
-  virtual void DestroyTexture(nuiTexture* pTexture);
-  virtual void InvalidateTexture(nuiTexture* pTexture, bool ForceReload);
-};
-
-
 class NUI_API nuiClipper : public nuiRect
 {
 public:
@@ -88,10 +64,10 @@ public:
   bool mEnabled;
 };
 
-class NUI_API nuiPainter : public nuiTextureCache, public nuiSurfaceCache
+class NUI_API nuiPainter
 {
 public:
-  nuiPainter(const nuiRect& rRect, nglContext* pContext = NULL);
+  nuiPainter(nglContext* pContext = NULL);
   virtual ~nuiPainter();
 
   virtual void SetSize(uint32 sizex, uint32 sizey) = 0;
@@ -101,7 +77,7 @@ public:
 
   virtual void SetState(const nuiRenderState& rState, bool ForceApply = false) = 0;
   virtual void DrawArray(nuiRenderArray* pArray) = 0;
-  virtual void ClearColor() = 0;
+  virtual void Clear(bool color, bool depth, bool stencil) = 0;
 
   virtual void LoadMatrix(const nuiMatrix& rMatrix);
   virtual void MultMatrix(const nuiMatrix& rMatrix);
@@ -150,13 +126,15 @@ public:
   void DEBUG_EnableDrawArray(bool set) const;
   bool DEBUG_GetEnableDrawArray() const;
   
-protected:
   virtual void SetSurface(nuiSurface* pSurface);
-  virtual void PushSurface();
-  virtual void PopSurface();
+  virtual nuiSurface* GetSurface() const;
+
+  virtual void DestroySurface(nuiSurface* pSurface) = 0;
+  virtual void ResizeSurface(nuiSurface* pSurface, int32 width, int32 height) = 0;
+
+protected:
   nuiSurface* mpSurface;
-  std::stack<nuiSurface*> mpSurfaceStack;
-  
+
   nuiRenderState mState;
   std::stack<nuiClipper> mpClippingStack;
   uint32 mWidth;

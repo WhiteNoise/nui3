@@ -6,11 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiLabel.h"
-#include "nuiDrawContext.h"
-#include "nuiApplication.h"
-#include "nuiXML.h"
-#include "nuiFontManager.h"
 
 #define NUI_LABEL_HMARGIN 6.f
 #define NUI_LABEL_VMARGIN 0.f
@@ -91,47 +86,9 @@ void nuiLabel::InitDefaultValues()
 }
 
 
-bool nuiLabel::Load(const nuiXMLNode* pNode)
-{
-  nuiWidget::Load(pNode);
-  mpLayout = NULL;
-  mpIdealLayout = NULL;
-  mpFont = NULL;
-  mFontChanged = true;
-
-  mUseEllipsis = false;
-  mClearBg = false;
-  mWrapping = false;
-  mIgnoreState = false;
-
-  mTextPosition = nuiGetPosition(pNode,nuiLeft);
-
-  InitAttributes();
-  InitProperties();
-  SetFont(nuiTheme::Default);
-  if (pNode->GetChild(nglString(_T("##text"))))
-    SetText(pNode->GetChild(nglString(_T("##text")))->GetValue());
-  
-  return true;
-}
-
-nuiXMLNode* nuiLabel::Serialize(nuiXMLNode* pParentNode, bool Recursive) const
-{
-  nuiXMLNode* pNode = nuiWidget::Serialize(pParentNode);
-  if (!pNode) 
-    return NULL;
-  nuiXMLNode* pTextNode = new nuiXMLNode(_T("##text"),pNode);
-  pTextNode->SetValue(mText);
-  pNode->SetAttribute(_T("TextPosition"),mTextPosition);
-  pNode->DelAttribute(_T("Text"));
-
-  return pNode;
-}
-
-
 nuiLabel::~nuiLabel()
 {
-  //printf("~nuiLabel: '%ls'\n", mText.GetChars());
+  //printf("~nuiLabel: '%s'\n", mText.GetChars());
   delete mpLayout;
   delete mpIdealLayout;
   if (mpFont)
@@ -202,6 +159,12 @@ void nuiLabel::InitAttributes()
                (nglString(_T("VMargin")), nuiUnitNone,
                 nuiMakeDelegate(this, &nuiLabel::GetVMargin), 
                 nuiMakeDelegate(this, &nuiLabel::SetVMargin)));
+
+  AddAttribute(new nuiAttribute<bool>
+               (nglString(_T("UseEllipsis")), nuiUnitYesNo,
+                nuiMakeDelegate(this, &nuiLabel::GetUseEllipsis), 
+                nuiMakeDelegate(this, &nuiLabel::UseEllipsis)));
+  
 }
 
 void nuiLabel::InitProperties()
@@ -302,10 +265,10 @@ bool nuiLabel::Draw(nuiDrawContext* pContext)
     }
   }
 
-  nglGlyphInfo GlyphInfo;
+  nuiGlyphInfo GlyphInfo;
   mpLayout->GetMetrics(GlyphInfo);
 
-  nglFontInfo info;
+  nuiFontInfo info;
   mpFont->GetInfo(info);
   //info.Dump(0);
 
@@ -367,25 +330,20 @@ void nuiLabel::CalcLayout()
   {
     if (mTextChanged || mFontChanged || !mpLayout)
     {
-      if (mFontChanged)
-      {
-        delete mpLayout;
-        delete mpIdealLayout;
-        mpLayout = NULL;
-        mpIdealLayout = NULL;
-        mpLayout = new nuiFontLayout(*mpFont, 0, 0, mOrientation);
-        mpLayout->SetUnderline(mUnderline);
-        mpLayout->SetStrikeThrough(mStrikeThrough);
-        mpIdealLayout = new nuiFontLayout(*mpFont, 0, 0, mOrientation);
-        mpIdealLayout->SetUnderline(mUnderline);
-        mpIdealLayout->SetStrikeThrough(mStrikeThrough);
-        mFontChanged = false;
-      }
+      delete mpLayout;
+      delete mpIdealLayout;
+      mpLayout = NULL;
+      mpIdealLayout = NULL;
+      mpLayout = new nuiTextLayout(mpFont, mOrientation);
+      mpLayout->SetUnderline(mUnderline);
+      mpLayout->SetStrikeThrough(mStrikeThrough);
+      mpIdealLayout = new nuiTextLayout(mpFont, mOrientation);
+      mpIdealLayout->SetUnderline(mUnderline);
+      mpIdealLayout->SetStrikeThrough(mStrikeThrough);
+      mFontChanged = false;
 
       NGL_ASSERT(mpLayout);
       NGL_ASSERT(mpIdealLayout);
-      mpLayout->Init(0,0);
-      mpIdealLayout->Init(0,0);
 
       if (mWrapping)
       {
@@ -433,23 +391,28 @@ nuiRect nuiLabel::CalcIdealSize()
     mIdealRect = mIdealLayoutRect;
 //    if (GetDebug(1))
 //    {
-//      printf("New ideal rect: %ls\n", mIdealRect.GetValue().GetChars());
+//      printf("New ideal rect: %s\n", mIdealRect.GetValue().GetChars());
 //    }
   }
 
   mIdealRect.RoundToBiggest();
-  //NGL_OUT(_T("%ls [%ls]"), mText.GetChars(), mIdealRect.GetValue().GetChars());
+  //NGL_OUT(_T("%s [%s]"), mText.GetChars(), mIdealRect.GetValue().GetChars());
   return mIdealRect;
 }
 
 bool nuiLabel::SetRect(const nuiRect& rRect)
 {
+  bool needRecalcLayout = false;
+
+  if (mUseEllipsis || mWrapping)
+    needRecalcLayout = (rRect.GetWidth() != mRect.GetWidth());
+    
   nuiWidget::SetRect(rRect);
 
   nuiRect ideal(mIdealLayoutRect);
 
 
-  if (ideal.GetWidth() > mRect.GetWidth())
+  if (needRecalcLayout || ideal.GetWidth() > mRect.GetWidth())
   {
     if (mUseEllipsis)
     {
@@ -457,10 +420,14 @@ bool nuiLabel::SetRect(const nuiRect& rRect)
       nuiSize diff = ideal.GetWidth() - mRect.GetWidth();
       int NbLetterToRemove = ToNearest(diff / (ideal.GetWidth() / mText.GetLength())) + 3;
       nglString text = mText;
-      int len = text.GetLength();
-      text.DeleteRight(MIN(NbLetterToRemove, len));
-      text.Append(_T("..."));
-      mpLayout->Init(0,0);
+      if (NbLetterToRemove > 0)
+      {
+        int len = text.GetLength();
+        text.DeleteRight(MIN(NbLetterToRemove, len));
+        text.Append(_T("..."));
+      }
+      delete mpLayout;
+      mpLayout = new nuiTextLayout(mpFont);
       mpLayout->SetWrapX(0);
       mpLayout->Layout(text);
       GetLayoutRect();
@@ -468,8 +435,10 @@ bool nuiLabel::SetRect(const nuiRect& rRect)
     else if (mWrapping)
     {
       CalcLayout();
-      mpLayout->Init(0,0);
-      mpIdealLayout->Init(0,0);
+      delete mpLayout;
+      mpLayout = new nuiTextLayout(mpFont);
+      delete mpIdealLayout;
+      mpIdealLayout = new nuiTextLayout(mpFont);
       mpLayout->SetWrapX(mRect.GetWidth() - mBorderLeft - mBorderRight);
       mpIdealLayout->SetWrapX(mRect.GetWidth() - mBorderLeft - mBorderRight);
       mpLayout->Layout(mText);
@@ -495,7 +464,7 @@ nuiRect nuiLabel::GetLayoutRect()
   mIdealLayoutRect = mIdealLayoutRect.Size();
 //  if (GetDebug())
 //  {
-//    printf("New layout rect: %ls\n", mIdealLayoutRect.GetValue().GetChars());
+//    printf("New layout rect: %s\n", mIdealLayoutRect.GetValue().GetChars());
 //  }
   
   if (!(mIdealLayoutRect == mIdealRect))
@@ -680,6 +649,10 @@ void nuiLabel::UseEllipsis(bool useEllipsis)
 {
   mUseEllipsis = useEllipsis;
   InvalidateLayout();
+}
+bool nuiLabel::GetUseEllipsis() const
+{
+  return mUseEllipsis;
 }
 
 void nuiLabel::SetOrientation(nuiOrientation Orientation)

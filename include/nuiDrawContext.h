@@ -35,12 +35,14 @@
 #include "nuiPainter.h"
 
 class nuiTexture;
+class nuiShaderProgram;
 
 enum nuiRenderer
 {
-  eSoftware,
-  eOpenGL,
-  eDirect3D,
+  eSoftware = eTargetAPI_None,
+  eOpenGL = eTargetAPI_OpenGL,
+  eOpenGL2 = eTargetAPI_OpenGL2,
+  eDirect3D = eTargetAPI_Direct3D,
   eMeta
 };
 
@@ -83,6 +85,9 @@ public:
   void SetPainter(nuiPainter* pPainter);
   nuiPainter* GetPainter() const;
 
+  void SetMainPainter(nuiPainter* pPainter);
+  nuiPainter* GetMainPainter() const;
+
   /** @name Render state manipulation */
   //@{
   void PushState();
@@ -101,9 +106,18 @@ public:
 
   /** @name Texture manipulation */
   //@{
-  bool IsTextureCurrent(nuiTexture* pTex) const;
-  nuiTexture* GetTexture() const;
-  void SetTexture(nuiTexture* pTex);
+  bool IsTextureCurrent(nuiTexture* pTex, int slot = 0) const;
+  nuiTexture* GetTexture(int slot = 0) const;
+  void SetTexture(nuiTexture* pTex, int slot = 0);
+  //@}
+
+  /** @name Shader manipulation */
+  //@{
+  bool IsShaderCurrent(nuiShaderProgram* pShader) const;
+  nuiShaderProgram* GetShader() const;
+  void SetShader(nuiShaderProgram* pShader, nuiShaderState* pShaderState);
+  void SetShaderState(nuiShaderState* pState);
+  nuiShaderState* GetShaderState() const;
   //@}
 
   /** @name Matrix operations */
@@ -159,7 +173,7 @@ public:
   void DrawLine(float x1, float y1, float x2, float y2);
   void DrawPoint(const nuiVector2& rPoint);
   void DrawPoint(float x, float y);
-  void Clear(); ///< Initializes the current drawing buffer with the default values.
+  void Clear(bool color = true, bool depth = true, bool stencil = true); ///< Initializes the current drawing buffer with the default values.
   void DrawImage(const nuiRect& rDest, const nuiRect& rSource);
   void DrawImageQuad(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, const nuiRect& rSource);
   void DrawShade (const nuiRect& rSourceRect, const nuiRect& rShadeRect, const nuiColor& rTint); ///< Draw a shade extending from SourceRect to ShadeRect. The shade may look quite diferent depending on the actual renderer.
@@ -170,7 +184,6 @@ public:
   void DrawObject(const nuiRenderObject& rObject);
   //@}
 
-  void SetSize(uint w, uint h); ///< Set the size of the drawing surface (for clipping calculus).
   int GetWidth() const;
   int GetHeight() const;
 
@@ -182,7 +195,7 @@ public:
   void SetTextColor(const nuiColor& rColor);
   nuiColor GetTextColor() const;
   void DrawText(nuiSize x, nuiSize y, const nglString& rString, bool AlignGlyphPixels = true); /// Draw text at the given coordinates and the current font.
-  void DrawText(nuiSize x, nuiSize y, const nuiFontLayout& rLayout, bool AlignGlyphPixels = true); /// Draw text layout at the given coordinates and the current font. The given layout must use the same font as the current font otherwise the results are unpredictable.
+  void DrawText(nuiSize x, nuiSize y, const nuiTextLayout& rLayout, bool AlignGlyphPixels = true); /// Draw text layout at the given coordinates and the current font. The given layout must use the same font as the current font otherwise the results are unpredictable.
   //@}
 
   /** @name Global Draw Settings Manipulation */
@@ -192,7 +205,9 @@ public:
   //@}
 
   void AddBreakPoint();
-  
+
+  void SetSurface(nuiSurface* pSurface);
+  nuiSurface* GetSurface() const;
 protected:
   // Render state stack:
   std::stack<nuiRenderState*> mpRenderStateStack;
@@ -216,7 +231,8 @@ protected:
   bool mPermitAntialising;
 
   nuiPainter* mpPainter;
-  nuiPainter* mpOldPainter;
+  nuiPainter* mpMainPainter;
+  nuiPainter* mpSavedPainter;
   nuiTexture* mpAATexture;
   GLint mClipShapeValue;
   

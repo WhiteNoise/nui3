@@ -6,8 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiDrawContext.h"
-#include "nuiComboBox.h"
 
 #define DEFAULT_HANDLE_WIDTH    10.f
 #define DEFAULT_HANDLE_HEIGHT   10.f
@@ -44,20 +42,6 @@ nuiComboBox::nuiComboBox(nuiTreeNode* pChoicesTree, bool ownTree)
     mpChoicesTree->Acquire();
   ReparentTree(mpChoicesTree);
   SetWantKeyboardFocus(true);
-}
-
-bool nuiComboBox::Load(nuiXMLNode* pNode)
-{
-  nuiSimpleContainer::Load(pNode);
-  delete mpChoicesTree;
-  mpChoicesTree = NULL; 
-  mpSelected = NULL;
-  mpOldSelected = NULL; 
-  mHandleWidth = DEFAULT_HANDLE_WIDTH; 
-  mHandleHeight = DEFAULT_HANDLE_HEIGHT;
-  mHandleOffset = DEFAULT_HANDLE_OFFSET;
-
-  return true;
 }
 
 nuiComboBox::~nuiComboBox()

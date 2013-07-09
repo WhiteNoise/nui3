@@ -40,7 +40,17 @@ enum nuiBlendFunc
   
 };
 
+enum nuiCulling
+{
+  eCullingBack = GL_BACK,
+  eCullingFront = GL_FRONT,
+  eCullingBoth = GL_FRONT_AND_BACK
+};
+
+
 void nuiGetBlendFuncFactors(nuiBlendFunc Func, GLenum& src, GLenum& dst);
+
+#define NUI_MAX_TEXTURE_UNITS 8
 
 class NUI_API nuiRenderState
 {
@@ -59,9 +69,14 @@ public:
 
   bool mDepthTest;
   bool mDepthWrite;
+
+  bool mCulling;
+  nuiCulling mCullingMode;
   
   bool mTexturing;
-  nuiTexture* mpTexture;
+  nuiTexture* mpTexture[NUI_MAX_TEXTURE_UNITS];
+  nuiShaderProgram* mpShader;
+  nuiShaderState* mpShaderState;
 
   // Rendering buffers:
   bool mColorBuffer;
@@ -73,6 +88,7 @@ public:
   nuiShape::Winding mWinding;
 
   nuiColor mClearColor;
+  float mClearDepth;
   nuiColor mTextColor;
   nuiFont* mpFont;
 

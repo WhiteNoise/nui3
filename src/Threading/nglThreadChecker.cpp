@@ -7,8 +7,6 @@
 
 
 #include "nui.h"
-#include "nglThreadChecker.h"
-#include "nglLightLock.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +109,7 @@ nglString nglThreadState::GetWarningToString() const
 
 
 nglThreadChecker::nglThreadChecker()
-  : nglThread()
+  : nglThread("nglThreadChecker")
 {
 }
 
@@ -127,7 +125,7 @@ nglThreadChecker::~nglThreadChecker()
 //
 //*****************************************************************************************
 
-void nglThreadChecker::EnableChecker(bool set)
+void nglThreadChecker::EnableChecker(bool set, bool start)
 {
   if (mEnabled == set)
     return;
@@ -135,9 +133,12 @@ void nglThreadChecker::EnableChecker(bool set)
   if (!set)
   {
     // stop checker
-    mpChecker->Stop();
-    mpChecker->Join();
-    mEnabled = false;   
+    if (mpChecker->IsRunning())
+    {
+      mpChecker->Stop();
+      mpChecker->Join();
+    }
+    mEnabled = false;
   }    
   else
   {
@@ -146,11 +147,18 @@ void nglThreadChecker::EnableChecker(bool set)
     {
       mpChecker = new nglThreadChecker();
     }
-    mpChecker->Start();
+    if (start)
+      mpChecker->Start();
     mEnabled = true;
   }
   
 }
+
+bool nglThreadChecker::IsRunning() const
+{
+  return mRunning;
+}
+
 
 bool nglThreadChecker::IsCheckerEnabled()
 {
@@ -287,14 +295,20 @@ bool nglThreadChecker::GetStates(std::map<nglThread::ID, std::list<nglThreadStat
 
 
 //**************************************************************************
-
+static nglString CheckerDisabled("nglThreadChecker disabled");
 
 const nglString& nglThreadChecker::Dump()
 {
-  if (!mEnabled)
-    return nglString::Null;
-    
-  return mpChecker->_Dump(nglTime());
+  if (!mpChecker)
+    return CheckerDisabled;
+
+  mpChecker->mAtomicLock.Lock();
+  if (!mpChecker->IsRunning())
+    mpChecker->BuildLocksMap();
+  const nglString& str = mpChecker->_Dump(nglTime());
+  mpChecker->mAtomicLock.Unlock();
+
+  return str;
 }
 
 
@@ -324,7 +338,7 @@ const nglString& nglThreadChecker::_Dump(double currentTime)
     GetThreadName(threadID, name);
     const std::list<nglThreadState>& stack = it->second;
     
-    tmp.CFormat(_T("thread '%ls' [0x%x]:\n"), name.GetChars(), threadID);
+    tmp.CFormat(_T("thread '%s' [0x%x]:\n"), name.GetChars(), threadID);
     mDump.Append(tmp);
     
     uint32 size = stack.size();
@@ -342,7 +356,7 @@ const nglString& nglThreadChecker::_Dump(double currentTime)
         --its;
         const nglThreadState& state = *its;
         
-        tmp.CFormat(_T("\t\t%d: %ls '%ls' [0x%x] [state='%ls'] [timelength=%.3f]\n"), 
+        tmp.CFormat(_T("\t\t%d: %s '%s' [0x%x] [state='%s'] [timelength=%.3f]\n"), 
           size,
           state.GetLockPointer()->GetLabel().GetChars(),
           state.GetLockPointer()->GetName().GetChars(),
@@ -357,8 +371,6 @@ const nglString& nglThreadChecker::_Dump(double currentTime)
     }
   }
   mDump.Append(_T("------------------------\n"));
-
-  
   return mDump;
 }
 
@@ -438,11 +450,11 @@ void nglThreadChecker::Checker(double currentTime)
       if (FindDeadLock_2ndPass(state.GetLockPointer(), log))
       {
        // it's a dead-lock. do what u have to do.        
-        wprintf(_T("\nnglThreadChecker WARNING : dead-lock on %ls '%ls' [0x%x]!\n"), 
+        printf(_T("\nnglThreadChecker WARNING : dead-lock on %s '%s' [%p]!\n"), 
           state.GetLockPointer()->GetLabel().GetChars(), state.GetLockPointer()->GetName().GetChars(), state.GetLockPointer());
-        wprintf(_T("%ls\n"), log.GetChars());  
+        printf(_T("%s\n"), log.GetChars());  
         _Dump(currentTime);
-        wprintf(_T("%ls\n"), mDump.GetChars());
+        printf(_T("%s\n"), mDump.GetChars());
         
         // if a dead-lock blocks the main thread, the UI won't be able to refresh any information about that. we choose to exit with a clear information.
         exit(2);
@@ -472,12 +484,12 @@ void nglThreadChecker::Checker(double currentTime)
       {
         state.SetWarning(nglThreadState::eWarningLong);
         // it's a long lock. do what u have to do.
-        wprintf(_T("nglThreadChecker WARNING!\n"));
-        wprintf(_T("nglThreadChecker WARNING : the %ls '%ls' [0x%x] has been locked for more than %.3fsec in thread '%ls' [0x%x]\n"), 
+        printf(_T("nglThreadChecker WARNING!\n"));
+        printf(_T("nglThreadChecker WARNING : the %s '%s' [%p] has been locked for more than %.3fsec in thread '%s' [%p]\n"), 
         state.GetLockPointer()->GetLabel().GetChars(),
         state.GetLockPointer()->GetName().GetChars(), state.GetLockPointer(), delay, threadName.GetChars(), threadID);
         _Dump(currentTime);
-        wprintf(_T("%ls\n"), mDump.GetChars());
+        printf(_T("%s\n"), mDump.GetChars());
       }
     }
 
@@ -538,7 +550,7 @@ void nglThreadChecker::FindDeadLock_1stPass(nglThread::ID waitingThread, nglStri
   nglString tmp;
   nglString name;
   GetThreadName(waitingThread, name);
-  tmp.Format(_T("thread '%ls' [0x%x] "), name.GetChars(), waitingThread);
+  tmp.Format(_T("thread '%s' [0x%x] "), name.GetChars(), waitingThread);
   log.Append(tmp);
   mTestedThread.insert(waitingThread);
 }
@@ -555,6 +567,13 @@ bool nglThreadChecker::FindDeadLock_2ndPass(nglLock* pWaitingLock, nglString& lo
 {
   // retrieve corresponding thread
   std::map<nglLock*, nglThread::ID>::iterator itm = mLockmap.find(pWaitingLock);
+  if (itm == mLockmap.end())
+  {
+    nglString tmp;
+    tmp.CFormat("Error: unable to find lock %p '%s' (%s)", pWaitingLock, pWaitingLock->GetName().GetChars(), pWaitingLock->GetLabel().GetChars());
+    return false;
+  }
+
   NGL_ASSERT(itm != mLockmap.end());
   nglThread::ID nextThread = itm->second;
   nglString nextName;
@@ -565,7 +584,7 @@ bool nglThreadChecker::FindDeadLock_2ndPass(nglLock* pWaitingLock, nglString& lo
   if (its != mTestedThread.end())
   {
     nglString tmp;
-    tmp.Format(_T(" is waiting for thread '%ls' [0x%x]. And there is the dead-lock!\n"), nextName.GetChars(), nextThread);
+    tmp.Format(_T(" is waiting for thread '%s' [0x%x]. And there is the dead-lock!\n"), nextName.GetChars(), nextThread);
     log.Append(tmp);
     
     return true;
@@ -583,7 +602,7 @@ bool nglThreadChecker::FindDeadLock_2ndPass(nglLock* pWaitingLock, nglString& lo
   if (list.size() == 0)
   {
     nglString tmp;
-    tmp.Format(_T(" is waiting for thread '%ls' [0x%x], no locks in this thread. No Dead-lock then. Test Over.\n"), nextName.GetChars(), nextThread);
+    tmp.Format(_T(" is waiting for thread '%s' [0x%x], no locks in this thread. No Dead-lock then. Test Over.\n"), nextName.GetChars(), nextThread);
     log.Append(tmp);
 
     return false;
@@ -595,7 +614,7 @@ bool nglThreadChecker::FindDeadLock_2ndPass(nglLock* pWaitingLock, nglString& lo
   if (state.GetState() != nglThreadState::eWait)
   {
     nglString tmp;
-    tmp.Format(_T(" is waiting for thread '%ls' [0x%x]. In this thread, %ls '%ls' [0x%x] has already been locked. No Dead-lock then. Test Over.\n"), 
+    tmp.Format(_T(" is waiting for thread '%s' [0x%x]. In this thread, %s '%s' [0x%x] has already been locked. No Dead-lock then. Test Over.\n"), 
       nextName.GetChars(), nextThread, 
       state.GetLockPointer()->GetLabel().GetChars(),
       state.GetLockPointer()->GetName().GetChars(), state.GetLockPointer());
@@ -608,7 +627,7 @@ bool nglThreadChecker::FindDeadLock_2ndPass(nglLock* pWaitingLock, nglString& lo
   // recursive call
 
   nglString tmp;
-  tmp.Format(_T(" is waiting for thread '%ls' [0x%x].\nthread '%ls' [0x%x] "), nextName.GetChars(), nextThread, nextName.GetChars(), nextThread);
+  tmp.Format(_T(" is waiting for thread '%s' [0x%x].\nthread '%s' [0x%x] "), nextName.GetChars(), nextThread, nextName.GetChars(), nextThread);
   log.Append(tmp);
 
   return FindDeadLock_2ndPass(state.GetLockPointer(), log);
@@ -762,7 +781,7 @@ bool nglThreadChecker::_Unlock(nglThread::ID threadID, nglLock* pLock)
         // information found, unregister the previous state
         stack.erase(its);
 
-        // wprintf(_T("ThreadChecker Unlock : threadID 0x%x   CriticalSection 0x%x (named '%ls')\n"), threadID, pCS, pCS->GetName().GetChars());
+        // wprintf(_T("ThreadChecker Unlock : threadID 0x%x   CriticalSection 0x%x (named '%s')\n"), threadID, pCS, pCS->GetName().GetChars());
 
         break;
       }
@@ -800,8 +819,11 @@ bool nglThreadChecker::_UnregisterThread(nglThread::ID ID)
   
   std::map<nglThread::ID, std::list<nglThreadState> >::iterator it = mThreadStates.find(ID);
   if (it == mThreadStates.end())
+  {
+    mAtomicLock.Unlock();
     return false;
-    
+  }
+
   mThreadStates.erase(it);
 
   mAtomicLock.Unlock();
@@ -815,7 +837,9 @@ bool nglThreadChecker::_UnregisterThread(nglThread::ID ID)
 
 void nglThreadChecker::_GetStates(std::map<nglThread::ID, std::list<nglThreadState> >& states)
 {
+  mAtomicLock.Lock();
   states = mThreadStates;
+  mAtomicLock.Unlock();
 }
 
 

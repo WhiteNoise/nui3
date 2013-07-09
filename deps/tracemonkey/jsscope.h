@@ -210,6 +210,10 @@ struct JSEmptyScope;
 
 #define SPROP_INVALID_SLOT              0xffffffff
 
+extern void
+js_SweepScopeProperties(JSContext *cx);
+
+
 struct JSScope : public JSObjectMap
 {
 #ifdef JS_THREADSAFE
@@ -961,10 +965,6 @@ js_GetMutableScope(JSContext *cx, JSObject *obj);
 
 extern void
 js_TraceId(JSTracer *trc, jsid id);
-
-extern "C++" {
-    void js_SweepScopeProperties(JSContext *cx);
-}
 
 extern bool
 js_InitPropertyTree(JSRuntime *rt);

@@ -21,7 +21,7 @@
 class nuiD3DPainter : public nuiPainter, public nuiCacheManager
 {
 public:
-  nuiD3DPainter(nglContext* pContext, const nuiRect& rRect);
+  nuiD3DPainter(nglContext* pContext);
   virtual ~nuiD3DPainter();
   
   virtual void SetSize(uint32 sizex, uint32 sizey);
@@ -29,7 +29,7 @@ public:
   virtual void SetState(const nuiRenderState& rState, bool ForceApply = false);
   virtual void DrawArray(nuiRenderArray* pArray);
   void         DrawPrimitiveBatch();
-  virtual void ClearColor();
+  virtual void Clear(bool color, bool depth, bool stencil);
   virtual void BeginSession();
   virtual void EndSession();
   virtual void LoadMatrix(const nuiMatrix& rMatrix);

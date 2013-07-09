@@ -7,8 +7,6 @@
 
 
 #include "nui.h"
-#include "nuiBindingManager.h"
-#include "nuiTypeTraits.h"
 
 void TestVariant()
 {
@@ -63,7 +61,7 @@ void TestBinding()
     pMethod->Run(context);
     nuiVariant result = context.GetResult();
     nglString res = result;
-    NGL_OUT(_T("GetObjectClass result: %ls\n"), res.GetChars());
+    NGL_OUT(_T("GetObjectClass result: %s\n"), res.GetChars());
   }
   
   {
@@ -87,7 +85,7 @@ void TestBinding()
     pMethod->Run(context);
     nuiVariant result = context.GetResult();
     nglString res = result;
-    NGL_OUT(_T("GetObjectName result: %ls\n"), res.GetChars());
+    NGL_OUT(_T("GetObjectName result: %s\n"), res.GetChars());
   }
   
   {

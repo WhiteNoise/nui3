@@ -10,17 +10,16 @@
 
 //#include "nui.h"
 #include "nuiWidget.h"
-#include "nuiComposite.h"
+#include "nuiSimpleContainer.h"
 #include "nuiScrollBar.h"
 #include "nuiContainer.h"
 #include "nuiWidgetAnimation.h"
 
-class NUI_API nuiScrollView : public nuiComposite
+class NUI_API nuiScrollView : public nuiSimpleContainer
 {
 public:
   nuiScrollView(bool Horizontal = true, bool Vertical = true);
   nuiScrollView(nuiScrollBar* pHorizontalScrollbar, nuiScrollBar* pVerticalScrollbar );
-  virtual bool Load(const nuiXMLNode* pNode);
   virtual ~nuiScrollView();
   
   virtual nuiRect CalcIdealSize();
@@ -84,7 +83,12 @@ public:
   bool IsDragEnabled();
   
   void ActivateMobileMode();
-  
+
+  void ActivateHotRect(bool hset, bool vset);
+  void ActivateHotRect(bool set);
+  void IsVerticalHotRectActive() const;
+  void IsHorizontalHotRectActive() const;
+
 private:
   void InitAttributes();
   void Init(nuiScrollBar* pHorizontalScrollBar, nuiScrollBar* pVerticalScrollBar, bool Horizontal, bool Vertical);
@@ -92,6 +96,8 @@ private:
   void OnChildAdded(const nuiEvent& rEvent);
   void OnChildRemoved(const nuiEvent& rEvent);
   void OnHotRectChanged(const nuiEvent& rEvent);
+  bool mHorizontalHotRectActive;
+  bool mVerticalHotRectActive;
 
   nuiRect mChildrenUnionRect;
   bool SetChildrenRect(nuiSize x, nuiSize y, nuiSize xx, nuiSize yy, nuiSize scrollv, nuiSize scrollh);

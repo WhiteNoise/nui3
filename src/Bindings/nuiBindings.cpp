@@ -6,10 +6,6 @@
  */
 
 #include "nui.h"
-#include "nuiBindings.h"
-#include "nuiBindingManager.h"
-
-#include "nuiWidget.h"
 
 NUI_DECLARE_ATTRIBUTE_TYPE(void);
 NUI_DECLARE_ATTRIBUTE_TYPE(void*);
@@ -67,14 +63,10 @@ bool nuiInitBindings()
     nuiAddMethod(GetObjectClass,  nuiObject::GetObjectClass);
 //    nuiAddMethod(IsOfClass,       nuiObject::IsOfClass);
 //    nuiAddMethod(IsOfClassId,     nuiObject::IsOfClass );
-//    nuiAddMethod(SetProperty,     nuiObject::SetProperty);
-//    nuiAddMethod(GetProperty,     nuiObject::GetProperty);
-//    nuiAddMethod(HasProperty,     nuiObject::HasProperty);
-    nuiAddMethod(ClearProperties, nuiObject::ClearProperties);
-//    nuiAddMethod(ClearProperty,   nuiObject::ClearProperty);
     nuiAddMethod(GetObjectClassNameIndex, nuiObject::GetObjectClassNameIndex);
   nuiEndClass;
 
+#ifndef _MINUI3_
   nuiBindClass(nuiWidget);
   nuiInheritFrom(nuiObject);
   nuiAddCtor(nuiCreateObject<nuiWidget>);
@@ -150,10 +142,11 @@ bool nuiInitBindings()
   // nuiOrientation:
   nuiAddEnum(nuiHorizontal);
   nuiAddEnum(nuiVertical);
-  
+#endif // ifndef _MINUI3_
+
   nglString str;
   nuiBindingManager::GetManager().Dump(str);
-  NGL_OUT(_T("Binding manager dump:\n%ls\n"), str.GetChars());
+  NGL_OUT(_T("Binding manager dump:\n%s\n"), str.GetChars());
   
   return true;
 }

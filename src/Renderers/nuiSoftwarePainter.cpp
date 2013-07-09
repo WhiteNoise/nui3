@@ -9,9 +9,6 @@
 
 
 #include "nui.h"
-#include "nuiSoftwarePainter.h"
-#include "nglCPUInfo.h"
-#include "nuiTexture.h"
 
 #ifndef _CARBON_
 #define NUI_USE_BGRA
@@ -108,11 +105,11 @@ Shark result:
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-nuiSoftwarePainter::nuiSoftwarePainter(const nuiRect& rRect, nglContext* pContext)
-: nuiPainter(rRect, pContext)
+nuiSoftwarePainter::nuiSoftwarePainter(nglContext* pContext)
+: nuiPainter(pContext)
 {
-  mWidth = ToNearest(rRect.GetWidth());
-  mHeight = ToNearest(rRect.GetHeight());
+  mWidth = 0;
+  mHeight = 0;
   mpRasterizer = new nuiRasterizer(mWidth, mHeight);
   AddNeedTextureBackingStore();
 }

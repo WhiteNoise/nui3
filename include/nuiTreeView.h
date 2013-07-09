@@ -22,6 +22,8 @@ public:
   nuiTreeNode(const nglString& rLabelName, bool Opened = false, bool Selected = false, bool DrawTreeHandle = true, bool alwaysDisplayTreeHandle=false);
   virtual ~nuiTreeNode();
 
+  virtual void SetElement(nuiWidget* pNewElement, bool DeletePrevious = true, bool OwnNewElement = true); ///< Beware what you are doing if you decide to use this method!
+
   bool IsOpened() const;
   virtual void Open(bool Opened);
 
@@ -126,10 +128,7 @@ class NUI_API nuiTreeView : public nuiSimpleContainer
 {
 public:
   nuiTreeView(nuiTreeNode* pTree = NULL, bool displayRoot=true);
-  bool Load(const nuiXMLNode* pNode);
   virtual ~nuiTreeView();
-
-  virtual nuiXMLNode* Serialize(nuiXMLNode* pParentNode, bool Recursive) const;
 
   virtual bool Draw(nuiDrawContext* pContext);
 
@@ -149,6 +148,9 @@ public:
   //! Rendering modifiers:
   void SetDepthInset(uint32 depth, nuiSize inset);
   nuiSize GetDepthInset(uint32 depth);
+
+  void SetDisplayRoot(bool set);
+  bool GetDisplayRoot() const;
 
   //! Selection support
   virtual nuiTreeNodePtr FindNode(nuiSize X, nuiSize Y);
@@ -173,7 +175,15 @@ public:
   void SetHandleColor(const nuiColor& rColor);
   
   void EnableSubElements(uint32 count);
-  
+  uint32 GetSubElementsCount() const;
+  void SetSubElementWidth(uint32 index, nuiSize MinWidth, nuiSize MaxWidth);
+  void SetSubElementWidth(uint32 index, nuiSize Width);
+  void SetSubElementMinWidth(uint32 index, nuiSize Width);
+  void SetSubElementMaxWidth(uint32 index, nuiSize Width);
+  nuiSize GetSubElementMinWidth(uint32 index) const;
+  nuiSize GetSubElementMaxWidth(uint32 index) const;
+
+
   nuiMouseClicked Clicked; ///< This event is called whenever an item is clicked.
   
   nuiSimpleEventSource<nuiWidgetActivated> Activated; ///< This event is called whenever an item is chosen, that is to say, double clicked. This can only happend in a mono-selection tree.
@@ -201,7 +211,7 @@ protected:
 
 
     
-  bool mDisplayRoot;  
+  bool mDisplayRoot;
   bool mMultiSelectable;
   bool mInMultiSelection;
   bool mDeSelectable;

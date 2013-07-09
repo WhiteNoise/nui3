@@ -1,9 +1,5 @@
 #include "nui.h"
 
-#include "nuiSurface.h"
-#include "nuiTexture.h"
-#include "nuiMetaPainter.h"
-
 nuiSurfaceMap nuiSurface::mpSurfaces;
 nuiSurfaceCacheSet nuiSurface::mpSurfaceCaches;
 
@@ -24,7 +20,7 @@ nuiSurface* nuiSurface::GetSurface (const nglString& rName, bool Acquired)
 nuiSurface* nuiSurface::CreateSurface (const nglString& rName, int32 Width, int32 Height, nglImagePixelFormat PixelFormat)
 {
   nuiSurface* pSurface = NULL;
-  //NGL_OUT(_T("nuiSurface::CreateSurface(%ls, %.1f, %.1f)\n"), rName.GetChars(), Width, Height);
+  //NGL_OUT(_T("nuiSurface::CreateSurface(%s, %.1f, %.1f)\n"), rName.GetChars(), Width, Height);
   nuiSurfaceMap::const_iterator it = mpSurfaces.find(rName);
   if (it != mpSurfaces.end())
   {
@@ -40,13 +36,13 @@ nuiSurface* nuiSurface::CreateSurface (const nglString& rName, int32 Width, int3
   pSurface->Acquire();
   mpSurfaces[rName] = pSurface;
 
-//  NGL_OUT(_T("nuiSurface CreateSurface [0x%x] NAME: [%ls] COUNT [%d]\n"), pSurface, rName.GetChars(), mpSurfaces.size());
+//  NGL_OUT(_T("nuiSurface CreateSurface [0x%x] NAME: [%s] COUNT [%d]\n"), pSurface, rName.GetChars(), mpSurfaces.size());
 
   return pSurface;
 }
 
 nuiSurface::nuiSurface(const nglString& rName, int32 Width, int32 Height, nglImagePixelFormat PixelFormat)
-  : nuiObject(), nuiDrawContext(nuiRect(Width, Height))
+  : nuiObject()
 {
   SetObjectClass(_T("nuiSurface"));
   SetObjectName(rName);
@@ -60,28 +56,12 @@ nuiSurface::nuiSurface(const nglString& rName, int32 Width, int32 Height, nglIma
   mWidth = Width;
   mHeight= Height;
   mPixelFormat = PixelFormat;
-  mDepth = false;
-  mStencil = false;
+  mDepth = 0;
+  mStencil = 0;
   mRenderToTexture = true;
   mpTexture = NULL;
-  mpSurfacePainter = new nuiMetaPainter(nuiRect(Width, Height), NULL);
-#ifdef DEBUG
-  mpSurfacePainter->DBGSetReferenceObject(this);
-#endif
-  mpSurfacePainter->SetDrawChildrenImmediat(true);
   mDirty = true;
   
-  SetPainter(mpSurfacePainter);
-  
-  nuiSurfaceCacheSet::iterator it = mpSurfaceCaches.begin();
-  nuiSurfaceCacheSet::iterator end = mpSurfaceCaches.end();
-  while (it != end)
-  {
-    nuiSurfaceCache* pCache = *it;
-    pCache->CreateSurface(this);
-    ++it;
-  }
-
   mpTexture = nuiTexture::GetTexture(this);
   mpTexture->Acquire();
   
@@ -90,23 +70,21 @@ nuiSurface::nuiSurface(const nglString& rName, int32 Width, int32 Height, nglIma
 
 nuiSurface::~nuiSurface()
 {
-  nuiSurfaceCacheSet::iterator it = mpSurfaceCaches.begin();
-  nuiSurfaceCacheSet::iterator end = mpSurfaceCaches.end();
-  while (it != end)
-  {
-    nuiSurfaceCache* pCache = *it;
-    pCache->DestroySurface(this);
-    ++it;
-  }
   mpSurfaces.erase(GetObjectName());
-
-  if (mpPainter == mpSurfacePainter)
-    SetPainter(NULL);
-  delete mpSurfacePainter;
 
   if (mpTexture)
     mpTexture->Release();
-//  NGL_OUT(_T("nuiSurface DTOR [0x%x] NAME: [%ls] COUNT [%d]\n"), this, GetObjectName().GetChars(), mpSurfaces.size());
+//  NGL_OUT(_T("nuiSurface DTOR [0x%x] NAME: [%s] COUNT [%d]\n"), this, GetObjectName().GetChars(), mpSurfaces.size());
+
+  auto it = mPainters.begin();
+  auto end = mPainters.end();
+
+  while (it != end)
+  {
+    nuiPainter* pPainter = *it;
+    pPainter->DestroySurface(this);
+    ++it;
+  }
 }
 
 int32 nuiSurface::GetWidth() const
@@ -125,23 +103,23 @@ nglImagePixelFormat nuiSurface::GetPixelFormat() const
 }
 
 
-void nuiSurface::SetDepth(bool Enable)
+void nuiSurface::SetDepth(int32 bits)
 {
-  mDepth = Enable;
+  mDepth = bits;
 }
 
-bool nuiSurface::GetDepth() const
+int32 nuiSurface::GetDepth() const
 {
   return mDepth;
 }
 
-bool nuiSurface::GetStencil() const
+int32 nuiSurface::GetStencil() const
 {
   return mStencil;
 }
-void nuiSurface::SetStencil(bool Enable)
+void nuiSurface::SetStencil(int32 bits)
 {
-  mStencil = Enable;
+  mStencil = bits;
 }
 
 bool nuiSurface::GetRenderToTexture() const
@@ -188,32 +166,30 @@ bool nuiSurface::IsPermanent()
   return mPermanent;
 }
 
-nuiMetaPainter* nuiSurface::GetSurfacePainter() const
+void nuiSurface::Resize(int32 width, int32 height)
 {
-  return mpSurfacePainter;
+  auto it = mPainters.begin();
+  auto end = mPainters.end();
+
+  while (it != end)
+  {
+    nuiPainter* pPainter = *it;
+    pPainter->ResizeSurface(this, width, height);
+    ++it;
+  }
+
+  mWidth = width;
+  mHeight = height;
+
+  mpTexture->ResizeSurface(width, height);
 }
 
-void nuiSurface::Wipe()
+void nuiSurface::AddPainter(nuiPainter* pPainter)
 {
-  mpSurfacePainter->Reset(NULL);
-  mDirty = true;
+  mPainters.insert(pPainter);
 }
 
-void nuiSurface::Realize(nuiDrawContext* pDestinationPainter)
+void nuiSurface::DelPainter(nuiPainter* pPainter)
 {
-  //NGL_OUT(_T("nuiSurface::Realize() [%x]\n"), this);
-  mpSurfacePainter->ReDraw(pDestinationPainter);
-  mDirty = false;
-  mpSurfacePainter->Reset(NULL);
+  mPainters.erase(pPainter);
 }
-
-bool nuiSurface::IsDirty() const
-{
-  return mDirty;
-}
-
-void nuiSurface::SetDirty(bool set)
-{
-  mDirty = set;
-}
-

@@ -1,14 +1,5 @@
 #include "nui.h"
-#include "nglKernel.h"
-#include "nglContext.h"
-
-
-#include <Cocoa/Cocoa.h>
 #include "nglWindow_Cocoa.h"
-
-#include <OpenGL/OpenGL.h>
-
-#include <QuartzCore/QuartzCore.h>
 
 //#include "ngl_uikit.h"
 
@@ -136,6 +127,9 @@ const nglChar* gpEAGLErrorTable[] =
 
 nglContext::nglContext()
 {
+  mpPainter = NULL;
+  mScale = 1.0f;
+  mScaleInv = 1.0f;
 }
 
 nglContext::~nglContext()
@@ -162,3 +156,10 @@ nglContext::GLExtFunc nglContext::LookupExtFunc (const char* pFuncName)
 {
   return NULL;//(GLExtFunc)eaglGetProcAddress(pFuncName);
 }
+
+void nglContext::Build(const nglContextInfo& rInfo)
+{
+  mTargetAPI = rInfo.TargetAPI;
+  InitPainter();
+}
+

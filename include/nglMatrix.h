@@ -216,6 +216,56 @@ public:
     *this = result;
   }
 
+  nglVector3<T> GetCol(int col) const
+  {
+    return nglVector3<T>((*this)(0, col), (*this)(1, col), (*this)(2, col));
+  }
+
+  void SetCol(int col, const nglVector3<T>& rCol)
+  {
+    (*this)(0, col) = rCol[0];
+    (*this)(1, col) = rCol[1];
+    (*this)(2, col) = rCol[2];
+  }
+
+  nglVector3<T> GetRow3(int row) const
+  {
+    return nglVector3<T>((*this)(row, 0), (*this)(row, 1), (*this)(row, 2));
+  }
+
+  nglVector<T> GetRow(int row) const
+  {
+    return nglVector<T>((*this)(row, 0), (*this)(row, 1), (*this)(row, 2), (*this)(row, 3));
+  }
+
+  void SetRow(int row, const nglVector3<T>& rRow)
+  {
+    (*this)(row, 0) = rRow[0];
+    (*this)(row, 1) = rRow[1];
+    (*this)(row, 2) = rRow[2];
+  }
+
+  void SetRow(int row, const nglVector<T>& rRow)
+  {
+    (*this)(row, 0) = rRow[0];
+    (*this)(row, 1) = rRow[1];
+    (*this)(row, 2) = rRow[2];
+    (*this)(row, 3) = rRow[3];
+  }
+
+  /// Setup a translation matrix
+  void SetDirectTranslation (const nglVector<T>& rDelta)
+  {
+    SetDirectTranslation(rDelta[0], rDelta[1], rDelta[2]);
+  }
+
+  /// Setup a translation matrix
+  void SetDirectTranslation (T X, T Y, T Z)
+  {
+    Elt.M14 = X;
+    Elt.M24 = Y;
+    Elt.M34 = Z;
+  }
 
   /// Setup a translation matrix
   void SetTranslation (const nglVector<T>& rDelta)
@@ -227,9 +277,12 @@ public:
   void SetTranslation (T X, T Y, T Z)
   {
     SetIdentity();
-    Elt.M14 = X;
-    Elt.M24 = Y;
-    Elt.M34 = Z;
+    SetDirectTranslation(X, Y, Z);
+  }
+
+  nglVector3<T> GetTranslation() const
+  {
+    return nglVector3<T>(Elt.M14, Elt.M24, Elt.M34);
   }
 
   /// Compose with a translation
@@ -243,7 +296,7 @@ public:
   {
     nglMatrix<T> m;
     m.SetTranslation(X, Y, Z);
-    *this *= m;
+    (*this) *= m;
   }
 
   /// Setup a scaling transformation (homothetia)
@@ -271,13 +324,13 @@ public:
   {
     nglMatrix<T> m;
     m.SetScaling(X, Y, Z);
-    *this *= m;
+    (*this) *= m;
   }
 
   /// Apply a scaling transformation
   void Scale (const nglVector<T>& rVector)
   {
-    SetScaling(rVector[0], rVector[1], rVector[2]);
+    Scale(rVector[0], rVector[1], rVector[2]);
   }
 
   /// Setup a rotation matrix of \a Angle degrees around \a rAxis (using right hand convention)
@@ -329,7 +382,7 @@ public:
   {
     nglMatrix<T> trans;
     trans.SetRotation(Angle, rAxis);
-    *this *= trans;
+    (*this) *= trans;
   }
 
   /// Compose with a rotation of \a Angle degrees around the axis which coordinates are \a X, \a Y and \a Z
@@ -337,7 +390,7 @@ public:
   {
     nglMatrix<T> trans;
     trans.SetRotation(Angle, X, Y, Z);
-    *this *= trans;
+    (*this) *= trans;
   }
 
   /// Setup a camera matrix, given eye and target position and up direction
@@ -355,15 +408,15 @@ public:
     forward.Normalize();
 
     /* Side = forward x up */
-    nglVector<T> side = forward ^ rUp;
-    side.Normalize();
+    nglVector<T> right = forward ^ rUp;
+    right.Normalize();
 
-    /* Recompute up as : up = side x forward */
-    nglVector<T> up = side ^ forward;
+    /* Recompute up as : up = right x forward */
+    nglVector<T> up = right ^ forward;
 
-    Elt.M11 = side[0];
-    Elt.M12 = side[1];
-    Elt.M13 = side[2];
+    Elt.M11 = right[0];
+    Elt.M12 = right[1];
+    Elt.M13 = right[2];
     Elt.M14 = -rEye[0];
 
     Elt.M21 = up[0];
@@ -509,7 +562,7 @@ public:
   nglMatrix<T> operator = (const nglMatrix<T>& rMatrix)
   {
     memcpy(Array, rMatrix.Array, 16*sizeof(T));
-    return *this;
+    return (*this);
   }
 
   /*!< Right matrix multiplication. These two lines perform the same operation :
@@ -520,29 +573,35 @@ mat1 = mat1 * mat2;
   */
   void operator *= (const nglMatrix<T>& rMatrix)
   {
-    nglMatrix<T> result;
+    struct
+    {
+      T M11,M21,M31,M41;
+      T M12,M22,M32,M42;
+      T M13,M23,M33,M43;
+      T M14,M24,M34,M44;
+    } elt;
 
-    result.Elt.M11 =(Elt.M11 * rMatrix.Elt.M11 + Elt.M12 * rMatrix.Elt.M21 + Elt.M13 * rMatrix.Elt.M31 + Elt.M14 * rMatrix.Elt.M41);
-    result.Elt.M12 =(Elt.M11 * rMatrix.Elt.M12 + Elt.M12 * rMatrix.Elt.M22 + Elt.M13 * rMatrix.Elt.M32 + Elt.M14 * rMatrix.Elt.M42);
-    result.Elt.M13 =(Elt.M11 * rMatrix.Elt.M13 + Elt.M12 * rMatrix.Elt.M23 + Elt.M13 * rMatrix.Elt.M33 + Elt.M14 * rMatrix.Elt.M43);
-    result.Elt.M14 =(Elt.M11 * rMatrix.Elt.M14 + Elt.M12 * rMatrix.Elt.M24 + Elt.M13 * rMatrix.Elt.M34 + Elt.M14 * rMatrix.Elt.M44);
+    elt.M11 =(Elt.M11 * rMatrix.Elt.M11 + Elt.M12 * rMatrix.Elt.M21 + Elt.M13 * rMatrix.Elt.M31 + Elt.M14 * rMatrix.Elt.M41);
+    elt.M12 =(Elt.M11 * rMatrix.Elt.M12 + Elt.M12 * rMatrix.Elt.M22 + Elt.M13 * rMatrix.Elt.M32 + Elt.M14 * rMatrix.Elt.M42);
+    elt.M13 =(Elt.M11 * rMatrix.Elt.M13 + Elt.M12 * rMatrix.Elt.M23 + Elt.M13 * rMatrix.Elt.M33 + Elt.M14 * rMatrix.Elt.M43);
+    elt.M14 =(Elt.M11 * rMatrix.Elt.M14 + Elt.M12 * rMatrix.Elt.M24 + Elt.M13 * rMatrix.Elt.M34 + Elt.M14 * rMatrix.Elt.M44);
 
-    result.Elt.M21 =(Elt.M21 * rMatrix.Elt.M11 + Elt.M22 * rMatrix.Elt.M21 + Elt.M23 * rMatrix.Elt.M31 + Elt.M24 * rMatrix.Elt.M41);
-    result.Elt.M22 =(Elt.M21 * rMatrix.Elt.M12 + Elt.M22 * rMatrix.Elt.M22 + Elt.M23 * rMatrix.Elt.M32 + Elt.M24 * rMatrix.Elt.M42);
-    result.Elt.M23 =(Elt.M21 * rMatrix.Elt.M13 + Elt.M22 * rMatrix.Elt.M23 + Elt.M23 * rMatrix.Elt.M33 + Elt.M24 * rMatrix.Elt.M43);
-    result.Elt.M24 =(Elt.M21 * rMatrix.Elt.M14 + Elt.M22 * rMatrix.Elt.M24 + Elt.M23 * rMatrix.Elt.M34 + Elt.M24 * rMatrix.Elt.M44);
+    elt.M21 =(Elt.M21 * rMatrix.Elt.M11 + Elt.M22 * rMatrix.Elt.M21 + Elt.M23 * rMatrix.Elt.M31 + Elt.M24 * rMatrix.Elt.M41);
+    elt.M22 =(Elt.M21 * rMatrix.Elt.M12 + Elt.M22 * rMatrix.Elt.M22 + Elt.M23 * rMatrix.Elt.M32 + Elt.M24 * rMatrix.Elt.M42);
+    elt.M23 =(Elt.M21 * rMatrix.Elt.M13 + Elt.M22 * rMatrix.Elt.M23 + Elt.M23 * rMatrix.Elt.M33 + Elt.M24 * rMatrix.Elt.M43);
+    elt.M24 =(Elt.M21 * rMatrix.Elt.M14 + Elt.M22 * rMatrix.Elt.M24 + Elt.M23 * rMatrix.Elt.M34 + Elt.M24 * rMatrix.Elt.M44);
 
-    result.Elt.M31 =(Elt.M31 * rMatrix.Elt.M11 + Elt.M32 * rMatrix.Elt.M21 + Elt.M33 * rMatrix.Elt.M31 + Elt.M34 * rMatrix.Elt.M41);
-    result.Elt.M32 =(Elt.M31 * rMatrix.Elt.M12 + Elt.M32 * rMatrix.Elt.M22 + Elt.M33 * rMatrix.Elt.M32 + Elt.M34 * rMatrix.Elt.M42);
-    result.Elt.M33 =(Elt.M31 * rMatrix.Elt.M13 + Elt.M32 * rMatrix.Elt.M23 + Elt.M33 * rMatrix.Elt.M33 + Elt.M34 * rMatrix.Elt.M43);
-    result.Elt.M34 =(Elt.M31 * rMatrix.Elt.M14 + Elt.M32 * rMatrix.Elt.M24 + Elt.M33 * rMatrix.Elt.M34 + Elt.M34 * rMatrix.Elt.M44);
+    elt.M31 =(Elt.M31 * rMatrix.Elt.M11 + Elt.M32 * rMatrix.Elt.M21 + Elt.M33 * rMatrix.Elt.M31 + Elt.M34 * rMatrix.Elt.M41);
+    elt.M32 =(Elt.M31 * rMatrix.Elt.M12 + Elt.M32 * rMatrix.Elt.M22 + Elt.M33 * rMatrix.Elt.M32 + Elt.M34 * rMatrix.Elt.M42);
+    elt.M33 =(Elt.M31 * rMatrix.Elt.M13 + Elt.M32 * rMatrix.Elt.M23 + Elt.M33 * rMatrix.Elt.M33 + Elt.M34 * rMatrix.Elt.M43);
+    elt.M34 =(Elt.M31 * rMatrix.Elt.M14 + Elt.M32 * rMatrix.Elt.M24 + Elt.M33 * rMatrix.Elt.M34 + Elt.M34 * rMatrix.Elt.M44);
                                                                                                 
-    result.Elt.M41 =(Elt.M41 * rMatrix.Elt.M11 + Elt.M42 * rMatrix.Elt.M21 + Elt.M43 * rMatrix.Elt.M31 + Elt.M44 * rMatrix.Elt.M41);
-    result.Elt.M42 =(Elt.M41 * rMatrix.Elt.M12 + Elt.M42 * rMatrix.Elt.M22 + Elt.M43 * rMatrix.Elt.M32 + Elt.M44 * rMatrix.Elt.M42);
-    result.Elt.M43 =(Elt.M41 * rMatrix.Elt.M13 + Elt.M42 * rMatrix.Elt.M23 + Elt.M43 * rMatrix.Elt.M33 + Elt.M44 * rMatrix.Elt.M43);
-    result.Elt.M44 =(Elt.M41 * rMatrix.Elt.M14 + Elt.M42 * rMatrix.Elt.M24 + Elt.M43 * rMatrix.Elt.M34 + Elt.M44 * rMatrix.Elt.M44);
+    elt.M41 =(Elt.M41 * rMatrix.Elt.M11 + Elt.M42 * rMatrix.Elt.M21 + Elt.M43 * rMatrix.Elt.M31 + Elt.M44 * rMatrix.Elt.M41);
+    elt.M42 =(Elt.M41 * rMatrix.Elt.M12 + Elt.M42 * rMatrix.Elt.M22 + Elt.M43 * rMatrix.Elt.M32 + Elt.M44 * rMatrix.Elt.M42);
+    elt.M43 =(Elt.M41 * rMatrix.Elt.M13 + Elt.M42 * rMatrix.Elt.M23 + Elt.M43 * rMatrix.Elt.M33 + Elt.M44 * rMatrix.Elt.M43);
+    elt.M44 =(Elt.M41 * rMatrix.Elt.M14 + Elt.M42 * rMatrix.Elt.M24 + Elt.M43 * rMatrix.Elt.M34 + Elt.M44 * rMatrix.Elt.M44);
 
-    *this = result;
+    memcpy(&(this->Elt), &elt, sizeof(Elt));
   }
 
   bool operator == (const nglMatrix<T>& rMatrix) const
@@ -595,7 +654,7 @@ mat1 = mat1 * mat2;
 
     if (pTitle)
     {
-      NGL_LOG(_T("math"), Level, _T("%ls :"), pTitle);
+      NGL_LOG(_T("math"), Level, _T("%s :"), pTitle);
     }
     for (i = 0; i < 4; i++)
     {

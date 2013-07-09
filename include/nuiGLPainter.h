@@ -18,17 +18,42 @@
 
 #ifndef __NUI_NO_GL__
 
+class nuiGLDebugGuard
+{
+public:
+  nuiGLDebugGuard(const nglString& rString)
+  {
+#if defined DEBUG && defined _UIKIT_
+    glPushGroupMarkerEXT(0, rString.GetChars());
+#endif
+  }
+
+  nuiGLDebugGuard(const char* pString)
+  {
+#if defined DEBUG && defined _UIKIT_
+    glPushGroupMarkerEXT(0, pString);
+#endif
+  }
+
+  ~nuiGLDebugGuard()
+  {
+#if defined DEBUG && defined _UIKIT_
+    glPopGroupMarkerEXT();
+#endif
+  }
+};
+
 class NUI_API nuiGLPainter : public nuiPainter, public nuiCacheManager
 {
 public:
-  nuiGLPainter(nglContext* pContext, const nuiRect& rRect);
+  nuiGLPainter(nglContext* pContext);
   virtual ~nuiGLPainter();
   
   virtual void SetSize(uint32 sizex, uint32 sizey);
   virtual void StartRendering();
   virtual void SetState(const nuiRenderState& rState, bool ForceApply = false);
   virtual void DrawArray(nuiRenderArray* pArray);
-  virtual void ClearColor();
+  virtual void Clear(bool color, bool depth, bool stencil);
   virtual void BeginSession();
   virtual void EndSession();
   virtual void LoadMatrix(const nuiMatrix& rMatrix);
@@ -47,9 +72,11 @@ public:
 
   virtual void CreateSurface(nuiSurface* pSurface);
   virtual void DestroySurface(nuiSurface* pSurface);
-  virtual void InvalidateSurface(nuiSurface* pSurface, bool ForceReload);
+  virtual void ResizeSurface(nuiSurface* pSurface, int32 width, int32 height);
+
   
 protected:
+  virtual void ResetOpenGLState();
   void SetSurface(nuiSurface* pSurface);
   nglContext* mpContext;
 
@@ -63,7 +90,7 @@ protected:
   uint32 mCanRectangleTexture;
   GLenum mTextureTarget;
 
-  void ApplyTexture(const nuiRenderState& rState, bool ForceApply);
+  void ApplyTexture(const nuiRenderState& rState, bool ForceApply, int slot);
   
   class TextureInfo
   {
@@ -71,12 +98,12 @@ protected:
     TextureInfo();
     
     bool mReload;
-    GLuint mTexture;
+    GLint mTexture;
   };
   std::map<nuiTexture*, TextureInfo> mTextures;
 
   GLenum GetTextureTarget(bool POT) const;
-  void UploadTexture(nuiTexture* pTexture);
+  void UploadTexture(nuiTexture* pTexture, int slot);
 
   class FramebufferInfo
   {
@@ -84,17 +111,38 @@ protected:
     FramebufferInfo();
     
     bool mReload;
-    GLuint mFramebuffer;
-    GLuint mTexture; ///< the framebuffer can be used to render to a texture
-    GLuint mRenderbuffer; ///< or a render buffer
-    GLuint mDepthbuffer;
-    GLuint mStencilbuffer;
+    GLint mFramebuffer;
+    GLint mTexture; ///< the framebuffer can be used to render to a texture
+    GLint mRenderbuffer; ///< or a render buffer
+    GLint mDepthbuffer;
+    GLint mStencilbuffer;
   };
   std::map<nuiSurface*, FramebufferInfo> mFramebuffers;
   GLint mDefaultFramebuffer, mDefaultRenderbuffer;
 
+  class VertexBufferInfo
+  {
+  public:
+    VertexBufferInfo(nuiRenderArray* pRenderArray = NULL);
+    VertexBufferInfo(const VertexBufferInfo& rInfo);
+
+    nuiRenderArray* mpRenderArray;
+    GLuint mVertexBuffer;
+    std::vector<GLuint> mIndexBuffers;
+    std::vector<GLuint> mStreamBuffers;
+
+    void Create(nuiRenderArray* pRenderArray);
+    void BindVertices() const;
+    void BindStream(int index) const;
+    void BindIndices(int index) const;
+    void Draw() const;
+    void Destroy();
+  };
+  
+  std::map<nuiRenderArray*, VertexBufferInfo> mVertexBuffers;
+
   bool CheckFramebufferStatus();
-  void SetViewport();
+  virtual void SetViewport();
   
   int32 mScissorX;
   int32 mScissorY;
@@ -121,9 +169,16 @@ protected:
   GLenum mTexEnvMode;
   
   uint32 mViewPort[4];
+
+  bool mUseShaders;
+
+  // Only used for shaders:
+  nglVector2f mTextureTranslate;
+  nglVector2f mTextureScale;
 };
 
-void nuiCheckForGLErrors();
+bool nuiCheckForGLErrorsReal();
+#define nuiCheckForGLErrors() { NGL_ASSERT(nuiCheckForGLErrorsReal()); }
 
 #endif //   #ifndef __NUI_NO_GL__
 

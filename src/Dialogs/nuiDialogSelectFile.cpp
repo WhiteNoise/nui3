@@ -6,9 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiDialogSelectFile.h"
-#include "nuiVBox.h"
-#include "nuiHBox.h"
 
 
 nuiDialogSelectFile::nuiDialogSelectFile(nuiMainWindow* pParent, const nglString& rTitle, const nglPath& rPath, const nglPath& rRootPath, const nglString& defaultEntry, const nglString& rFilter, bool showHiddenFiles, nuiSize Left, nuiSize Top, nuiSize Width, nuiSize Height)
@@ -115,7 +112,7 @@ void nuiDialogSelectFile::OnSelectorOK(const nuiEvent& rEvent)
 {
 //  nglString text = mpEditLine->GetText();
 //  text.Trim();
-//  if (text == nglString::Null)
+//  if (text.IsNull())
 //    return false;
   
   mPath = mpSelector->GetPath();
@@ -160,7 +157,7 @@ void nuiDialogSelectFile::OnCreateNewFolderDone(const nuiEvent& rEvent)
   {
     nglString text = mpCreateEditLine->GetText();
     text.Trim();
-    if (text == nglString::Null)
+    if (text.IsNull())
     {
       rEvent.Cancel();
       return;

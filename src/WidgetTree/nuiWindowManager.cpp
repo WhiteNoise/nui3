@@ -6,10 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiDrawContext.h"
-#include "nuiWindow.h"
-#include "nuiWindowManager.h"
-#include "nuiTopLevel.h"
 
 
 nuiWindowManager::nuiWindowManager()
@@ -19,22 +15,9 @@ nuiWindowManager::nuiWindowManager()
   SetObjectClass(_T("nuiWindowManager"));
 }
 
-bool nuiWindowManager::Load(const nuiXMLNode* pNode)
-{
-  nuiSimpleContainer::Load(pNode);
-  SetObjectClass(_T("nuiWindowManager"));
-  return true;
-}
-
 nuiWindowManager::~nuiWindowManager()
 {
 }
-
-nuiXMLNode* nuiWindowManager::Serialize(nuiXMLNode* pParentNode, bool Recursive) const
-{
-  return nuiSimpleContainer::Serialize(pParentNode, Recursive);
-}
-
 
 bool nuiWindowManager::KeyDown(const nglKeyEvent& rEvent)
 {

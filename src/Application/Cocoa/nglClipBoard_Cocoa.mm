@@ -6,9 +6,6 @@
 */
 
 #include "nui.h"
-#include "nglKernel.h"
-#include "nglLog.h"
-#include "nglClipBoard.h"
 
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>

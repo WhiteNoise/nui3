@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiNavigationViewDecoration.h"
 
 nuiNavigationViewDecoration::nuiNavigationViewDecoration(const nglString& rName)
 : nuiDecoration(rName)
@@ -44,19 +43,6 @@ void nuiNavigationViewDecoration::InitAttributes()
 
 }
 
-
-
-bool nuiNavigationViewDecoration::Load(const nuiXMLNode* pNode)
-{
-  //#FIXME
-  return true;
-}
-
-nuiXMLNode* nuiNavigationViewDecoration::Serialize(nuiXMLNode* pNode)
-{
-//#FIXME
-  return pNode;
-}
 
 // virtual
 void nuiNavigationViewDecoration::Draw(nuiDrawContext* pContext, nuiWidget* pWidget, const nuiRect& rDestRect)

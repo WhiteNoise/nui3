@@ -6,13 +6,7 @@ licence: see nui3/LICENCE.TXT
 */
 
 #include "nui.h"
-#include "nui.h"
 #include "nuiD3DPainter.h"
-#include "nuiWidget.h"
-#include "nuiTheme.h"
-#include "nglMatrix.h"
-#include "AAPrimitives.h"
-#include "nuiTexture.h"
 #include "AAPrimitives.h"
 
 #ifndef _DEBUG
@@ -33,7 +27,7 @@ WCHAR strOut[512];
 #define PROFILE_CHRONO_IN(a) QueryPerformanceCounter(&start[a])
 #define PROFILE_CHRONO_RESET(a) cumul[a] = 0
 #define PROFILE_CHRONO_OUT(a) {LARGE_INTEGER stop,freq;QueryPerformanceCounter(&stop);QueryPerformanceFrequency(&freq);stop.QuadPart -=start[a].QuadPart;cumul[a] += (double)((stop.QuadPart*1000000)/freq.QuadPart);}
-#define PROFILE_CHRONO_LOG(a,str) wsprintf(strOut, L"%s chrono(%d) = %d ms \n", _T(str), a, (int)(cumul[a]));NGL_OUT(strOut);
+#define PROFILE_CHRONO_LOG(a,str) wsprintf(strOut, "%s chrono(%d) = %d ms \n", _T(str), a, (int)(cumul[a]));NGL_OUT(strOut);
 int drawArrayCount = 0;
 int setStateCount = 0;
 #else
@@ -212,8 +206,8 @@ static void ConvertMatrix(D3DMATRIX& rResult, const nuiMatrix& rSource)
       rResult.m[i][j] = rSource(i,j);
 }
 
-nuiD3DPainter::nuiD3DPainter(nglContext* pContext, const nuiRect& rRect)
-: nuiPainter(rRect, pContext),
+nuiD3DPainter::nuiD3DPainter(nglContext* pContext)
+: nuiPainter(pContext),
 mpBackBuffer(NULL)
 {
   mpVB = NULL;
@@ -242,6 +236,15 @@ mpBackBuffer(NULL)
 
 nuiD3DPainter::~nuiD3DPainter()
 {
+  auto it = mFramebuffers.begin();
+  auto end = mFramebuffers.end();
+  while (it != end)
+  {
+    nuiSurface* pSurface = it->first;
+    pSurface->DelPainter(this);
+    ++it;
+  }
+
   mActiveContexts--;
   if (mActiveContexts == 0)
     glAAExit(); //FIXME
@@ -1777,6 +1780,7 @@ void nuiD3DPainter::SetSurface(nuiSurface* pSurface)
     FramebufferInfo info;
     if (it == mFramebuffers.end())
     {
+      pSurface->AddPainter(this);
       // Create the rendertarget
       pDev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &info.mpRenderTexture, NULL);
       info.mpRenderTexture->GetSurfaceLevel(0, &info.mpRenderSurface);

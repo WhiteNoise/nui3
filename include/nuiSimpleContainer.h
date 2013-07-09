@@ -15,10 +15,6 @@ class nuiSimpleContainer : public nuiContainer
 public:
   nuiSimpleContainer();
   
-	bool Load(const nuiXMLNode* pNode);
-  virtual bool LoadChildren(const nuiXMLNode* pNode); // top level of LoadChildren
-	virtual bool LoadAttributes(const nuiXMLNode* pNode); // top level of LoadAttributes
-	
   virtual ~nuiSimpleContainer();
   
   virtual bool SetObjectClass(const nglString& rName);
@@ -29,7 +25,7 @@ public:
   virtual uint GetChildrenCount() const;
   virtual nuiWidgetPtr GetChild(int index);
   virtual nuiWidgetPtr GetChild(nuiSize X, nuiSize Y);
-  virtual nuiWidgetPtr GetChild(const nglString& rName, bool deepsearch = true); ///< Find a child by its name property. Try to resolve path names like /window/fixed/toto or ../../tata if deepsearch is true
+  virtual nuiWidgetPtr GetChild(const nglString& rName, bool ResolveNameAsPath = true); ///< Find a child by its name property. Try to resolve path names like /window/fixed/toto or ../../tata if deepsearch is true
   virtual bool Clear();
   
   virtual nuiContainer::Iterator* GetFirstChild(bool DoRefCounting = false);

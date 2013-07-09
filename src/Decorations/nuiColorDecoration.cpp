@@ -6,7 +6,6 @@
 */
 
 #include "nui.h"
-#include "nuiColorDecoration.h"
 
 nuiColorDecoration::nuiColorDecoration(const nglString& rName)
 : nuiDecoration(rName)
@@ -23,7 +22,7 @@ nuiColorDecoration::nuiColorDecoration(const nglString& rName)
 }
 
 
-nuiColorDecoration::nuiColorDecoration(const nglString& rName, const nuiRect& rClientRect, const nuiColor& rFillColor, uint32 strokeSize, const nuiColor& rStrokeColor, nuiShapeMode ShapeMode, nuiBlendFunc BlendFunc)
+nuiColorDecoration::nuiColorDecoration(const nglString& rName, const nuiRect& rClientRect, const nuiColor& rFillColor, float strokeSize, const nuiColor& rStrokeColor, nuiShapeMode ShapeMode, nuiBlendFunc BlendFunc)
 : nuiDecoration(rName)
 {
   if (SetObjectClass(_T("nuiColorDecoration")))
@@ -38,7 +37,7 @@ nuiColorDecoration::nuiColorDecoration(const nglString& rName, const nuiRect& rC
 }
 
 
-nuiColorDecoration::nuiColorDecoration(const nglString& rName, const nuiColor& rFillColor, uint32 strokeSize, const nuiColor& rStrokeColor, nuiShapeMode ShapeMode, nuiBlendFunc BlendFunc, const nuiRect& rClientRect)
+nuiColorDecoration::nuiColorDecoration(const nglString& rName, const nuiColor& rFillColor, float strokeSize, const nuiColor& rStrokeColor, nuiShapeMode ShapeMode, nuiBlendFunc BlendFunc, const nuiRect& rClientRect)
 : nuiDecoration(rName)
 {
   if (SetObjectClass(_T("nuiColorDecoration")))
@@ -66,7 +65,7 @@ void nuiColorDecoration::InitAttributes()
     nuiAttribute<const nuiRect&>::GetterDelegate(this, &nuiColorDecoration::GetSourceClientRect),
     nuiAttribute<const nuiRect&>::SetterDelegate(this, &nuiColorDecoration::SetSourceClientRect)));
 
-  AddAttribute(new nuiAttribute<uint32>
+  AddAttribute(new nuiAttribute<float>
   (nglString(_T("StrokeSize")), nuiUnitPixels,
    nuiMakeDelegate(this, &nuiColorDecoration::GetStrokeSize),
    nuiMakeDelegate(this, &nuiColorDecoration::SetStrokeSize)));
@@ -90,39 +89,6 @@ void nuiColorDecoration::InitAttributes()
 }
 
 
-bool nuiColorDecoration::Load(const nuiXMLNode* pNode)
-{
-  uint32 code = pNode->GetAttribute(_T("ShapeMode")).GetCInt();
-  switch(code)
-  {
-  case 0: mShapeMode = eStrokeShape; break;
-  case 1: mShapeMode = eFillShape; break;
-  case 2: mShapeMode = eStrokeAndFillShape; break;
-  default: mShapeMode = eDefault; break;
-  }
-
-  mFillColor.SetValue(nuiGetString(pNode, _T("FillColor"), _T("white")));
-  mStrokeSize = nuiGetString(pNode, _T("StrokeSize")).GetCUInt();
-  mStrokeColor.SetValue(nuiGetString(pNode, _T("StrokeColor"), _T("black")));
-  
-  //#FIXME
-  return true;
-}
-
-nuiXMLNode* nuiColorDecoration::Serialize(nuiXMLNode* pNode)
-{
-//#FIXME
-//  pNode->SetName(_T("nuiGradientDecoration"));
-//  pNode->SetAttribute(_T("GradientType"), (int)mGradientType);
-//  pNode->SetAttribute(_T("Color1"), mColor1.GetValue());
-//  pNode->SetAttribute(_T("Color2"), mColor2.GetValue());
-//  pNode->SetAttribute(_T("Color3"), mColor3.GetValue());
-//  pNode->SetAttribute(_T("Color4"), mColor4.GetValue());
-//  pNode->SetAttribute(_T("Overdraw"), mOverdraw);
-
-  return pNode;
-}
-
 // virtual
 void nuiColorDecoration::Draw(nuiDrawContext* pContext, nuiWidget* pWidget, const nuiRect& rDestRect)
 {
@@ -131,11 +97,12 @@ void nuiColorDecoration::Draw(nuiDrawContext* pContext, nuiWidget* pWidget, cons
   pContext->EnableAntialiasing(false);
   pContext->EnableBlending(true);
   pContext->SetBlendFunc(mBlendFunc);
-  //pContext->EnableTexturing(false);
+  pContext->EnableTexturing(false);
   
   nuiColor fillColor = mFillColor;
   nuiColor strokeColor = mStrokeColor;
-  if (pWidget) {
+  if (pWidget && mUseWidgetAlpha)
+  {
     fillColor.Multiply(pWidget->GetMixedAlpha());
     strokeColor.Multiply(pWidget->GetMixedAlpha());
   }
@@ -145,18 +112,6 @@ void nuiColorDecoration::Draw(nuiDrawContext* pContext, nuiWidget* pWidget, cons
 
   pContext->DrawRect(rDestRect, mShapeMode);
 
-  // waiting for DrawRect to use the StrokeSize parameter, do this hack
-  uint32 strokeSize = 1;
-  nuiRect rect = rDestRect;
-  pContext->SetLineWidth(1);
-  while (strokeSize < mStrokeSize)
-  {
-    rect.Set(rect.Left()+1.f, rect.Top()+1.f, rect.GetWidth()-2.f, rect.GetHeight()-2.f);
-    pContext->DrawRect(rect, mShapeMode);
-    strokeSize++;
-  }
-  
-  
   pContext->PopState();
 }
 
@@ -267,14 +222,14 @@ void nuiColorDecoration::SetStrokeColor(const nuiColor& color)
 }
 
 
-void nuiColorDecoration::SetStrokeSize(uint32 size)
+void nuiColorDecoration::SetStrokeSize(float size)
 {
   mStrokeSize = size;
   Changed();
 }
 
 
-uint32 nuiColorDecoration::GetStrokeSize() const
+float nuiColorDecoration::GetStrokeSize() const
 {
   return mStrokeSize;
 }
