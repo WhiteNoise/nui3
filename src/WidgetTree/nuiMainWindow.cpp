@@ -651,7 +651,7 @@ void nuiMainWindow::InvalidateTimer(const nuiEvent& rEvent)
     double v = (now - mFPSDelay);
     double c = mFPSCount;
     mFPS = c / v;
-    NGL_LOG(_T("fps"), NGL_LOG_DEBUG, _T("FPS: %f (%f seconds - %d frames)\n"), mFPS, v, ToNearest(c));
+    //NGL_LOG(_T("fps"), NGL_LOG_DEBUG, _T("FPS: %f (%f seconds - %d frames)\n"), mFPS, v, ToNearest(c));
     
     mFPSCount = 0;
     mFPSDelay = now;
@@ -689,6 +689,11 @@ bool nuiMainWindow::OnMouseUnclick(nglMouseInfo& rInfo)
   mLastEventTime = nglTime();
   mLastInteractiveEventTime = nglTime();
   return CallMouseUnclick(rInfo);
+}
+
+bool nuiMainWindow::OnMultiEventsFinished(nglMouseInfo& rInfo)
+{
+    return CallMultiEventsFinished(rInfo);
 }
 
 void nuiMainWindow::OnTextCompositionStarted()
@@ -1139,6 +1144,11 @@ bool nuiMainWindow::NGLWindow::OnMouseUnclick(nglMouseInfo& rInfo)
 bool nuiMainWindow::NGLWindow::OnMouseMove(nglMouseInfo& rInfo)
 {
   return mpMainWindow->OnMouseMove(rInfo);
+}
+
+bool nuiMainWindow::NGLWindow::OnMultiEventsFinished(nglMouseInfo& rInfo)
+{
+    return mpMainWindow->OnMultiEventsFinished(rInfo);
 }
 
 bool nuiMainWindow::NGLWindow::OnRotation(uint Angle)

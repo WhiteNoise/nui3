@@ -148,6 +148,7 @@ public:
   virtual bool DispatchMouseClick(const nglMouseInfo& rInfo);
   virtual bool DispatchMouseUnclick(const nglMouseInfo& rInfo);
   virtual nuiWidgetPtr DispatchMouseMove(const nglMouseInfo& rInfo);
+    virtual nuiWidgetPtr DispatchMultiEventsFinished(const nglMouseInfo& rInfo);
   //@}
 
   virtual bool DelChild(nuiWidgetPtr pChild) = 0;

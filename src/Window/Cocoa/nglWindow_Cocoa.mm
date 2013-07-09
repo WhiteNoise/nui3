@@ -406,6 +406,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   info.Buttons |= [theEvent clickCount] > 1 ? nglMouseInfo::ButtonDoubleClick : 0;
   mpNGLWindow->CallOnMouseClick(info);
+    mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 - (void)mouseUp:(NSEvent *)theEvent
@@ -417,6 +418,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.X = p.x;
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   mpNGLWindow->CallOnMouseUnclick(info);
+    mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent
@@ -428,6 +430,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.X = p.x;
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   mpNGLWindow->CallOnMouseMove(info);
+    mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
@@ -439,6 +442,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.X = p.x;
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   mpNGLWindow->CallOnMouseMove(info);
+  mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 ////
@@ -452,6 +456,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   info.Buttons |= [theEvent clickCount] > 1 ? nglMouseInfo::ButtonDoubleClick : 0;
   mpNGLWindow->CallOnMouseClick(info);
+  mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent
@@ -463,6 +468,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.X = p.x;
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   mpNGLWindow->CallOnMouseUnclick(info);
+  mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 - (void)rightMouseDragged:(NSEvent *)theEvent
@@ -474,6 +480,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.X = p.x;
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   mpNGLWindow->CallOnMouseMove(info);
+  mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 - (void)scrollWheel:(NSEvent *)theEvent
@@ -513,6 +520,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
     mpNGLWindow->CallOnMouseClick(info);
     mpNGLWindow->CallOnMouseUnclick(info);
   }
+  mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 //////
 
@@ -526,6 +534,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   info.Buttons |= [theEvent clickCount] > 1 ? nglMouseInfo::ButtonDoubleClick : 0;
   mpNGLWindow->CallOnMouseClick(info);
+  mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 - (void)otherMouseUp:(NSEvent *)theEvent
@@ -537,6 +546,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.X = p.x;
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   mpNGLWindow->CallOnMouseUnclick(info);
+  mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 - (void)otherMouseDragged:(NSEvent *)theEvent
@@ -548,6 +558,7 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
   info.X = p.x;
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   mpNGLWindow->CallOnMouseMove(info);
+  mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 ////////// Keyboard:

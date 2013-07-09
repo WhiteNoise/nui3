@@ -303,7 +303,7 @@ struct JSString {
 extern const jschar *
 js_GetStringChars(JSContext *cx, JSString *str);
 
-extern JSString * JS_FASTCALL
+extern "C++" JSString * JS_FASTCALL
 js_ConcatStrings(JSContext *cx, JSString *left, JSString *right);
 
 extern const jschar *

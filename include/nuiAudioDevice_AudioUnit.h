@@ -30,6 +30,8 @@ public:
   
     void pausePlayback();
     void resumePlayback();
+    
+    AudioUnit getAudioUnit() { return mAudioUnit; };
 protected:
   
   void EnumSampleRates();

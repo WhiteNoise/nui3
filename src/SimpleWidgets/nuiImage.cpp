@@ -226,6 +226,7 @@ bool nuiImage::Draw(nuiDrawContext* pContext)
   pContext->SetTexture(mpTexture);
 //  mpTexture->Apply(pContext);
   pContext->EnableTexturing(true);
+    //pContext->EnableAntialiasing(true);
   //nglImage* pImage = mpTexture->GetImage();
 
   float alpha = 1.0f;

@@ -176,6 +176,7 @@ protected:
   virtual bool OnMouseClick  (nglMouseInfo& rInfo);
   virtual bool OnMouseUnclick(nglMouseInfo& rInfo);
   virtual bool OnMouseMove   (nglMouseInfo& rInfo);
+  virtual bool OnMultiEventsFinished (nglMouseInfo &rInfo);
   virtual bool OnRotation    (uint Angle);
   //@}
 
@@ -235,6 +236,7 @@ private:
     virtual bool OnMouseClick(nglMouseInfo& rInfo);
     virtual bool OnMouseUnclick(nglMouseInfo& rInfo);
     virtual bool OnMouseMove(nglMouseInfo& rInfo);
+    virtual bool OnMultiEventsFinished(nglMouseInfo& rInfo);
     virtual bool OnRotation(uint Angle);
 
     virtual void OnTextCompositionStarted(); ///< Tells the widget that a complex text input session is starting (mostly used to enter diacritics with dead keys and complex scripts like east asian glyphs)

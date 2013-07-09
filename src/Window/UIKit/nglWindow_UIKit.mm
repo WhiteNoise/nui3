@@ -481,6 +481,8 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   std::vector<UITouch*> touches;
   touches.resize((uint)count);
   [pArray getObjects: &touches[0]];
+    
+    std::vector<nglMouseInfo> touchFrame;
 
   const nuiRect rect(0,0, mpNGLWindow->GetWidth(), mpNGLWindow->GetHeight());
 
@@ -524,6 +526,7 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
 //        if (touchTapCount > 1)// && ([pTouch timestamp] - sOldTimestamp < DOUBLE_TAP_DELAY))
 //          info.Buttons |= nglMouseInfo::ButtonDoubleClick;
 
+          touchFrame.push_back(info);
         mpNGLWindow->CallOnMouseUnclick(info);
 
         gAvailableTouches.push_back(rTouch.mTouchId);
@@ -554,7 +557,7 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
 ///< if tapcount > 1, moved from a double click
 //        if (touchTapCount > 1)// && ([pTouch timestamp] - sOldTimestamp < DOUBLE_TAP_DELAY))
 //          info.Buttons |= nglMouseInfo::ButtonDoubleClick;
-        
+          touchFrame.push_back(info);
         mpNGLWindow->CallOnMouseMove(info);
       }
       else
@@ -601,7 +604,7 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
 
       info.SwipeInfo = nglMouseInfo::eNoSwipe;
       info.TouchId = newTouch.mTouchId;
-
+          touchFrame.push_back(info);
       mpNGLWindow->CallOnMouseClick(info);
     }
     else
@@ -609,6 +612,12 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
       NGL_TOUCHES_OUT(_T("[%p][available: %d] Discarding event: [UITouchPhaseBegan X:%d Y:%d]\n"), pTouch, gAvailableTouches.size(), x, y);
     }
   }
+    
+    for (uint n = 0; n < touchFrame.size(); n++)
+    {
+        mpNGLWindow->CallOnMultiEventsFinished(touchFrame[n]);
+    }
+
 
 /*
 ** Debug prints:

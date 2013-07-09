@@ -252,6 +252,11 @@ bool nglWindow::OnRotation(uint Angle)
   return true;
 }
 
+bool nglWindow::OnMultiEventsFinished(nglMouseInfo& rInfo)
+{
+    return false;
+}
+
 void nglWindow::EnableAutoRotation(bool set)
 {
   mAutoRotate = set;
@@ -319,7 +324,7 @@ void nglWindow::CallOnPaint()
     double v = (now - mFPSDelay);
     double c = mFPSCount;
     mFPS = c / v;
-    NGL_LOG(_T("fps"), NGL_LOG_DEBUG, _T("FPS: %f (%f seconds - %d frames)\n"), mFPS, v, ToNearest(c));
+    //NGL_LOG(_T("fps"), NGL_LOG_DEBUG, _T("FPS: %f (%f seconds - %d frames)\n"), mFPS, v, ToNearest(c));
 
     mFPSCount = 0;
     mFPSDelay = now;
@@ -398,6 +403,11 @@ bool nglWindow::CallOnMouseMove (nglMouseInfo& rInfo)
   //nuiStopWatch watch(_T("nglWindow::CallOnMouseMove"));
   NGL_DEBUG( NGL_LOG(_T("window"), NGL_LOG_DEBUG, _T("Motion: %d,%d"), rInfo.X, rInfo.Y); )
   return OnMouseMove (rInfo);
+}
+
+bool nglWindow::CallOnMultiEventsFinished (nglMouseInfo& rInfo)
+{
+    return OnMultiEventsFinished(rInfo);
 }
 
 bool nglWindow::CallOnRotation(uint Angle)

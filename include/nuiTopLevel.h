@@ -105,6 +105,7 @@ public:
   bool CallMouseClick (nglMouseInfo& rInfo);
   bool CallMouseUnclick(nglMouseInfo& rInfo);
   bool CallMouseMove (nglMouseInfo& rInfo);
+  bool CallMultiEventsFinished(nglMouseInfo& rInfo);
   void GetMouseInfo(nglMouseInfo& rMouseInfo) const;
   nuiWidget* GetWidgetUnderMouse() { return mpUnderMouse; }
 

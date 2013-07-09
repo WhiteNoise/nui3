@@ -246,6 +246,7 @@ public:
   virtual bool MouseMoved(const nglMouseInfo& rInfo);
   virtual bool MouseGrabbed(nglTouchId Id);
   virtual bool MouseUngrabbed(nglTouchId Id);
+  virtual bool MultiEventsFinished(const nglMouseInfo& rInfo);
   //@}
 
   /** @name Other Incomming events */

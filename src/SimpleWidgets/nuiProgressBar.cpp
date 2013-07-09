@@ -232,6 +232,8 @@ void nuiProgressBar::SetProgress(float Progress)
   if (mProgress != Progress)
   {
     mProgress = Progress;
+      if(mProgress > 100)
+          mProgress = 100;
     Invalidate();
   }
 }

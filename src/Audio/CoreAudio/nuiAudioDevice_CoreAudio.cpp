@@ -41,6 +41,19 @@
   #endif
 #endif
 
+static char *FormatOSStatusError(char *str, OSStatus error)
+{
+    // see if it appears to be a 4-char-code
+    *(UInt32 *)(str + 1) = CFSwapInt32HostToBig(error);
+    if (isprint(str[1]) && isprint(str[2]) && isprint(str[3]) && isprint(str[4])) {
+        str[0] = str[5] = '\'';
+        str[6] = '\0';
+    } else
+        // no, format it as an integer
+        sprintf(str, "%d", (int)error);
+    return str;
+}
+
 
 class AudioDeviceState
   {
@@ -55,29 +68,101 @@ class AudioDeviceState
     
     bool Update(AudioDeviceID ID)
     {
-      if (ID == 0)
-        return false;
-      
-      Float64 sr;
-      UInt32 size = sizeof(Float64);
-      if (!AudioDeviceGetProperty(ID, 0, false, kAudioDevicePropertyNominalSampleRate, &size, &sr))
+        if (ID == 0)
+            return false;
+        OSStatus error;
+        
+        Float64 sr;
+        UInt32 size = sizeof(Float64);
+        
+
+        AudioObjectPropertyAddress sampleRateAddress = {
+            kAudioDevicePropertyNominalSampleRate,  // mSelector
+            kAudioObjectPropertyScopeGlobal,            // mScope
+            kAudioObjectPropertyElementMaster           // mElement
+        };
+
+        
+        error = AudioObjectGetPropertyData( ID,
+                                   &sampleRateAddress,
+                                   0,     // inQualifierDataSize
+                                   NULL,  // inQualifierData
+                                   &size,
+                                   &sr);
+        
+      if (!error)
         mSampleRate = sr;
+      else
+        NGL_OUT(nglString((int)error) + _T("\n"));
+        
+
+        UInt32 FPB;
+        size = sizeof (FPB);
+
+        AudioObjectPropertyAddress bufferSizeAddress = {
+            kAudioDevicePropertyBufferFrameSize,  // mSelector
+            kAudioObjectPropertyScopeGlobal,            // mScope
+            kAudioObjectPropertyElementMaster           // mElement
+        };
+        
+        
+        error = AudioObjectGetPropertyData( ID,
+                                           &bufferSizeAddress,
+                                           0,     // inQualifierDataSize
+                                           NULL,  // inQualifierData
+                                           &size,
+                                           &FPB);
       
-      UInt32 FPB;
-      size = sizeof (FPB);
-      if (!AudioDeviceGetProperty(ID, 0, false, kAudioDevicePropertyBufferFrameSize, &size, &FPB))
+        //error = AudioDeviceGetProperty(ID, 0, false, kAudioDevicePropertyBufferFrameSize, &size, &sr);
+        
+      if (!error)
         mBufferSize = FPB;
+      else
+          NGL_OUT(nglString((int)error) + _T("\n"));
       
       mInputLatency = 0;
       mOutputLatency = 0;
       UInt32 Latency;
       size = sizeof (UInt32);
-      if (!AudioDeviceGetProperty(ID, 0, true, kAudioDevicePropertyLatency, &size, &Latency))
+        
+        AudioObjectPropertyAddress inputLatencyAddress = {
+            kAudioDevicePropertyLatency,  // mSelector
+            kAudioObjectPropertyScopeInput,            // mScope
+            kAudioObjectPropertyElementMaster           // mElement
+        };
+        
+        
+        error = AudioObjectGetPropertyData( ID,
+                                           &inputLatencyAddress,
+                                           0,     // inQualifierDataSize
+                                           NULL,  // inQualifierData
+                                           &size,
+                                           &Latency);
+        
+        //error = AudioDeviceGetProperty(ID, 0, true, kAudioDevicePropertyLatency, &size, &Latency);
+        
+      if (!error)
         mInputLatency = Latency;
-      
-      size = sizeof(UInt32);
-      if (!AudioDeviceGetProperty(ID, 0, false, kAudioDevicePropertyLatency, &size, &Latency))
+      else
+          NGL_OUT(nglString((int)error) + _T("\n"));
+
+        AudioObjectPropertyAddress outputLatencyAddress = {
+            kAudioDevicePropertyLatency,  // mSelector
+            kAudioObjectPropertyScopeOutput,            // mScope
+            kAudioObjectPropertyElementMaster           // mElement
+        };
+        
+        error = AudioObjectGetPropertyData( ID,
+                                           &outputLatencyAddress,
+                                           0,     // inQualifierDataSize
+                                           NULL,  // inQualifierData
+                                           &size,
+                                           &Latency);
+        //error = AudioDeviceGetProperty(ID, 0, false, kAudioDevicePropertyLatency, &size, &Latency);
+      if (!error)
         mOutputLatency = Latency;
+      else
+          NGL_OUT(nglString((int)error) + _T("\n"));
       
       return true;
     }
@@ -123,13 +208,19 @@ nuiAudioDevice_CoreAudio::~nuiAudioDevice_CoreAudio()
 
 bool nuiAudioDevice_CoreAudio::Open(std::vector<uint32>& rInputChannels, std::vector<uint32>& rOutputChannels, double SampleRate, uint32 BufferSize, nuiAudioProcessFn pProcessFunction)
 {
+    NGL_OUT(_T("Core audio open ") + nglString((int)mDeviceID) + _T("\n"));
+        NGL_OUT(_T("settings ") + nglString(SampleRate) + _T(" ") + nglString(BufferSize) + _T("\n"));
   mAudioProcessFn = pProcessFunction;
   
+  if(rInputChannels.size())
   {
     mActiveInputChannels = rInputChannels;
     mInputSamples.resize(mActiveInputChannels.size());
     for (uint32 ch = 0; ch < mInputSamples.size(); ch++)
       mInputSamples[ch].resize(BufferSize);
+  } else {
+      mActiveInputChannels.clear();
+      mInputSamples.clear();
   }
   
   {
@@ -159,6 +250,8 @@ bool nuiAudioDevice_CoreAudio::Open(std::vector<uint32>& rInputChannels, std::ve
   
   // change buffer size
   UInt32 FPB = BufferSize;
+    
+  if(mBufferSizes.size())
   {
     uint32 minbufsize = mBufferSizes[0];
     uint32 maxbufsize = mBufferSizes[0];
@@ -181,6 +274,7 @@ bool nuiAudioDevice_CoreAudio::Open(std::vector<uint32>& rInputChannels, std::ve
   error = AudioDeviceSetProperty (mDeviceID, 0, 0, false, kAudioDevicePropertyBufferFrameSize, size, &FPB);
   error = AudioDeviceSetProperty (mDeviceID, 0, 0, true,  kAudioDevicePropertyBufferFrameSize, size, &FPB);
   
+    
   // wait for the changes to happen (on some devices)
   AudioDeviceState state;
   int i = 30;
@@ -191,21 +285,33 @@ bool nuiAudioDevice_CoreAudio::Open(std::vector<uint32>& rInputChannels, std::ve
     if (SampleRate == state.mSampleRate && FPB == state.mBufferSize)
       break;
     
-    nglThread::MsSleep(100);
+    nglThread::MsSleep(500);
   }
   
   mSampleRate = state.mSampleRate;
   mBufferSize = state.mBufferSize;
   
-  if (i < 0)
-    return false;
+    if (i < 0) {
+        NGL_OUT(_T("Could not set sample rate / buffer size ") + nglString(mSampleRate) + _T(" ") + nglString(mBufferSize) + _T("\n"));
+        return false;
+    }
   
+    
+    //mSampleRate = SampleRate;
+    //mBufferSize = BufferSize;
+    
   mInMap.clear();
   mOutMap.clear();
   
   error = AudioDeviceAddIOProc(mDeviceID, IOProc, this);
   if (!error)
     error = AudioDeviceStart(mDeviceID, IOProc);
+    
+    if(!error)
+        NGL_OUT(_T("CoreAudio starting up\n"));
+    else
+        NGL_OUT(_T("Error\n"));
+    
   return !error;
 }
 
@@ -627,20 +733,58 @@ nglString nuiAudioDeviceAPI_CoreAudio::GetDeviceName(uint32 index) const
 
 nuiAudioDevice* nuiAudioDeviceAPI_CoreAudio::GetDefaultOutputDevice()
 {
-  AudioDeviceID deviceID = 0;
-  UInt32 size;
-  nui_verify_noerr(AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDefaultOutputDevice, &size, NULL));
-  nui_verify_noerr(AudioHardwareGetProperty(kAudioHardwarePropertyDefaultOutputDevice, &size, &deviceID));
-  return new nuiAudioDevice_CoreAudio(deviceID);
+
+    
+//#ifdef NUI_IOS
+//    AudioDeviceID deviceID = 0;
+//    UInt32 size;
+//    
+//    nui_verify_noerr(AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDefaultOutputDevice, &size, NULL));
+//    nui_verify_noerr(AudioHardwareGetProperty(kAudioHardwarePropertyDefaultOutputDevice, &size, &deviceID));
+//#else
+    AudioDeviceID output_device_id = kAudioObjectUnknown;
+    AudioObjectPropertyAddress property_address = {
+        kAudioHardwarePropertyDefaultOutputDevice,  // mSelector
+        kAudioObjectPropertyScopeGlobal,            // mScope
+        kAudioObjectPropertyElementMaster           // mElement
+    };
+    
+    UInt32 output_device_id_size = sizeof(output_device_id);
+    OSStatus err = AudioObjectGetPropertyData(kAudioObjectSystemObject,
+                                              &property_address,
+                                              0,     // inQualifierDataSize
+                                              NULL,  // inQualifierData
+                                              &output_device_id_size,
+                                              &output_device_id);
+//#endif
+    
+  return new nuiAudioDevice_CoreAudio(output_device_id);
 }
 
 nuiAudioDevice* nuiAudioDeviceAPI_CoreAudio::GetDefaultInputDevice()
 {
-  AudioDeviceID deviceID = 0;
-  UInt32 size;
-  nui_verify_noerr(AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDefaultInputDevice, &size, NULL));
-  nui_verify_noerr(AudioHardwareGetProperty(kAudioHardwarePropertyDefaultInputDevice, &size, &deviceID));
-  return new nuiAudioDevice_CoreAudio(deviceID);
+//#ifdef NUI_IOS
+//  AudioDeviceID deviceID = 0;
+//  UInt32 size;
+//  nui_verify_noerr(AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDefaultInputDevice, &size, NULL));
+//  nui_verify_noerr(AudioHardwareGetProperty(kAudioHardwarePropertyDefaultInputDevice, &size, &deviceID));
+//#else
+    AudioDeviceID output_device_id = kAudioObjectUnknown;
+    AudioObjectPropertyAddress property_address = {
+        kAudioHardwarePropertyDefaultInputDevice,  // mSelector
+        kAudioObjectPropertyScopeGlobal,            // mScope
+        kAudioObjectPropertyElementMaster           // mElement
+    };
+    
+    UInt32 output_device_id_size = sizeof(output_device_id);
+    OSStatus err = AudioObjectGetPropertyData(kAudioObjectSystemObject,
+                                              &property_address,
+                                              0,     // inQualifierDataSize
+                                              NULL,  // inQualifierData
+                                              &output_device_id_size,
+                                              &output_device_id);
+//#endif
+  return new nuiAudioDevice_CoreAudio(output_device_id);
 }
 
 nuiAudioDeviceAPI_CoreAudio CoreAudioAPI;

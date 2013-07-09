@@ -37,22 +37,25 @@ public:
       NGL_OUT(_T("Release object 0x%x (%d)\n"), this, mCount - 1);
     }
 
-    
-    NGL_ASSERTR(mCount > 0, mCount); 
-    mCount--;
-    if (mCount == 0)
+    if(mCount > 0 )
     {
-      if (mTrace)
-      {
-        NGL_OUT(_T("Delete object 0x%x\n"), this);
-      }
-      
-      
-      const_cast<nuiRefCount*>(this)->OnFinalize();
-      delete this;
-      return 0;
+        //NGL_ASSERTR(mCount > 0, mCount);
+        mCount--;
+        if (mCount == 0)
+        {
+          if (mTrace)
+          {
+            NGL_OUT(_T("Delete object 0x%x\n"), this);
+          }
+          
+          
+          const_cast<nuiRefCount*>(this)->OnFinalize();
+          delete this;
+          return 0;
+        }
     }
-    return mCount; 
+      
+    return mCount;
   }
 
   void SetTrace(bool set)

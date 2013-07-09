@@ -8,6 +8,8 @@ using namespace std;
 #include "../../Window/UIKit/nglWindow_UIKit.h"
 #include "nglWindow.h"
 
+#import <UIKit/UIKit.h>
+
 /*
 ** nglUIApplication
 */
@@ -74,17 +76,17 @@ void objCCallOnMemoryWarning();
 	NSURL *launchURL = nil;
     
 #ifdef NUI_IOS
-    launchURL = [launchOptions objectForKey:NSApplicationLaunchOptionsURLKey];	
+    launchURL = [launchOptions objectForKey:UIApplicationLaunchOptionsURLKey];
 #endif
 
   	if(launchURL)
   	{
   		NSString *urlstr = [launchURL absoluteString];
   		
-  		objCCallOnInitWithURL(pNSApplication, nglString ((CFStringRef)urlstr));
+  		objCCallOnInitWithURL(pUIApplication, nglString ((CFStringRef)urlstr));
   	} else {
   		
-  		objCCallOnInit(pNSApplication);
+  		objCCallOnInit(pUIApplication);
   	}
     
 

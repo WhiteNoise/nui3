@@ -347,6 +347,7 @@ void nuiAudioDevice_AudioUnit::ProcessInput(AudioUnitRenderActionFlags* ioAction
 
 bool nuiAudioDevice_AudioUnit::Open(std::vector<uint32>& rInputChannels, std::vector<uint32>& rOutputChannels, double SampleRate, uint32 BufferSize, nuiAudioProcessFn pProcessFunction)
 {
+    NGL_OUT(_T("Audio unit open"));
   OSStatus err;
   	
   mAudioProcessFn = pProcessFunction;

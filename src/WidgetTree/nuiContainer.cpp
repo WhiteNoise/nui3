@@ -631,6 +631,20 @@ nuiWidgetPtr nuiContainer::DispatchMouseMove(const nglMouseInfo& rInfo)
   return (res && inside) ? this : NULL;
 }
 
+nuiWidgetPtr nuiContainer::DispatchMultiEventsFinished(const nglMouseInfo& rInfo)
+{
+    CheckValid();
+    if (!mMouseEventEnabled || mTrashed)
+        return false;
+
+    bool hasgrab = HasGrab(rInfo.TouchId);
+    
+    if(hasgrab)
+        MultiEventsFinished(rInfo);
+    
+    return NULL;
+}
+
 void nuiContainer::SetAlpha(float Alpha)
 {
   CheckValid();

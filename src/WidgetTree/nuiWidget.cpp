@@ -1852,6 +1852,12 @@ bool nuiWidget::MouseUngrabbed(nglTouchId id)
   return MouseUngrabbed();
 }
 
+bool nuiWidget::MultiEventsFinished(const nglMouseInfo& rInfo)
+{
+  CheckValid();
+    return false;
+}
+
 
 ////// Private event management:
 bool nuiWidget::DispatchMouseClick(const nglMouseInfo& rInfo)

@@ -664,6 +664,12 @@ window = new nglWindow (context, info, NULL);
     \a ButtonDoubleClick and \a ButtonTripleClick bits cannot be set in \a Buttons.
   */
   virtual bool OnMouseMove (nglMouseInfo& rInfo);
+    
+    
+    
+    virtual bool OnMultiEventsFinished(nglMouseInfo& rInfo);
+    
+    
   /*!<
     This method is called when a mouse motion is detected.
     \param rInfo mouse status
@@ -769,6 +775,7 @@ public:
   bool CallOnMouseClick (nglMouseInfo& rInfo);
   bool CallOnMouseUnclick(nglMouseInfo& rInfo);
   bool CallOnMouseMove  (nglMouseInfo& rInfo);
+  bool CallOnMultiEventsFinished (nglMouseInfo& rInfo);
   bool CallOnRotation(uint Angle);
 
 #ifdef _X11_

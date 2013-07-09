@@ -1442,6 +1442,65 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] BEGIN\n"), rInfo.TouchId) );
   return pHandled != NULL;
 }
 
+bool nuiTopLevel::CallMultiEventsFinished (nglMouseInfo& rInfo)
+{
+    CheckValid();
+    NGL_TOUCHES_DEBUG( NGL_OUT(_T("nuiTopLevel::CallMouseMove X:%d Y:%d\n"), rInfo.X, rInfo.Y) );
+    
+    // Update counterpart:
+    std::map<nglTouchId, nglMouseInfo>::iterator it = mMouseClickedEvents.find(rInfo.TouchId);
+    if (it != mMouseClickedEvents.end())
+        rInfo.Counterpart = &it->second;
+    
+
+    
+    nuiWidgetPtr pWidget = NULL;
+    nuiWidgetPtr pWidgetUnder = NULL;
+	nuiWidgetPtr pHandled = NULL;
+    
+    nuiWidgetPtr pGrab = GetGrab();
+    if (pGrab)
+    {
+        std::vector<nuiContainerPtr> containers;
+        nuiContainerPtr pParent = pGrab->GetParent();
+        while (pParent)
+        {
+            containers.push_back(pParent);
+            pParent = pParent->GetParent();
+        }
+        
+        if(mpGrab[rInfo.TouchId])
+        {
+            NGL_ASSERT(mpGrab[rInfo.TouchId]);
+            if (mpGrab[rInfo.TouchId]->MouseEventsEnabled() )
+            {
+                pGrab->MultiEventsFinished(rInfo);
+            }
+            
+            nuiWidgetPtr pChild = NULL;
+            // There might be no grab object left after the mouse move event!
+            if (pGrab)
+                pChild = pGrab;
+            else
+                pChild = GetChild((nuiSize)rInfo.X, (nuiSize)rInfo.Y);
+            
+            NGL_ASSERT(pChild);
+            
+            // Set the mouse cursor to the right object:
+            nuiWidgetList widgets;
+            GetChildren(rInfo.X, rInfo.Y, widgets, true);
+            UpdateMouseCursor(widgets);
+            
+            SetToolTipRect();
+            
+            //NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] END\n"), rInfo.TouchId) );
+            return true;
+        }
+
+    }
+    return true;
+}
+
 void nuiTopLevel::SetToolTipRect()
 {
   CheckValid();

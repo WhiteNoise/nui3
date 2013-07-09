@@ -262,7 +262,7 @@ public:
   {
     OSErr err = noErr;
     Size dataSize;
-    err = GetFlavorDataSize (dragRef, itemRef, flavorType, &dataSize);
+      err = ::GetFlavorDataSize (dragRef, itemRef, flavorType, &dataSize);
 
     if (err != noErr)
     {
