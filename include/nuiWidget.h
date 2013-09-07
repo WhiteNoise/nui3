@@ -46,7 +46,7 @@ typedef std::vector<nuiWidgetPtr> nuiWidgetList;
 typedef nuiContainer* nuiContainerPtr;
 typedef std::vector<nuiContainerPtr> nuiContainerList;
 
-class NUI_API nuiWidget : public nuiObject
+class nuiWidget : public nuiObject
 {
   friend class nuiContainer;
 public:
@@ -501,7 +501,7 @@ public:
   
   /** @name Layout Constraints */
   //@{
-  class NUI_API LayoutConstraint
+  class LayoutConstraint
   {
   public:
     LayoutConstraint();
@@ -630,7 +630,7 @@ protected:
   nuiTheme* mpTheme;
   nuiPainter* mpSavedPainter;
 
-  class NUI_API TestWidgetFunctor
+  class TestWidgetFunctor
   {
   public:
     TestWidgetFunctor() {};

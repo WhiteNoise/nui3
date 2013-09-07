@@ -147,7 +147,7 @@ extern nglString nglStringFloat(float fl, int32 precision = 8);
 extern nglString nglStringDouble(float d, int32 precision = 8);
 
 
-class NGL_API nglString
+class nglString
 {
 public:
 	static const nglChar Zero;     ///< The usual 'terminal' zero, cannot be embedded \e in a string
@@ -182,12 +182,11 @@ public:
 	\p pSource string, using the given \p Encoding. See Import() for more info.
 	*/
 
-    /*
-	explicit nglString(int32 integer);
-	explicit nglString(uint32 integer);
-	explicit nglString(float fl, int32 precision = 8);
-	explicit nglString(double db, int32 precision = 8);
-     */
+//	explicit nglString(int32 integer);
+//	explicit nglString(uint32 integer);
+//	explicit nglString(float fl, int32 precision = 8);
+//	explicit nglString(double db, int32 precision = 8);
+
 	~nglString();                            ///< Destructor. Release associated data
 	//@}
 
@@ -858,7 +857,7 @@ enum nglStringConvState
   eStringConv_NeedOutput ///< Conversion incomplete (insufficient output buffer)
 };
 
-class NGL_API nglStringConv
+class nglStringConv
 {
 public:
   static nglChar mUnknown;  ///< Default char used to mark in place a conversion error. Unused if set to '\\0'

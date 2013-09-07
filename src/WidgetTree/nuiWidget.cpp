@@ -3106,7 +3106,7 @@ bool nuiWidget::GetFixedAspectRatio() const
 nuiRect nuiWidget::GetLayoutForRect(const nuiRect& rRect)
 {
   CheckValid();
-  nuiRect rect(GetIdealRect().Size());
+  nuiRect rect(GetIdealRect());
   nuiRect r(rRect);
 
   if (mMaxWidth >= 0)

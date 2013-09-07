@@ -18,10 +18,10 @@
 
 class nuiFont;
 
-class NUI_API nuiEditText : public nuiSimpleContainer
+class nuiEditText : public nuiSimpleContainer
 {
 protected:
-  class NUI_API TextBlock;
+  class TextBlock;
 
 public:
   nuiEditText(const nglString& rText = nglString::Empty);
@@ -142,6 +142,7 @@ public:
   void AddText(const nglString& rText); ///< Adds the given string to the currently held text
   void Print(const nglChar* pFormat, ...); ///< Adds the given string to the currently held text
   void SetFollowModifications(bool Set);
+  bool GetFollowModifications() const;
 
   void SetTextColor(const nuiColor& Color);
   const nuiColor& GetTextColor() const;
@@ -205,7 +206,7 @@ protected:
   bool InsertText(nuiObject* pParams);
   bool NewLine(nuiObject* pParams);
 
-  class NUI_API TextBlock
+  class TextBlock
   {
   public:
     TextBlock(nuiFont* pFont, const nglString& rString, uint begin, uint end);

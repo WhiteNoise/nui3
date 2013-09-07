@@ -15,7 +15,7 @@
 #include "nuiContainer.h"
 #include "nuiWidgetAnimation.h"
 
-class NUI_API nuiScrollView : public nuiSimpleContainer
+class nuiScrollView : public nuiSimpleContainer
 {
 public:
   nuiScrollView(bool Horizontal = true, bool Vertical = true);
@@ -86,8 +86,8 @@ public:
 
   void ActivateHotRect(bool hset, bool vset);
   void ActivateHotRect(bool set);
-  void IsVerticalHotRectActive() const;
-  void IsHorizontalHotRectActive() const;
+  bool IsVerticalHotRectActive() const;
+  bool IsHorizontalHotRectActive() const;
 
 private:
   void InitAttributes();

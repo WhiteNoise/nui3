@@ -6,12 +6,7 @@
 */
 
 #include "nui.h"
-
-#if (defined _WIN32_)
-  #define ISNAN_DOUBLE isnan
-#else
-  #define ISNAN_DOUBLE std::isnan<double>
-#endif
+#include <cmath>
 
 nuiRange::nuiRange(double Value, double Min, double Max, double Increment, double PageIncrement, double PageSize, double Origin, float UnitCurve)
 {
@@ -39,7 +34,7 @@ nuiRange::nuiRange(double Value, double Min, double Max, double Increment, doubl
   mValue = Value;
   SetValue(Value);
 
-  if (ISNAN_DOUBLE(Origin))
+  if (std::isnan(Origin))
   {
     mOrigin = Min;
   }
@@ -447,12 +442,10 @@ bool nuiRange::MakeInRangeVisual(double Position, double size)
     if (Position < mMinimum)
     {
       Position = mMinimum;
-      return tmp != mValue;
     }
     if (Position + size >= mMaximum)
     {
-      size = MAX(0, mMaximum - Position);
-      return tmp != mValue;
+      Position = MAX(0, mMaximum - mPageSize);
     }
 
     if (size > mPageSize)
@@ -467,20 +460,25 @@ bool nuiRange::MakeInRangeVisual(double Position, double size)
   }
   else
   {
-    nuiRange bis;
-    bis.mMaximum = -mMaximum;
-    bis.mMinimum = -mMinimum;
-    bis.mPageSize = mPageSize;
-    bis.mValue = -mValue;
-    bis.mIncrement = -mIncrement;
-    bis.mPageIncrement = -mPageIncrement;
-    bis.mOrigin = -mOrigin;
-    bis.mUnitCurve = mUnitCurve;
-    bis.mDiscreetStepSize = mDiscreetStepSize;
-    bis.mEvents = mEvents;
+    if (mMaximum != mMinimum)
+    {
+      nuiRange bis;
+      bis.mMaximum = -mMaximum;
+      bis.mMinimum = -mMinimum;
+      bis.mPageSize = mPageSize;
+      bis.mValue = -mValue;
+      bis.mIncrement = -mIncrement;
+      bis.mPageIncrement = -mPageIncrement;
+      bis.mOrigin = -mOrigin;
+      bis.mUnitCurve = mUnitCurve;
+      bis.mDiscreetStepSize = mDiscreetStepSize;
+      bis.mEvents = mEvents;
 
-    bis.MakeInRangeVisual(-Position, size);
-    SetValue(-bis.GetValue());
+      bis.MakeInRangeVisual(-Position, size);
+      SetValue(-bis.GetValue());
+    }
+    else
+      SetValue(mMinimum);
   }
   return tmp != mValue;
 }
