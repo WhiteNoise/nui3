@@ -223,8 +223,8 @@ nuiAudioDevice_CoreAudio::~nuiAudioDevice_CoreAudio()
 
 bool nuiAudioDevice_CoreAudio::Open(std::vector<int32>& rInputChannels, std::vector<int32>& rOutputChannels, double SampleRate, int32 BufferSize, nuiAudioProcessFn pProcessFunction)
 {
-    NGL_OUT(_T("Core audio open ") + nglString((int)mDeviceID) + _T("\n"));
-        NGL_OUT(_T("settings ") + nglString(SampleRate) + _T(" ") + nglString(BufferSize) + _T("\n"));
+//    NGL_OUT(_T("Core audio open ") + nglString((int)mDeviceID) + _T("\n"));
+//        NGL_OUT(_T("settings ") + SampleRate + _T(" ") + BufferSize + _T("\n"));
   mAudioProcessFn = pProcessFunction;
   
   if(rInputChannels.size())

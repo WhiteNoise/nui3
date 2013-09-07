@@ -1558,6 +1558,10 @@
 		944C54140E00017400B691C5 /* nuiHotKeyEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 944C54120E00017400B691C5 /* nuiHotKeyEditor.cpp */; };
 		944C54180E00018200B691C5 /* nuiHotKeyEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = 944C54170E00018200B691C5 /* nuiHotKeyEditor.h */; };
 		944C54190E00018200B691C5 /* nuiHotKeyEditor.h in Headers */ = {isa = PBXBuildFile; fileRef = 944C54170E00018200B691C5 /* nuiHotKeyEditor.h */; };
+		A7788F4617C9147F00CD7332 /* nglString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816DF60C3CECAB00902DFE /* nglString.cpp */; };
+		A7788F4717C9148000CD7332 /* nglString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816DF60C3CECAB00902DFE /* nglString.cpp */; };
+		A7788F4817C9148100CD7332 /* nglString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816DF60C3CECAB00902DFE /* nglString.cpp */; };
+		A7788F6017C9222A00CD7332 /* nglString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816DF60C3CECAB00902DFE /* nglString.cpp */; };
 		BC0F707E0DB3BC0100329939 /* nglThreadChecker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BC0F707C0DB3BC0100329939 /* nglThreadChecker.cpp */; };
 		BC0F70800DB3BC0100329939 /* nglThreadChecker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BC0F707C0DB3BC0100329939 /* nglThreadChecker.cpp */; };
 		BC0F70D50DB4A70F00329939 /* nglThreadChecker.h in Headers */ = {isa = PBXBuildFile; fileRef = BC0F70D40DB4A70F00329939 /* nglThreadChecker.h */; };
@@ -2482,7 +2486,6 @@
 		E524161F11CB860B0025CA71 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = E5816DF30C3CECAB00902DFE /* zip.c */; };
 		E524162011CB860B0025CA71 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = E5816DEF0C3CECAB00902DFE /* ioapi.c */; };
 		E524162111CB860B0025CA71 /* nuiGladeLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816D5D0C3CECAB00902DFE /* nuiGladeLoader.cpp */; };
-		E524162211CB860B0025CA71 /* nglString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816DF60C3CECAB00902DFE /* nglString.cpp */; };
 		E524162311CB860B0025CA71 /* nglCPUInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816D350C3CECAB00902DFE /* nglCPUInfo.cpp */; };
 		E524162411CB860B0025CA71 /* nuiUserArea.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816D9F0C3CECAB00902DFE /* nuiUserArea.cpp */; };
 		E524162511CB860B0025CA71 /* nglBitmapTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5816D870C3CECAB00902DFE /* nglBitmapTools.cpp */; };
@@ -7558,6 +7561,13 @@
 			remoteGlobalIDString = 73F097E812E9D09E00656E84;
 			remoteInfo = thirdparty_ios_arm7;
 		};
+		A7CF45A3178ECA0C0016FDB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E5DD3A5C12E0B08300F1EF4E;
+			remoteInfo = thirdparty_ios;
+		};
 		E511CAA2142A27FA0079F31F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
@@ -7587,13 +7597,6 @@
 			remoteInfo = thirdparty;
 		};
 		E5DD459612E0B13F00F1EF4E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = E5DD3A5C12E0B08300F1EF4E;
-			remoteInfo = thirdparty_ios;
-		};
-		E5DD45E212E0B5D500F1EF4E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E581672F0C3CEBF100902DFE /* Project object */;
 			proxyType = 1;
@@ -10426,6 +10429,7 @@
 				E5FB9CF3147D5CEE001A1829 /* libminui3D.a */,
 			);
 			name = Products;
+			path = "build/Default-iphoneos";
 			sourceTree = "<group>";
 		};
 		E58167440C3CECA700902DFE /* deps */ = {
@@ -16564,7 +16568,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				E5DD45E312E0B5D500F1EF4E /* PBXTargetDependency */,
+				A7CF45A4178ECA0C0016FDB3 /* PBXTargetDependency */,
 			);
 			name = nuiPhoneD;
 			productName = nui3D;
@@ -17313,6 +17317,7 @@
 				E5AA571813C70FA300245C10 /* hb-ot-shape-complex-misc.cc in Sources */,
 				E57E571313CC8ED50021055F /* hb-ot-shape-complex-indic.cc in Sources */,
 				E5CB6A8913D9D375005C7B6F /* hb-ot-shape-normalize.cc in Sources */,
+				A7788F4617C9147F00CD7332 /* nglString.cpp in Sources */,
 				E501C11E13FD4561009FB677 /* hb-fallback-shape.cc in Sources */,
 				E5C4EBAC16AF43A30029047C /* jsapi.cpp in Sources */,
 				E5C4EBAD16AF43A30029047C /* jsarena.cpp in Sources */,
@@ -17381,11 +17386,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A7788F6017C9222A00CD7332 /* nglString.cpp in Sources */,
 				E524161E11CB860B0025CA71 /* unzip.c in Sources */,
 				E524161F11CB860B0025CA71 /* zip.c in Sources */,
 				E524162011CB860B0025CA71 /* ioapi.c in Sources */,
 				E524162111CB860B0025CA71 /* nuiGladeLoader.cpp in Sources */,
-				E524162211CB860B0025CA71 /* nglString.cpp in Sources */,
 				E524162311CB860B0025CA71 /* nglCPUInfo.cpp in Sources */,
 				E524162411CB860B0025CA71 /* nuiUserArea.cpp in Sources */,
 				E524162511CB860B0025CA71 /* nglBitmapTools.cpp in Sources */,
@@ -19661,6 +19666,7 @@
 				E5DD339E12E09CA800F1EF4E /* NativeMIPS.cpp in Sources */,
 				E5DD339F12E09CA800F1EF4E /* NativePPC.cpp in Sources */,
 				E5DD33A012E09CA800F1EF4E /* NativeSparc.cpp in Sources */,
+				A7788F4817C9148100CD7332 /* nglString.cpp in Sources */,
 				E5DD33A112E09CA800F1EF4E /* NativeX64.cpp in Sources */,
 				E5DD33A212E09CA800F1EF4E /* njconfig.cpp in Sources */,
 				E5DD33A312E09CA800F1EF4E /* RegAlloc.cpp in Sources */,
@@ -19958,6 +19964,7 @@
 				E5AA571913C70FA400245C10 /* hb-ot-shape-complex-misc.cc in Sources */,
 				E57E571413CC8ED60021055F /* hb-ot-shape-complex-indic.cc in Sources */,
 				E5CB6A8813D9D375005C7B6F /* hb-ot-shape-normalize.cc in Sources */,
+				A7788F4717C9148000CD7332 /* nglString.cpp in Sources */,
 				E501C11D13FD4561009FB677 /* hb-fallback-shape.cc in Sources */,
 				E5C4EB7D16AF43A20029047C /* jsapi.cpp in Sources */,
 				E5C4EB7E16AF43A20029047C /* jsarena.cpp in Sources */,
@@ -20177,6 +20184,11 @@
 			target = 73F097E812E9D09E00656E84 /* thirdparty_ios_arm7 */;
 			targetProxy = 73F09ACA12E9D0B200656E84 /* PBXContainerItemProxy */;
 		};
+		A7CF45A4178ECA0C0016FDB3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E5DD3A5C12E0B08300F1EF4E /* thirdparty_ios */;
+			targetProxy = A7CF45A3178ECA0C0016FDB3 /* PBXContainerItemProxy */;
+		};
 		E511CAA3142A27FA0079F31F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E5DD2E8D12E09CA700F1EF4E /* thirdparty */;
@@ -20202,11 +20214,6 @@
 			target = E5DD3A5C12E0B08300F1EF4E /* thirdparty_ios */;
 			targetProxy = E5DD459612E0B13F00F1EF4E /* PBXContainerItemProxy */;
 		};
-		E5DD45E312E0B5D500F1EF4E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = E5DD3A5C12E0B08300F1EF4E /* thirdparty_ios */;
-			targetProxy = E5DD45E212E0B5D500F1EF4E /* PBXContainerItemProxy */;
-		};
 		E5FB9A21147D5CEE001A1829 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E5DD2E8D12E09CA700F1EF4E /* thirdparty */;
@@ -20219,7 +20226,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS)";
@@ -20264,7 +20271,6 @@
 					deps/libcss/src/libparserutils,
 					deps/libcss/include,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = nuiPhone_arm7;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -20277,7 +20283,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREFIX_HEADER = "";
@@ -20336,6 +20342,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD)";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
@@ -20382,7 +20389,6 @@
 					deps/libcss/src/libparserutils,
 					deps/libcss/include,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_CFLAGS = "";
 				PRODUCT_NAME = nuiPhoneD;
 				SDKROOT = iphoneos;
@@ -20394,7 +20400,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = "$(GCC_PREPROCESSOR_DEFINITIONS)";
@@ -20440,7 +20446,6 @@
 					deps/libcss/src/libparserutils,
 					deps/libcss/include,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = nuiPhone;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -20462,7 +20467,6 @@
 		E58167310C3CEBF100902DFE /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COPY_PHASE_STRIP = NO;
@@ -20523,9 +20527,8 @@
 					AVMPLUS_ARM,
 				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				USER_HEADER_SEARCH_PATHS = ". include deps/libpng deps/gameswf deps/zlib deps/ungif deps/ucdata deps/libjpeg src/Application/Carbon src/Stream/Zip deps/freetype2/include deps/expat/include deps/harfbuzz deps/expat/lib deps/tracemonkey deps/libcss/src deps/libcss/src/libwapcaplet deps/libcss/src/libparserutils deps/libcss/include";
@@ -20540,13 +20543,14 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
 					_DEBUG,
+					_COCOA_,
 					DEBUG,
-					_CARBON_,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				ONLY_ACTIVE_ARCH = YES;
 				PRELINK_LIBS = "-liconv -lz";
 				PRODUCT_NAME = nui3D;
+				SDKROOT = macosx;
 			};
 			name = Default;
 		};
@@ -20710,8 +20714,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				DSTROOT = "lib/$(PROJECT_NAME)";
+				ARCHS = "$(ARCHS_STANDARD)";
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREFIX_HEADER = "";
@@ -20759,11 +20762,9 @@
 					deps/libcss/include,
 				);
 				INSTALL_PATH = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = thirdparty_ios;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "armv7 armv7s";
 			};
 			name = Default;
 		};

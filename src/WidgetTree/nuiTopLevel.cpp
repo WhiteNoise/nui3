@@ -1180,7 +1180,7 @@ bool nuiTopLevel::CallMouseUnclick(nglMouseInfo& rInfo)
   mMouseInfo.X = rInfo.X;
   mMouseInfo.Y = rInfo.Y;
   mMouseInfo.Buttons &= ~rInfo.Buttons;
-  nglMouseInfo::Flags Buttons = rInfo.Buttons | mLastClickedButton & nglMouseInfo::ButtonDoubleClick;
+  nglMouseInfo::Flags Buttons = rInfo.Buttons | (mLastClickedButton & nglMouseInfo::ButtonDoubleClick);
 
   mMouseInfo.TouchId = rInfo.TouchId;
 NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseUnclick [%d] BEGIN\n"), rInfo.TouchId) );
@@ -1503,7 +1503,7 @@ bool nuiTopLevel::CallMultiEventsFinished (nglMouseInfo& rInfo)
             GetChildren(rInfo.X, rInfo.Y, widgets, true);
             UpdateMouseCursor(widgets);
             
-            SetToolTipRect();
+            //SetToolTipRect();
             
             //NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] END\n"), rInfo.TouchId) );
             return true;

@@ -41,7 +41,7 @@ public:
 
   virtual ~nuiMainWindow();
 
-  virtual nuiXMLNode* Serialize(nuiXMLNode* pParentNode, bool Recursive) const;
+  //virtual nuiXMLNode* Serialize(nuiXMLNode* pParentNode, bool Recursive) const;
 
 
   bool virtual IsKeyDown (nglKeyCode Key) const;

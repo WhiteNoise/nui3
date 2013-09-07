@@ -73,27 +73,37 @@ int64 nglOStream::WriteText (const nglChar* pData, int64 Count)
 
 int64 nglOStream::WriteText (const nglString& rData)
 {
-  if (rData.IsEmpty() ||
+  if (rData.IsEmpty() || rData.IsNull() ||
     ((GetState() != eStreamReady) && (GetState() != eStreamEnd)))
     return 0;
 
   // Make sure we have a text conversion context
   if (!GetOConv())
     return 0;
+    
+  if(mpConv == 0)
+      return 0;
 
   char buffer[BUFFER_SIZE];
   int64 written = 0;
   int32 out_offset = 0;
+    
+    nglString backup = rData;
 
   do
   {
-    int64 bytes;
+  NGL_ASSERT(!backup.IsNull());
+      
+    int64 bytes=0;
     const char* data;
-    int64 todo;
+    int64 todo=0;
     int32 buffer_free = BUFFER_SIZE;
 
     // FIXME!!!!!!!!!!!
-    rData.Export(out_offset, buffer, buffer_free, *mpConv);
+    int32 err = backup.Export(out_offset, buffer, buffer_free, *mpConv);
+      
+
+      
     switch (mpConv->GetState())
     {
     case eStringConv_OK:
@@ -118,9 +128,9 @@ int64 nglOStream::WriteText (const nglString& rData)
     else
     {
       int64 done = 0;
-      int64 last_ending, ending = -1;
+      int64 last_ending=0, ending = -1;
 
-      while (ending < todo)
+      while (ending < todo && todo > 0)
       {
         last_ending = ending;
         do
@@ -130,7 +140,12 @@ int64 nglOStream::WriteText (const nglString& rData)
         while ((ending < todo) && (data[ending] != '\n'));
 
         int64 line_size = ending - last_ending - 1;
-        bytes = Write(&(data[last_ending + 1]), line_size, 1);
+          
+        if(line_size > 0)
+            bytes = Write(&(data[last_ending + 1]), line_size, 1);
+        else
+            bytes = 0;
+          
         if (bytes > 0)
         {
           done += bytes;

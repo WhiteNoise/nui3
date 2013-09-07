@@ -140,6 +140,13 @@ typedef std::map<nglEncodingPair, nglStringConv*> nglStringConvMap;
 //		Class nglString
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+extern nglString nglStringInt(int32 integer);
+extern nglString nglStringUInt(uint32 integer);
+extern nglString nglStringFloat(float fl, int32 precision = 8);
+extern nglString nglStringDouble(float d, int32 precision = 8);
+
+
 class NGL_API nglString
 {
 public:
@@ -175,11 +182,12 @@ public:
 	\p pSource string, using the given \p Encoding. See Import() for more info.
 	*/
 
-//	explicit nglString(int32 integer);
-//	explicit nglString(uint32 integer);
-//	explicit nglString(float fl, int32 precision = 8);
-//	explicit nglString(double db, int32 precision = 8);
-
+    /*
+	explicit nglString(int32 integer);
+	explicit nglString(uint32 integer);
+	explicit nglString(float fl, int32 precision = 8);
+	explicit nglString(double db, int32 precision = 8);
+     */
 	~nglString();                            ///< Destructor. Release associated data
 	//@}
 

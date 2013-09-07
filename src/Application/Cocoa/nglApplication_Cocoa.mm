@@ -482,7 +482,7 @@ static NSString* GetApplicationName(void)
 {
   //NGL_OUT(_T("[nglNSApplicationDelegate applicationSignificantTimeChange]\n"));
 }
-*/
+
 - (void) applicationWillTerminate:            (NSNotification*) pNotification
 {
   //	NGL_DEBUG( NGL_OUT(_T("[nglNSApplicationDelegate applicationWillTerminate]\n")) );

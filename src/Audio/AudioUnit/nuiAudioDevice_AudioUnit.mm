@@ -126,13 +126,12 @@ OSStatus AudioUnitCallback(void* inRefCon,
                            UInt32 inNumberFrames_,
                            AudioBufferList* ioData)
 {
-  // Return if not pre-render
+    
+// Return if not pre-render
 //	if(!(*ioActionFlags & kAudioUnitRenderAction_))
 //  {
 //    return noErr;
 //  }
-  
-    
     
 	// Get a pointer to the audio device
 	nuiAudioDevice_AudioUnit* pAudioDevice = (nuiAudioDevice_AudioUnit*)inRefCon;
@@ -206,7 +205,7 @@ void nuiAudioDevice_AudioUnit::resumePlayback()
 
 void nuiAudioDevice_AudioUnit::Process(uint uNumFrames, AudioBufferList* ioData)
 {
-  NGL_OUT(_T("nuiAudioDevice_AudioUnit::Process uNumFrames %d   (%d) %d %d\n"),uNumFrames, ioData->mNumberBuffers, ioData->mBuffers[0].mNumberChannels, ioData->mBuffers[1].mNumberChannels );
+//  NGL_OUT(_T("nuiAudioDevice_AudioUnit::Process uNumFrames %d   (%d) %d %d\n"),uNumFrames, ioData->mNumberBuffers, ioData->mBuffers[0].mNumberChannels, ioData->mBuffers[1].mNumberChannels );
 /*
     if(mBufferSize < uNumFrames)
     {
@@ -348,6 +347,20 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
 {
     NGL_OUT(_T("Audio unit open"));
   OSStatus err;
+    
+    UInt32 channels = rOutputChannels.size();
+    UInt32 sz1 =  sizeof (UInt32);
+    OSStatus result = AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareInputNumberChannels, &sz1, &channels);
+    if ( result == kAudioSessionIncompatibleCategory ) {
+        // Audio session error (rdar://13022588). Power-cycle audio session.
+        AudioSessionSetActive(false);
+        AudioSessionSetActive(true);
+        result = AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareInputNumberChannels, &sz1, &channels);
+        if ( result != noErr ) {
+            NGL_OUT("Got error %d while querying input channels", result);
+        }
+    }
+
   	
   mAudioProcessFn = pProcessFunction;
   mSampleRate = SampleRate;
