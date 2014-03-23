@@ -69,7 +69,7 @@ protected:
   //Received Events:
   bool MouseClicked  (nuiSize X, nuiSize Y, nglMouseInfo::Flags Button);
   bool MouseUnclicked  (nuiSize X, nuiSize Y, nglMouseInfo::Flags Button);
-  bool MouseMoved  (nuiSize X, nuiSize Y);
+  virtual bool MouseMoved  (nuiSize X, nuiSize Y);
   
   void HandlePageDown(const nuiEvent& rEvent);
   void HandlePageUp(const nuiEvent& rEvent);

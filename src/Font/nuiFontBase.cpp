@@ -508,9 +508,9 @@ const nuiFontPanoseBytes& nuiFontDesc::GetPanoseBytes() const
 bool nuiFontDesc::Save(nglOStream& rStream)
 {
   uint32 s = 0;
-  const char* pPath = mPath.GetPathName().Export(eUTF8);
-  const char* pName = mName.Export(eUTF8);
-  const char* pStyle = mStyle.Export(eUTF8);
+    char* pPath = mPath.GetPathName().Export(eUTF8);
+    char* pName = mName.Export(eUTF8);
+    char* pStyle = mStyle.Export(eUTF8);
   
   // Write the path of the font:
   s = strlen(pPath);
@@ -565,9 +565,9 @@ bool nuiFontDesc::Save(nglOStream& rStream)
   // Write the panose bytes for this font:
   rStream.Write(&mPanoseBytes, 10, 1);
   
-  delete[] pPath;
-  delete[] pName;
-  delete[] pStyle;
+  free(pPath);
+    free(pName);
+    free(pStyle);
   
   
   

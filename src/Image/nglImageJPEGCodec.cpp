@@ -175,7 +175,7 @@ bool nglImageJPEGCodec::ReadData()
   }  
   
   mpBuffer -= mLineSize * (mpImage->GetHeight());
-  delete []buffer;
+  delete[] buffer;
   if(mCinfo.output_scanline >= mCinfo.output_height)
   {
     jpeg_finish_decompress(&mCinfo);

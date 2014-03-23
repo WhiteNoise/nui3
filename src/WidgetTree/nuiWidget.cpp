@@ -3894,8 +3894,10 @@ nuiMatrix nuiWidget::GetMatrix() const
 
 const nuiMatrix& nuiWidget::_GetMatrix() const
 {
-  CheckValid();
-  return GetMatrix();
+    CheckValid();
+    static nuiMatrix m = GetMatrix();
+    
+  return m;
 }
 
 void nuiWidget::SetMatrix(const nuiMatrix& rMatrix)

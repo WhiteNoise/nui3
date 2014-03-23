@@ -736,9 +736,11 @@ char* nglString::Export (const nglTextEncoding Encoding) const
     int32 buffer_size = GetLength() + 4;
     buffer_size *= 4 * sizeof(nglChar);
     char* buffer = (char*) malloc(buffer_size);
-    memset(buffer, 0, buffer_size);
+
     if (!buffer)
         return NULL;
+    
+    memset(buffer, 0, buffer_size);
     
     do
     {
@@ -777,10 +779,17 @@ char* nglString::Export (const nglTextEncoding Encoding) const
 #endif
                 int32 oldsize = buffer_size;
                 buffer_size += (GetLength() + 4) / 2;
-                buffer = (char*) realloc(buffer, buffer_size);
-                memset(buffer + oldsize, 0, buffer_size - oldsize);
-                if (!buffer)
+                
+                char* new_buffer = (char*) realloc(buffer, buffer_size);
+
+                if (!new_buffer) {
+                    free(buffer);
                     return NULL;
+                } else {
+                    buffer = new_buffer;
+                }
+                
+                memset(buffer + oldsize, 0, buffer_size - oldsize);
                 break;
             }
         }

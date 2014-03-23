@@ -26,10 +26,12 @@
 #include <stdlib.h>
 #endif
 #include <fcntl.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include "gif_lib.h"
 #include "gif_lib_private.h"
+
 
 #define COMMENT_EXT_FUNC_CODE	0xfe /* Extension function code for comment. */
 #define GIF_STAMP	"GIFVER"	 /* First chars in file - GIF stamp. */

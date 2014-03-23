@@ -134,6 +134,13 @@ nuiHTTPResponse* nuiHTTPRequest::SendRequest(const nuiHTTPResponseReceivedDelega
     
     if (size == -1)
     {
+        CFRelease(url);
+        CFRelease(method);
+        CFRelease(req);
+        CFRelease(readStream);
+        if (body)
+            CFRelease(body);
+        
       return NULL;
     }
     else

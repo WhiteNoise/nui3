@@ -478,7 +478,7 @@ Assembler::genPrologue()
 
     // so for alignment purposes we've pushed return addr and fp
     uint32_t stackPushed = STACK_GRANULARITY * savingCount;
-    uint32_t aligned = alignUp(stackNeeded + stackPushed, NJ_ALIGN_STACK);
+    uint32_t aligned = (uint32_t)alignUp(stackNeeded + stackPushed, NJ_ALIGN_STACK);
     int32_t amt = aligned - stackPushed;
 
     // Make room on stack for what we are doing

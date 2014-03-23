@@ -1228,7 +1228,8 @@ bool nuiGrid::Draw(nuiDrawContext *pContext)
       DrawChild(pContext, pItem);
     }
   }
-
+  delete pIt;
+    
   if (mDisplayGridBorder)
   {
     nuiShape shape;
@@ -1264,7 +1265,7 @@ bool nuiGrid::Draw(nuiDrawContext *pContext)
     pContext->DrawShape(&shape, eStrokeShape);
   }
 
-  delete pIt;
+
   return true;
 }
 

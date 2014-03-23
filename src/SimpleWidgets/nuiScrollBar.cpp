@@ -93,13 +93,13 @@ void nuiScrollBar::SetThumbRect(const nuiRect& rRect)
   nuiRange& rRange = GetRange();
 
   float length = rRange.GetRange();
-  float thumbPosition, thumbLength;
+  float thumbPosition = 0.0f, thumbLength = 1.0f;
 
   if (length <= 0)
   {
-    thumbLength = 1;
-    length = 1;
-    thumbPosition  = 0;
+    thumbLength = 1.0f;
+    length = 1.0f;
+    thumbPosition  = 0.0f;
   }
   else
   {

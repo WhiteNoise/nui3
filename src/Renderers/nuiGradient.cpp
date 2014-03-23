@@ -20,6 +20,7 @@ nuiGradient::nuiGradient(const nuiGradient& rGradient)
 
 nuiGradient::~nuiGradient()
 {
+    mStops.clear();
 }
 
 static bool PositionIsLesser(const nuiGradientPair& rElem1, const nuiGradientPair& rElem2)
@@ -220,8 +221,12 @@ void nuiReflection::Recalc()
 
   mRecalc = false;
 
-  delete mpSkyGradient;
-  delete mpGroundGradient;
+    if(mpSkyGradient)
+        delete mpSkyGradient;
+    
+    if(mpGroundGradient)
+        delete mpGroundGradient;
+    
   mpSkyGradient = new nuiGradient();
   mpGroundGradient = new nuiGradient();
 
@@ -245,7 +250,6 @@ void nuiReflection::Recalc()
   mpSkyGradient->AddStop(tmp, 1); 
 
   // Ground:
-  mpGroundGradient = new nuiGradient();
   tmp.SetOpacity(alpha * .1f);
   tmp.Crop();
   mpGroundGradient->AddStop(tmp, 0); 

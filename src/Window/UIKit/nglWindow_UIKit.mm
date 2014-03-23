@@ -522,8 +522,8 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
           touchFrame.push_back(info);
         mpNGLWindow->CallOnMouseUnclick(info);
 
-        gAvailableTouches.push_back(rTouch.mTouchId);
-        gPressedTouches[rTouch.mTouchId] = false;
+        gAvailableTouches.push_back(info.TouchId);
+        gPressedTouches[info.TouchId] = false;
         
         it = mTouches.find(pTouch);
         if(it != mTouches.end())

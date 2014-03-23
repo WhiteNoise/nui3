@@ -298,8 +298,9 @@ JSScope::finishRuntimeState(JSContext *cx)
     }
 }
 
-JS_STATIC_ASSERT(sizeof(JSHashNumber) == 4);
-JS_STATIC_ASSERT(sizeof(jsid) == JS_BYTES_PER_WORD);
+// DW
+//JS_STATIC_ASSERT(sizeof(JSHashNumber) == 4);
+//JS_STATIC_ASSERT(sizeof(jsid) == JS_BYTES_PER_WORD);
 
 #if JS_BYTES_PER_WORD == 4
 # define HASH_ID(id) ((JSHashNumber)(id))

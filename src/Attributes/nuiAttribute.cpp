@@ -2691,6 +2691,10 @@ public:
     capacity = INIT;
     data = new T[INIT];
   }
+  ~Stack()
+    {
+        delete[] data;
+    }
 
   void push(const T& t)
   {
@@ -2742,6 +2746,10 @@ public:
     capacity = INIT;
     data = new void*[INIT];
   }
+    ~Stack()
+    {
+        delete[] data;
+    }
 
   void push(void* const & t)
   {

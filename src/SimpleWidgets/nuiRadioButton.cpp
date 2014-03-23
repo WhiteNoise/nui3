@@ -213,7 +213,8 @@ nuiRadioButtonGroup* nuiRadioButton::GetGroupManager()
 
 const nglString& nuiRadioButton::GetGroup()
 {
-  return GetProperty(_T("Group"));
+    static nglString str = GetProperty(_T("Group"));
+  return str;
 }
 
 

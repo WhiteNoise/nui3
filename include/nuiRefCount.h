@@ -12,6 +12,7 @@ class nuiRefCount
 public:
   nuiRefCount() : mTrace(false), mRefCount(0), mPermanent(false)
   {
+      mRefCount = 0;
   }
 
   virtual ~nuiRefCount()           

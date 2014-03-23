@@ -1417,20 +1417,20 @@ namespace nanojit
                     break;
                 }
 
-#if defined NANOJIT_64BIT
-                case LIR_qiadd:
-                case LIR_qiand:
-                case LIR_qilsh:
-                case LIR_qursh:
-                case LIR_qirsh:
-                case LIR_qior:
-                CASE64(LIR_qaddp:)
-                case LIR_qxor:
-                {
-                    asm_qbinop(ins);
-                    break;
-                }
-#endif
+//#if defined NANOJIT_64BIT
+//                case LIR_qiadd:
+//                case LIR_qiand:
+//                case LIR_qilsh:
+//                case LIR_qursh:
+//                case LIR_qirsh:
+//                case LIR_qior:
+//                CASE64(LIR_qaddp:)
+//                case LIR_qxor:
+//                {
+//                    asm_qbinop(ins);
+//                    break;
+//                }
+//#endif
 
                 case LIR_add:
                 CASE32(LIR_iaddp:)

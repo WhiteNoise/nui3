@@ -31,7 +31,12 @@ public:
     void pausePlayback();
     void resumePlayback();
     
+    void stopPlayback();
+    void restartPlayback();
+    
     AudioUnit getAudioUnit() { return mAudioUnit; };
+    bool IsPlaying() { return bPlaying; };
+    bool IsInterrupted() { return interruptionWhilePlaying; };
 protected:
   
   void EnumSampleRates();
@@ -59,6 +64,9 @@ protected:
   AudioUnit mAudioUnit;
   AUGraph mProcessingGraph;
   AudioBufferList* mpIData;
+    
+    bool bPlaying;
+    bool interruptionWhilePlaying;
 };
 
 

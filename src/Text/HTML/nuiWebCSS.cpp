@@ -191,7 +191,7 @@ nuiCSSStyleSheet::nuiCSSStyleSheet(const nglString& rURL, const nglString& rText
 {
   NGL_OUT(_T("Create StyleSheet from text%s\n"), Inline ? _T(" (inline)") : _T(""));
   mpSheet = NULL;
-  mURL = rURL;
+  mURL = rURL;     
   mInline = Inline;
   char* pText = rText.Export();
   mpStream = new nglIMemory(pText, strlen(pText));
@@ -200,6 +200,8 @@ nuiCSSStyleSheet::nuiCSSStyleSheet(const nglString& rURL, const nglString& rText
   Init(*mpStream, _T("UTF-8"));
   delete mpStream;
   mpStream = NULL;
+    
+    free(pText);
 }
 
 nuiCSSStyleSheet::nuiCSSStyleSheet(const nglString& rURL, nglIStream& rStream, bool Inline, const nglString& rCharset, const nuiStyleSheetDoneDelegate& rDelegate)

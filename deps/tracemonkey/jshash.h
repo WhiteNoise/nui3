@@ -49,7 +49,7 @@
 
 JS_BEGIN_EXTERN_C
 
-typedef uint32 JSHashNumber;
+typedef uint64 JSHashNumber;
 typedef struct JSHashEntry JSHashEntry;
 typedef struct JSHashTable JSHashTable;
 

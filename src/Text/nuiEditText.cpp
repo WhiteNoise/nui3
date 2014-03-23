@@ -120,7 +120,7 @@ bool nuiEditText::Draw(nuiDrawContext* pContext)
     nuiSize CursorX, CursorY;
     GetCursorPos(CursorX, CursorY);
 
-    nuiRect cursor(CursorX, CursorY - fontinfo.Ascender, 2.0f, mpFont->GetHeight());
+    nuiRect cursor(CursorX, CursorY - mpFont->GetHeight(), 2.0f, mpFont->GetHeight());
     cursor.RoundToBelow();
     pContext->SetFillColor(GetColor(eNormalTextFg));
     pContext->DrawRect(cursor, eFillShape);
@@ -2141,7 +2141,12 @@ bool nuiEditText::TextBlock::GetCoordsFromPos(uint Pos, nuiSize& rX, nuiSize& rY
   // General Case:
   uint index = Pos;
   if (Pos == count)
+  {
     index--;
+   //   rX = mRect.Right();
+   //   rY = mpFont->GetHeight() + mRect.Top();
+   //   return true;
+  }
 
   const nuiTextGlyph* pGlyph = mpLayout->GetGlyph(index);
   rX = pGlyph->mX + mRect.Left();
@@ -2149,8 +2154,7 @@ bool nuiEditText::TextBlock::GetCoordsFromPos(uint Pos, nuiSize& rX, nuiSize& rY
 
   if (Pos == count)
   {
-    nuiGlyphInfo glyphinfo;
-    rX += glyphinfo.AdvanceX;
+    rX += pGlyph->AdvanceX;
   }
   return true;
 }

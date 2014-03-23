@@ -512,14 +512,14 @@ nuiSimpleContainerConstIterator::nuiSimpleContainerConstIterator(const nuiSimple
 
 nuiSimpleContainerIterator& nuiSimpleContainerIterator::operator = (const nuiSimpleContainerIterator& rIterator)
 {
-  *((nuiContainer::Iterator*)this) = rIterator;
+//  *((nuiContainer::Iterator*)this) = rIterator;
   mIndex = rIterator.mIndex;
   return *this;
 }
 
 nuiSimpleContainerConstIterator& nuiSimpleContainerConstIterator::operator = (const nuiSimpleContainerConstIterator& rIterator)
 {
-  *((nuiContainer::ConstIterator*)this) = rIterator;
+  //*((nuiContainer::ConstIterator*)this) = rIterator;
   mIndex = rIterator.mIndex;
   return *this;
 }

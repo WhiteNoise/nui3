@@ -116,7 +116,7 @@ bool nglImageInfo::AllocateBuffer()
 void nglImageInfo::Transfert(nglImageInfo& rInfo)
 {
   Copy(rInfo, false);
-  mOwnBuffer = true; 
+  mOwnBuffer = true;
   rInfo.mOwnBuffer = false;
 }
 
@@ -517,12 +517,9 @@ void ScaleRectAvg(uint8* pTarget, int32 TgtWidth, int32 TgtHeight,
     pTarget += TgtWidth * bpp;
   }
   
-  delete pScanLine;
-  delete pScanLineAhead;
+  delete[] pScanLine;
+  delete[] pScanLineAhead;
 }
-
-
-
 
 
 nglImage::nglImage(const nglImage& rImage, uint32 NewWidth, uint32 NewHeight)
@@ -750,15 +747,15 @@ nglImage* nglImage::Resize(uint32 width, uint32 height)
   
   // init new image params.
   nglImageInfo newInfo;
-  newInfo.Copy(mInfo, false/* don't clone*/);
+  newInfo.Copy(mInfo, false/* don't clone*/);       // don't copy our buffer..
   newInfo.mWidth = width;
   newInfo.mHeight = height;
   newInfo.mBytesPerLine = newInfo.mWidth * newInfo.mBytesPerPixel;
   newInfo.mOwnBuffer = false;
-  newInfo.AllocateBuffer();
+  newInfo.AllocateBuffer();                         // create a new buffer
 
   // build new image
-  nglImage* pNew = new nglImage(newInfo, eTransfert);
+  nglImage* pNew = new nglImage(newInfo, eTransfert);   // transfer buffer to newImage
   
   switch (mInfo.mBitDepth)
   {

@@ -333,7 +333,7 @@ int64 nglFile::Write(const nglString& str, const nglTextEncoding Encoding)
 {
 	char* pTemp = str.Export(Encoding);
 	std::string		tmp(pTemp);
-	delete pTemp;
+	free(pTemp);
 	return Write (tmp.c_str(), tmp.size(), sizeof(char));
 }
 
@@ -724,6 +724,10 @@ int64 nglFile::Write (const void* pData, int64 WordCount, uint WordSize)
 {
 	/* See remarks in Read
 	*/
+    
+    if (WordSize == 0)
+        WordSize = 1;
+    
 	int64 done, rest;
 	bool swapped;
 
@@ -803,13 +807,13 @@ bool nglFile::Open()
     return false;
 
   int flags;
-	const char* filename = mPath.GetPathName().Export();
+    char* filename = mPath.GetPathName().Export();
 #if (defined _LINUX_) || (defined __APPLE__) || (defined _MINUI3_)
 	nglPath resolvedPath = mPath;
 	bool resolved = resolvedPath.ResolveLink();
 	if (resolved)
 	{
-    delete filename;
+        free(filename);
 		filename = resolvedPath.GetPathName().Export();
 	}
 #endif
@@ -837,7 +841,7 @@ bool nglFile::Open()
 #endif
   mFD = open(filename, flags, 00644);
 
-  free(const_cast<char *>(filename));
+  free(filename);
   if (mFD == -1)
   {
     return false;
@@ -945,6 +949,8 @@ int64 nglFile::Read (void* pData, int64 WordCount, uint WordSize)
 int64 nglFile::Write (const void* pData, int64 WordCount, uint WordSize)
 {
   int64 done, rest;
+    if (WordSize == 0)
+        WordSize = 1;
 
   if (!IsOpen() || (mMode == eFileRead) || (pData == NULL) || (WordCount == 0)) return 0;
 

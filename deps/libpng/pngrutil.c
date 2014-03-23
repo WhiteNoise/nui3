@@ -291,11 +291,12 @@ png_decompress_chunk(png_structp png_ptr, int comp_type,
                   png_ptr->chunkdata = NULL;
                   png_error(png_ptr,
                     "Not enough memory to decompress chunk.");
+               } else {
+                   png_memcpy(text + prefix_size, png_ptr->zbuf,
+                        text_size - prefix_size);
+                   png_memcpy(text, png_ptr->chunkdata, prefix_size);
+                   *(text + text_size) = 0x00;
                }
-               png_memcpy(text + prefix_size, png_ptr->zbuf,
-                    text_size - prefix_size);
-               png_memcpy(text, png_ptr->chunkdata, prefix_size);
-               *(text + text_size) = 0x00;
             }
             else
             {
@@ -312,13 +313,14 @@ png_decompress_chunk(png_structp png_ptr, int comp_type,
                   png_ptr->chunkdata = NULL;
                   png_error(png_ptr,
                     "Not enough memory to decompress chunk..");
+               } else {
+                   png_memcpy(text, tmp, text_size);
+                   png_free(png_ptr, tmp);
+                   png_memcpy(text + text_size, png_ptr->zbuf,
+                      (png_ptr->zbuf_size - png_ptr->zstream.avail_out));
+                   text_size += png_ptr->zbuf_size - png_ptr->zstream.avail_out;
+                   *(text + text_size) = 0x00;
                }
-               png_memcpy(text, tmp, text_size);
-               png_free(png_ptr, tmp);
-               png_memcpy(text + text_size, png_ptr->zbuf,
-                  (png_ptr->zbuf_size - png_ptr->zstream.avail_out));
-               text_size += png_ptr->zbuf_size - png_ptr->zstream.avail_out;
-               *(text + text_size) = 0x00;
             }
             if (ret == Z_STREAM_END)
                break;

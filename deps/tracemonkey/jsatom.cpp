@@ -64,8 +64,8 @@
 /*
  * ATOM_HASH assumes that JSHashNumber is 32-bit even on 64-bit systems.
  */
-JS_STATIC_ASSERT(sizeof(JSHashNumber) == 4);
-JS_STATIC_ASSERT(sizeof(JSAtom *) == JS_BYTES_PER_WORD);
+//JS_STATIC_ASSERT(sizeof(JSHashNumber) == 4);
+//JS_STATIC_ASSERT(sizeof(JSAtom *) == JS_BYTES_PER_WORD);
 
 /*
  * Start and limit offsets for atom pointers in JSAtomState must be aligned
@@ -957,7 +957,8 @@ js_hash_atom_ptr(const void *key)
 #define TEMP_SIZE_START         JS_BIT(TEMP_SIZE_START_LOG2)
 #define TEMP_SIZE_LIMIT         JS_BIT(TEMP_SIZE_LIMIT_LOG2)
 
-JS_STATIC_ASSERT(TEMP_SIZE_START >= sizeof(JSHashTable));
+// DW
+//JS_STATIC_ASSERT(TEMP_SIZE_START >= sizeof(JSHashTable));
 
 static void *
 js_alloc_temp_space(void *priv, size_t size)

@@ -42,13 +42,16 @@ void nuiContainer::SetObjectName(const nglString& rName)
 bool nuiContainer::Trash()
 {
   nuiAutoRef;
+    
+
+    
   return nuiWidget::Trash();
 }
 
 void nuiContainer::CallOnTrash()
 {
   CheckValid();
-  ChildrenCallOnTrash();
+  //ChildrenCallOnTrash();
   nuiWidget::CallOnTrash();
 //  OnTrash();
 }
@@ -517,7 +520,7 @@ nuiWidgetPtr nuiContainer::DispatchMouseMove(const nglMouseInfo& rInfo)
   CheckValid();
   nuiAutoRef;
   if (!mMouseEventEnabled || mTrashed)
-    return false;
+    return NULL;
 
   nuiWidgetPtr pHandled=NULL;
   bool inside=false,res=false;
@@ -591,7 +594,7 @@ nuiWidgetPtr nuiContainer::DispatchMultiEventsFinished(const nglMouseInfo& rInfo
 {
     CheckValid();
     if (!mMouseEventEnabled || mTrashed)
-        return false;
+        return NULL;
 
     bool hasgrab = HasGrab(rInfo.TouchId);
     

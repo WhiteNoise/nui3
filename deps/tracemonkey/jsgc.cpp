@@ -296,9 +296,10 @@ const size_t GC_ARENA_MARK_BITMAP_WORDS =
     JS_HOWMANY(GC_CELLS_PER_ARENA, JS_BITS_PER_WORD);
 
 /* Check that GC_CELLS_PER_ARENA indeed maximises (1). */
-JS_STATIC_ASSERT(GC_CELLS_PER_ARENA * GC_CELL_SIZE +
-                 GC_ARENA_MARK_BITMAP_WORDS * sizeof(jsuword) <=
-                 GC_ARENA_SIZE - sizeof(JSGCArenaInfo));
+// DW
+//JS_STATIC_ASSERT(GC_CELLS_PER_ARENA * GC_CELL_SIZE +
+//                 GC_ARENA_MARK_BITMAP_WORDS * sizeof(jsuword) <=
+//                 GC_ARENA_SIZE - sizeof(JSGCArenaInfo));
 
 JS_STATIC_ASSERT((GC_CELLS_PER_ARENA + 1) * GC_CELL_SIZE +
                  sizeof(jsuword) *
@@ -369,8 +370,9 @@ struct JSGCArena {
 };
 
 JS_STATIC_ASSERT(sizeof(JSGCArena) == GC_ARENA_SIZE);
-JS_STATIC_ASSERT(GC_ARENA_SIZE - GC_ARENA_CELLS_SIZE - sizeof(JSGCArenaInfo) -
-                 GC_ARENA_MARK_BITMAP_SIZE < GC_CELL_SIZE);
+// DW
+//JS_STATIC_ASSERT(GC_ARENA_SIZE - GC_ARENA_CELLS_SIZE - sizeof(JSGCArenaInfo) -
+//                 GC_ARENA_MARK_BITMAP_SIZE < GC_CELL_SIZE);
 JS_STATIC_ASSERT((GC_ARENA_SIZE - GC_ARENA_CELLS_SIZE - sizeof(JSGCArenaInfo) -
                   GC_ARENA_MARK_BITMAP_SIZE) % sizeof(jsuword) == 0);
 

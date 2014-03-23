@@ -33,14 +33,25 @@ void interruptionListener( void* inClientData, UInt32 inInterruptionState)
       nuiAudioDevice_AudioUnit *pDevice = (nuiAudioDevice_AudioUnit*) inClientData;
     if(inInterruptionState == kAudioSessionBeginInterruption)
     {
-        pDevice->pausePlayback();
+        if(pDevice->IsPlaying())
+        {
+            pDevice->pausePlayback();
+//          AudioSessionSetActive(false);
+        }
+        
+
+
     }
     else if(inInterruptionState == kAudioSessionEndInterruption)
     {
-        pDevice->resumePlayback();
+        if(pDevice->IsInterrupted())
+            pDevice->resumePlayback();
+        
+//        UInt32 allowMixing = true;
+//        AudioSessionSetProperty(kAudioSessionProperty_OverrideCategoryMixWithOthers, sizeof (allowMixing), &allowMixing);
+//        AudioSessionSetActive(false);
+//        AudioSessionSetActive(true);
     }
-	
-    
 }		
 
 void audioRouteChangeListenerCallback (void                   *inUserData,                                 // 1
@@ -49,22 +60,25 @@ void audioRouteChangeListenerCallback (void                   *inUserData,      
                                        const void             *inPropertyValue                             // 4
                                        )
 {
-  if (inPropertyID != kAudioSessionProperty_AudioRouteChange)
-    return;
-  
-  printf("Audio Route change\n");
-  nuiAudioDevice_AudioUnit *pDevice = (nuiAudioDevice_AudioUnit*) inUserData;
-  
-  CFDictionaryRef routeChangeDictionary = (CFDictionaryRef)inPropertyValue;
-  CFNumberRef routeChangeReasonRef = (CFNumberRef)CFDictionaryGetValue(routeChangeDictionary, CFSTR(kAudioSession_AudioRouteChangeKey_Reason));
-  
-  SInt32 routeChangeReason;
-  CFNumberGetValue(routeChangeReasonRef, kCFNumberSInt32Type, &routeChangeReason);
-  
-  if (routeChangeReason == kAudioSessionRouteChangeReason_OldDeviceUnavailable)
-  {
-    printf("Audio Route change reason: Old Device unavailable\n");
-  }
+    if (inPropertyID != kAudioSessionProperty_AudioRouteChange)
+        return;
+
+
+    nuiAudioDevice_AudioUnit *pDevice = (nuiAudioDevice_AudioUnit*) inUserData;
+
+    CFDictionaryRef routeChangeDictionary = (CFDictionaryRef)inPropertyValue;
+    CFNumberRef routeChangeReasonRef = (CFNumberRef)CFDictionaryGetValue(routeChangeDictionary, CFSTR(kAudioSession_AudioRouteChangeKey_Reason));
+
+    SInt32 routeChangeReason;
+    CFNumberGetValue(routeChangeReasonRef, kCFNumberSInt32Type, &routeChangeReason);
+
+    if (routeChangeReason == kAudioSessionRouteChangeReason_OldDeviceUnavailable)
+    {
+        printf("Audio Route change reason: Old Device unavailable\n");
+    }
+    printf("Audio Route change %l\n", routeChangeReason);
+    AudioSessionSetActive(false);
+    AudioSessionSetActive(true);
 }
 
 
@@ -74,7 +88,10 @@ nuiAudioDevice_AudioUnit::nuiAudioDevice_AudioUnit()
 {  
   mpIData = NULL;
    mAudioUnit = NULL;
+    bPlaying = false;
 
+    interruptionWhilePlaying = false;
+    
 // do we need this?
   OSStatus err;
   UInt32 size = sizeof (UInt32);
@@ -85,7 +102,8 @@ nuiAudioDevice_AudioUnit::nuiAudioDevice_AudioUnit()
 	// Initialize our session
 	err = AudioSessionInitialize(NULL, NULL, interruptionListener, NULL);	
   
-  
+
+    
 	// Set the category
   UInt32 uCategory = kAudioSessionCategory_LiveAudio;
   if (HasAudioInput())
@@ -104,8 +122,12 @@ nuiAudioDevice_AudioUnit::nuiAudioDevice_AudioUnit()
 							 kAudioSessionProperty_OverrideCategoryDefaultToSpeaker,
 							 sizeof (doChangeDefaultRoute),
 							 &doChangeDefaultRoute
-							 );	
-  
+							 );
+    
+    UInt32 allowMixing = true;
+    AudioSessionSetProperty(kAudioSessionProperty_OverrideCategoryMixWithOthers, sizeof (allowMixing), &allowMixing);
+
+    
   EnumSampleRates();
   EnumBufferSizes();
   if (!HasAudioInput())
@@ -167,40 +189,81 @@ OSStatus AudioUnitInputCallback(void* inRefCon,
 
 void nuiAudioDevice_AudioUnit::pausePlayback()
 {
-    if(mAudioUnit)
-    AudioOutputUnitStop(mAudioUnit);    
+    if(mAudioUnit && bPlaying)
+    {
+        bPlaying = false;
+        interruptionWhilePlaying = true;
+        AudioSessionSetActive(false);
+    }
 }
-    
+
 void nuiAudioDevice_AudioUnit::resumePlayback()
 {
     OSStatus err;
     
-    /*
-    UInt32 uCategory = kAudioSessionCategory_MediaPlayback;
-    //if (HasAudioInput())
-    //uCategory = kAudioSessionCategory_PlayAndRecord;
     
-    err = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(UInt32), &uCategory);
-    if (err != noErr)
+  
+    if(mAudioUnit)      // && interruptionWhilePlaying
     {
-        NGL_ASSERT(0);
-        return;
-    } 		
-    
-    UInt32 allowMixing = true; 
-    err = AudioSessionSetProperty( 
-                                  kAudioSessionProperty_OverrideCategoryMixWithOthers, 
-                                  sizeof(allowMixing),&allowMixing 
-                                  ); 
-    
-    err = AudioSessionSetActive(true);
-    if (err != noErr)
-    {
-        return;
+        /*
+         UInt32 uCategory = kAudioSessionCategory_MediaPlayback;
+         //if (HasAudioInput())
+         //uCategory = kAudioSessionCategory_PlayAndRecord;
+         
+         err = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(UInt32), &uCategory);
+         if (err != noErr)
+         {
+         NGL_ASSERT(0);
+         return;
+         }
+         
+         UInt32 allowMixing = true;
+         err = AudioSessionSetProperty(
+         kAudioSessionProperty_OverrideCategoryMixWithOthers,
+         sizeof(allowMixing),&allowMixing
+         );
+         
+         */
+
+        UInt32 allowMixing = true;
+        AudioSessionSetProperty(kAudioSessionProperty_OverrideCategoryMixWithOthers, sizeof (allowMixing), &allowMixing);
+        
+        err = AudioSessionSetActive(true);
+        if (err != noErr)
+        {
+            return;
+        }
+
+        bPlaying = true;
+        interruptionWhilePlaying = false;
+        
+
     }
-    */
-    if(mAudioUnit)
-        err = AudioOutputUnitStart(mAudioUnit);    
+}
+
+void nuiAudioDevice_AudioUnit::stopPlayback()
+{
+    
+    if(mAudioUnit)      // && interruptionWhilePlaying
+    {
+        pausePlayback();
+
+        AudioOutputUnitStop(mAudioUnit);
+    }
+}
+
+
+void nuiAudioDevice_AudioUnit::restartPlayback()
+{
+    if(mAudioUnit)      // && interruptionWhilePlaying
+    {
+
+        AudioOutputUnitStart(mAudioUnit);
+        
+        resumePlayback();
+    }
+    
+    
 }
 
 void nuiAudioDevice_AudioUnit::Process(uint uNumFrames, AudioBufferList* ioData)
@@ -348,20 +411,19 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
     NGL_OUT(_T("Audio unit open"));
   OSStatus err;
     
-    UInt32 channels = rOutputChannels.size();
-    UInt32 sz1 =  sizeof (UInt32);
-    OSStatus result = AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareInputNumberChannels, &sz1, &channels);
-    if ( result == kAudioSessionIncompatibleCategory ) {
-        // Audio session error (rdar://13022588). Power-cycle audio session.
-        AudioSessionSetActive(false);
-        AudioSessionSetActive(true);
-        result = AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareInputNumberChannels, &sz1, &channels);
-        if ( result != noErr ) {
-            NGL_OUT("Got error %d while querying input channels", result);
-        }
-    }
+//    UInt32 channels = rInputChannels.size();
+//    UInt32 sz1 =  sizeof (UInt32);
+//    OSStatus result = AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareInputNumberChannels, &sz1, &channels);
+//    if ( result == kAudioSessionIncompatibleCategory ) {
+//        // Audio session error (rdar://13022588). Power-cycle audio session.
+//        AudioSessionSetActive(false);
+//        AudioSessionSetActive(true);
+//        result = AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareInputNumberChannels, &sz1, &channels);
+//        if ( result != noErr ) {
+//            NGL_OUT("Got error %d while querying input channels", result);
+//        }
+//    }
 
-  	
   mAudioProcessFn = pProcessFunction;
   mSampleRate = SampleRate;
   mBufferSize = BufferSize;
@@ -376,9 +438,9 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
     mOutputBuffers[i] = (float*)malloc(mBufferSize * sizeof(float));
   
   {
-    UInt32 size = sizeof (UInt32);
-    UInt32 value = kAudioSessionOverrideAudioRoute_None;
-    AudioSessionSetProperty(kAudioSessionProperty_OverrideAudioRoute, size, &value);  
+//    UInt32 size = sizeof (UInt32);
+//    UInt32 value = kAudioSessionOverrideAudioRoute_None;
+//    AudioSessionSetProperty(kAudioSessionProperty_OverrideAudioRoute, size, &value);
     
     AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, audioRouteChangeListenerCallback, this);
     
@@ -583,11 +645,11 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
     
 		// Enable INPUT
 		flag = 1;
-		if ((err = AudioUnitSetProperty(mAudioUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input,	kInputBus, &flag, sizeof (flag))) != noErr)
-		{
-      NGL_ASSERT(err == noErr);
-			return false;		
-		}
+//		if ((err = AudioUnitSetProperty(mAudioUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input,	kInputBus, &flag, sizeof (flag))) != noErr)
+//		{
+//            NGL_ASSERT(err == noErr);
+//			return false;		
+//		}
 		
 		// Set the INPUT stream format
 		size = sizeof (AudioStreamBasicDescription);
@@ -619,27 +681,28 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
     mInputBuffers.push_back(new float[BufferSize]);
 		
     cb.inputProc = AudioUnitInputCallback;
-		cb.inputProcRefCon = this;
-		size = sizeof (AURenderCallbackStruct);	
-		
-		// When output is active, need to use SetInputCallback rather than SetRenderCallback
-    //		if (EnableOutput)
-		{
-			if ((err = AudioUnitSetProperty(mAudioUnit, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, kInputBus, &cb, size)) != noErr)
-			{
-				NGL_ASSERT(err == noErr);
-				return false;
-			}
-		}
+    cb.inputProcRefCon = this;
+    size = sizeof (AURenderCallbackStruct);	
+    
+    // When output is active, need to use SetInputCallback rather than SetRenderCallback
+      
+    //if (false)
+    {
+        if ((err = AudioUnitSetProperty(mAudioUnit, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, kInputBus, &cb, size)) != noErr)
+        {
+            NGL_ASSERT(err == noErr);
+            return false;
+        }
+    }
 
-		
-		// Disable buffer allocation on input bus
-		flag = 0;
-		if ((err = AudioUnitSetProperty(mAudioUnit, kAudioUnitProperty_ShouldAllocateBuffer, kAudioUnitScope_Output, kInputBus, &flag, sizeof (flag))) != noErr)
-		{
-			NGL_ASSERT(err == noErr);
-			return false;		
-		}	
+    
+    // Disable buffer allocation on input bus
+    flag = 0;
+    if ((err = AudioUnitSetProperty(mAudioUnit, kAudioUnitProperty_ShouldAllocateBuffer, kAudioUnitScope_Output, kInputBus, &flag, sizeof (flag))) != noErr)
+    {
+        NGL_ASSERT(err == noErr);
+        return false;		
+    }	
   }
 
     
@@ -652,44 +715,41 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
 	
 	err = AudioUnitInitialize(mAudioUnit);
   
-  uint32 count = 4;
-  while (err == -12983 && count--)
-  {
-    nglThread::MsSleep(100);
-    err = AudioUnitInitialize(mAudioUnit);
-  }
+    uint32 count = 4;
+    while (err == -12983 && count--)
+    {
+        nglThread::MsSleep(100);
+        err = AudioUnitInitialize(mAudioUnit);
+    }
    
 
 	if (err != noErr)
-  {
-    NGL_ASSERT(0);
-    return false;
-  }	
+    {
+        NGL_ASSERT(0);
+        return false;
+    }
 
 
 	err = AudioOutputUnitStart(mAudioUnit);
 	if (err != noErr)
-  {
-    NGL_ASSERT(0);
-    return false;
-  }	
+    {
+        NGL_ASSERT(0);
+        return false;
+    }
 	//NSAssert (noErr == err, @"AU Start failed");
 	
+    bPlaying = true;
 	return true;
 }
 
-
-
-
-
-
 bool nuiAudioDevice_AudioUnit::Close()
 {
+    bPlaying = false;
 	AudioOutputUnitStop(mAudioUnit);
 	AudioUnitUninitialize(mAudioUnit);
 	AudioComponentInstanceDispose(mAudioUnit);
-  mAudioUnit = NULL;
-  return true;
+    mAudioUnit = NULL;
+    return true;
 }
     
     
@@ -719,14 +779,6 @@ nglString nuiAudioDevice_AudioUnit::GetChannelName(bool IsInput, int32 index) co
     return mInputChannels[index];
   return mOutputChannels[index];
 }
-
-
-
-
-
-
-
-
 
 
 //class nuiAudioDeviceAPI_AudioUnit : public nuiAudioDeviceAPI

@@ -118,5 +118,7 @@ typedef unsigned __int64  JSUint64;
 /* Some mozilla code uses JS-friend APIs that depend on JS_TRACER being
    correct. */
 #define JS_TRACER 1
+// DW
+
 
 #endif /* js_config_h___ */
