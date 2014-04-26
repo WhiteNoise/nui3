@@ -35,6 +35,6 @@ nuiScriptEngine* nuiApplication::GetScriptEngine() const
 void nuiApplication::EnableDefaultScriptEngine()
 {
 #ifndef _ANDROID_
-  mpScriptEngine = new nuiSpiderMonkey();
+//  mpScriptEngine = new nuiSpiderMonkey();
 #endif
 }

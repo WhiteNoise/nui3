@@ -9,6 +9,10 @@
 #include "nuiAudioDevice_AudioUnit.h"
 
 
+#import <AudioToolbox/AudioToolbox.h>
+#import <AVFoundation/AVFoundation.h>
+
+
 #define kOutputBus	(0)
 #define kInputBus		(1)
 
@@ -193,7 +197,12 @@ void nuiAudioDevice_AudioUnit::pausePlayback()
     {
         bPlaying = false;
         interruptionWhilePlaying = true;
-        AudioSessionSetActive(false);
+        //AudioSessionSetActive(false);
+        
+        NSError *setActiveError = nil;
+        [[AVAudioSession sharedInstance] setActive: NO
+                                             error: &setActiveError];
+
     }
 }
 
@@ -228,12 +237,18 @@ void nuiAudioDevice_AudioUnit::resumePlayback()
         UInt32 allowMixing = true;
         AudioSessionSetProperty(kAudioSessionProperty_OverrideCategoryMixWithOthers, sizeof (allowMixing), &allowMixing);
         
-        err = AudioSessionSetActive(true);
-        if (err != noErr)
-        {
-            return;
-        }
+//        err = AudioSessionSetActive(true);
+//        if (err != noErr)
+//        {
+//            return;
+//        }
 
+        NSError *setActiveError = nil;
+        [[AVAudioSession sharedInstance] setActive: YES
+                                             error: &setActiveError];
+
+        
+        
         bPlaying = true;
         interruptionWhilePlaying = false;
         
@@ -470,7 +485,11 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
 //  }	
 	
 	// Set active
-	err = AudioSessionSetActive(true);
+//	err = AudioSessionSetActive(true);
+    NSError *setActiveError = nil;
+    [[AVAudioSession sharedInstance] setActive: YES
+                                         error: &setActiveError];
+
 //	if (err != noErr)
 //  {
 //    NGL_ASSERT(0);
