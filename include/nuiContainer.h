@@ -87,7 +87,7 @@ public:
   nuiContainerPtr GetRoot() const;
   nuiWidgetPtr Find (const nglString& rName); ///< Finds a node given its full path relative to the current node. Eg. Find("background/color/red").
 
-  virtual uint GetChildrenCount() const = 0; ///< Returns the number of children this object has.
+  virtual int GetChildrenCount() const = 0; ///< Returns the number of children this object has.
   virtual IteratorPtr GetFirstChild(bool DoRefCounting = false) = 0; 
   virtual IteratorPtr GetLastChild(bool DoRefCounting = false) = 0; 
   virtual bool GetNextChild(IteratorPtr pIterator) = 0;
@@ -132,7 +132,8 @@ public:
   virtual bool PreMouseClicked(const nglMouseInfo& rInfo);
   virtual bool PreMouseUnclicked(const nglMouseInfo& rInfo);
   virtual bool PreMouseMoved(const nglMouseInfo& rInfo);
-  //@}  
+  virtual bool PreMouseWheelMoved(const nglMouseInfo& rInfo);
+  //@}
   
   /** @name Private event management system (do not override unless you know what you're doing!!!) */
   //@{
@@ -140,7 +141,9 @@ public:
   virtual bool DispatchMouseClick(const nglMouseInfo& rInfo);
   virtual bool DispatchMouseUnclick(const nglMouseInfo& rInfo);
   virtual nuiWidgetPtr DispatchMouseMove(const nglMouseInfo& rInfo);
-    virtual nuiWidgetPtr DispatchMultiEventsFinished(const nglMouseInfo& rInfo);
+virtual nuiWidgetPtr DispatchMultiEventsFinished(const nglMouseInfo& rInfo);
+virtual bool DispatchMouseCanceled(const nglMouseInfo& rInfo);
+
   //@}
 
   virtual bool DelChild(nuiWidgetPtr pChild) = 0;

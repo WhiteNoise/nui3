@@ -9,8 +9,17 @@
 
 #include "nui.h"
 
-//const bool gGlobalUseRenderCache = false;
-const bool gGlobalUseRenderCache = true;
+bool nuiWidget::mGlobalUseRenderCache = true;
+
+void nuiWidget::SetGlobalUseRenderCache(bool set)
+{
+  mGlobalUseRenderCache = set;
+}
+
+bool nuiWidget::GetGlobalUseRenderCache()
+{
+  return mGlobalUseRenderCache;
+}
 
 //#define NUI_LOG_GETIDEALRECT
 
@@ -138,6 +147,10 @@ void nuiWidget::InitDefaultValues()
   mpLayoutAnimation = NULL;
   mFixedAspectRatio = false;
   mAutoClip = true;
+  mAutoDraw = false;
+  mReverseRender = false;
+  mOverrideVisibleRect = false;
+  mAutoUpdateLayout = false;
 }
 
 
@@ -427,10 +440,10 @@ void nuiWidget::InitAttributes()
                 nuiMakeDelegate(this, &nuiWidget::GetSurfaceMatrix),
                 nuiMakeDelegate(this, &nuiWidget::SetSurfaceMatrix)));
   
-  AddAttribute(new nuiAttribute<const nuiMatrix&>
+  AddAttribute(new nuiAttribute<nuiMatrix>
                (nglString(_T("Matrix")), nuiUnitMatrix,
                 nuiMakeDelegate(this, &nuiWidget::_GetMatrix),
-                nuiMakeDelegate(this, &nuiWidget::SetMatrix)));
+                nuiMakeDelegate(this, &nuiWidget::_SetMatrix)));
   
   AddAttribute(new nuiAttribute<nuiBlendFunc>
                (nglString(_T("SurfaceBlendFunc")), nuiUnitCustom,
@@ -471,7 +484,17 @@ void nuiWidget::InitAttributes()
                (nglString(_T("FixedAspectRatio")), nuiUnitOnOff,
                 nuiMakeDelegate(this, &nuiWidget::GetFixedAspectRatio), 
                 nuiMakeDelegate(this, &nuiWidget::SetFixedAspectRatio)));
-  
+
+  AddAttribute(new nuiAttribute<bool>
+               (nglString(_T("ReverseRender")), nuiUnitOnOff,
+                nuiMakeDelegate(this, &nuiWidget::GetReverseRender),
+                nuiMakeDelegate(this, &nuiWidget::SetReverseRender)));
+
+  AddAttribute(new nuiAttribute<bool>
+               (nglString(_T("AutoUpdateLayout")), nuiUnitOnOff,
+                nuiMakeDelegate(this, &nuiWidget::GetAutoUpdateLayout),
+                nuiMakeDelegate(this, &nuiWidget::SetAutoUpdateLayout)));
+
   
 }
 
@@ -554,13 +577,16 @@ void nuiWidget::Init()
 
   NUI_ADD_EVENT(Clicked);
   NUI_ADD_EVENT(Unclicked);
+  NUI_ADD_EVENT(ClickCanceled);
   NUI_ADD_EVENT(MovedMouse);
+  NUI_ADD_EVENT(WheelMovedMouse);
 
   NUI_ADD_EVENT(FocusChanged);
   
   NUI_ADD_EVENT(PreClicked);
   NUI_ADD_EVENT(PreUnclicked);
   NUI_ADD_EVENT(PreMouseMoved);
+  NUI_ADD_EVENT(PreMouseWheelMoved);
 }
 
 bool nuiWidget::SetObjectClass(const nglString& rName)
@@ -618,6 +644,7 @@ nuiWidget::~nuiWidget()
   }
 #endif
   
+  StopAutoDraw();
   ClearAnimations();
 
   nuiTopLevel* pRoot = GetTopLevel();
@@ -646,6 +673,10 @@ nuiWidget::~nuiWidget()
     delete mpMatrixNodes;
     mpMatrixNodes = NULL;
   }
+
+  // Event Actions:
+  for (auto pAction : mEventActions)
+    pAction->Disconnect(this);
 }
 
 void nuiWidget::Built()
@@ -914,7 +945,7 @@ void nuiWidget::InvalidateRect(const nuiRect& rRect)
   CheckValid();
   #ifdef _DEBUG_LAYOUT
   if (GetDebug())
-    NGL_OUT(_T("  nuiWidget::InvalidateRect '%s' [%s] %s\n"), GetObjectClass().GetChars(), GetObjectName().GetChars(), rRect.GetValue().GetChars());
+    NGL_OUT(_T("  nuiWidget::InvalidateRect '%s' [%s] %s (thread: %d)\n"), GetObjectClass().GetChars(), GetObjectName().GetChars(), rRect.GetValue().GetChars(), nglThread::GetCurThreadID());
   #endif
   
   if (IsVisible(true))
@@ -967,7 +998,10 @@ void nuiWidget::BroadcastInvalidateRect(nuiWidgetPtr pSender, const nuiRect& rRe
   r.Move(rect.Left(), rect.Top());
 
   if (mpParent)
+  {
+    mpParent->CheckValid();
     mpParent->BroadcastInvalidateRect(pSender, r);
+  }
   DebugRefreshInfo();
 }
 
@@ -982,29 +1016,23 @@ void nuiWidget::Invalidate()
   if ((mNeedRender && mNeedSelfRedraw))
     return;
 
-  //printf("nuiWidget::Invalidate '%s [%s]'\n", GetObjectClass().GetChars() , GetObjectName().GetChars());
-  
+  NGL_ASSERT(nglThread::GetCurThreadID() == App->GetMainThreadID());
+  if (GetDebug())
+  {
+    NGL_OUT(_T("  nuiWidget::Invalidate '%s' [%s] (thread: %d)\n"),  GetObjectClass().GetChars(), GetObjectName().GetChars(), nglThread::GetCurThreadID());
+  }
+
   if (!IsVisible(true))
   {
-#ifdef _DEBUG_
-    if (GetDebug())
-    {
-      NGL_OUT(_T("  nuiWidget::Invalidate '%s' [%s]\n"), GetObjectClass().GetChars(), GetObjectName().GetChars());
-    }
-#endif
     mNeedSelfRedraw = true;
     InvalidateSurface();
     return;
   }
 
-  ////  nuiWidget::InvalidateRect(GetOverDrawRect(true, true));
   nuiRect r(GetOverDrawRect(true, true));
   r.Intersect(r, GetVisibleRect());
   nuiWidget::InvalidateRect(r);
-//  nuiWidget::InvalidateRect(GetVisibleRect());
-  ////  nuiWidget::InvalidateRect(GetRect());
   SilentInvalidate();
-
   if (mpParent)
     mpParent->BroadcastInvalidate(this);
   DebugRefreshInfo();
@@ -1124,7 +1152,15 @@ void nuiWidget::SilentInvalidateLayout()
 void nuiWidget::InvalidateLayout()
 {
   CheckValid();
-  if (!mNeedSelfLayout && HasUserRect())
+
+  if (mAutoUpdateLayout)
+  {
+    UpdateLayout();
+    Invalidate();
+    return;
+  }
+
+  if ((!mNeedSelfLayout && HasUserRect()))
   {
     UpdateLayout();
     return;
@@ -1158,7 +1194,8 @@ void nuiWidget::ForcedInvalidateLayout()
 void nuiWidget::BroadcastInvalidateLayout(nuiWidgetPtr pSender, bool BroadCastOnly)
 {
   CheckValid();
-  if (!mNeedSelfLayout && HasUserSize()) // A child can't change the ideal position of its parent so we can stop broadcasting if the parent has a fixed ideal size.
+
+  if ((!mNeedSelfLayout && HasUserSize())) // A child can't change the ideal position of its parent so we can stop broadcasting if the parent has a fixed ideal size.
   {
     UpdateLayout();
     return;
@@ -1177,7 +1214,7 @@ void nuiWidget::BroadcastInvalidateLayout(nuiWidgetPtr pSender, bool BroadCastOn
   if (mpParent)
   {
     mpParent->BroadcastInvalidateLayout(pSender, BroadCastOnly);
-    //NGL_OUT(_T("nuiWidget::BroadcastInvalidateLayout %s / %s / 0x%x\n"), pSender->GetObjectClass().GetChars(), pSender->GetObjectName().GetChars(), pSender);
+//    NGL_OUT(_T("nuiWidget::BroadcastInvalidateLayout %s / %s / 0x%x\n"), pSender->GetObjectClass().GetChars(), pSender->GetObjectName().GetChars(), pSender);
   }
 
 #ifdef DEBUG
@@ -1410,7 +1447,7 @@ bool nuiWidget::DrawWidget(nuiDrawContext* pContext)
     nuiDrawContext* pSavedCtx = pContext;
     
     bool rendertest = mNeedRender;
-    if (gGlobalUseRenderCache && mUseRenderCache)
+    if (mGlobalUseRenderCache && mUseRenderCache)
     {
       NGL_ASSERT(mpRenderCache);
       
@@ -1721,6 +1758,13 @@ bool nuiWidget::MouseUnclicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags Button)
   return false;
 }
 
+bool nuiWidget::MouseCanceled (nuiSize X, nuiSize Y, nglMouseInfo::Flags Button)
+{
+  CheckValid();
+  return false;
+}
+
+
 bool nuiWidget::MouseMoved(nuiSize X, nuiSize Y)
 {
   CheckValid();
@@ -1740,11 +1784,24 @@ bool nuiWidget::MouseUnclicked(const nglMouseInfo& rInfo)
   return MouseUnclicked(rInfo.X, rInfo.Y, rInfo.Buttons);
 }
 
+bool nuiWidget::MouseCanceled(const nglMouseInfo& rInfo)
+{
+  CheckValid();
+  return MouseCanceled(rInfo.X, rInfo.Y, rInfo.Buttons);
+}
+
 bool nuiWidget::MouseMoved(const nglMouseInfo& rInfo)
 {
   CheckValid();
   return MouseMoved(rInfo.X, rInfo.Y);
 }
+
+bool nuiWidget::MouseWheelMoved(const nglMouseInfo& rInfo)
+{
+  CheckValid();
+  return false;
+}
+
 
 bool nuiWidget::MouseGrabbed(nglTouchId id)
 {
@@ -1764,6 +1821,12 @@ bool nuiWidget::MultiEventsFinished(const nglMouseInfo& rInfo)
     return false;
 }
 
+const std::map<nglTouchId, nglMouseInfo>& nuiWidget::GetMouseStates() const
+{
+  nuiTopLevel* pTopLevel = GetTopLevel();
+  NGL_ASSERT(pTopLevel);
+  return pTopLevel->GetMouseStates();
+}
 
 ////// Private event management:
 bool nuiWidget::DispatchMouseClick(const nglMouseInfo& rInfo)
@@ -1794,7 +1857,10 @@ bool nuiWidget::DispatchMouseClick(const nglMouseInfo& rInfo)
       res |= Clicked(info);
     }
 
-    return res | (!mClickThru);
+    res = res | (!mClickThru);
+    if (res)
+      Grab();
+    return res;
   }
   return false;
 }
@@ -1827,9 +1893,41 @@ bool nuiWidget::DispatchMouseUnclick(const nglMouseInfo& rInfo)
       res |= Unclicked(info);
     }
 
-    return res | (!mClickThru);
+    res = res | (!mClickThru);
+    if (res)
+      Ungrab();
+    return res;
   }
   return false;
+}
+
+bool nuiWidget::DispatchMouseCanceled(const nglMouseInfo& rInfo)
+{
+  CheckValid();
+  nuiAutoRef;
+  if (mTrashed)
+    return NULL;
+
+  bool inside = false;
+  bool res = false;
+  bool hasgrab = HasGrab(rInfo.TouchId);
+  float X = rInfo.X;
+  float Y = rInfo.Y;
+
+  if (IsInsideFromRoot(X, Y))
+  {
+    inside = true;
+  }
+
+  GlobalToLocal(X, Y);
+  nglMouseInfo info(rInfo);
+  info.X = X;
+  info.Y = Y;
+
+  PreClickCanceled(info);
+  res = MouseCanceled(info);
+  res |= ClickCanceled(info) | (!mClickThru);
+  return res;
 }
 
 nuiWidgetPtr nuiWidget::DispatchMouseMove(const nglMouseInfo& rInfo)
@@ -1862,6 +1960,39 @@ nuiWidgetPtr nuiWidget::DispatchMouseMove(const nglMouseInfo& rInfo)
     return this;
   res = MouseMoved(info);
   res |= MovedMouse(info) | (!mClickThru);
+  return (res && inside) ? this : NULL;
+}
+
+nuiWidgetPtr nuiWidget::DispatchMouseWheelMove(const nglMouseInfo& rInfo)
+{
+  CheckValid();
+  nuiAutoRef;
+  if (!mMouseEventEnabled || mTrashed)
+    return NULL;
+
+  bool inside = false;
+  bool res = false;
+  bool hasgrab = HasGrab(rInfo.TouchId);
+  float X = rInfo.X;
+  float Y = rInfo.Y;
+
+  if (IsDisabled() && !hasgrab)
+    return NULL;
+
+  if (IsInsideFromRoot(X, Y))
+  {
+    inside = true;
+  }
+
+  GlobalToLocal(X, Y);
+  nglMouseInfo info(rInfo);
+  info.X = X;
+  info.Y = Y;
+
+  if (PreMouseWheelMoved(info))
+    return this;
+  res = MouseWheelMoved(info);
+  res |= WheelMovedMouse(info) | (!mClickThru);
   return (res && inside) ? this : NULL;
 }
 
@@ -1904,10 +2035,18 @@ bool nuiWidget::HasGrab()
   CheckValid();
   return DispatchHasGrab(this);
 }
+
 bool nuiWidget::HasGrab(nglTouchId TouchId)
 {
   CheckValid();
   return DispatchHasGrab(this, TouchId);
+}
+
+bool nuiWidget::StealMouseEvent(const nglMouseInfo& rInfo)
+{
+  nuiTopLevel* pTop = GetTopLevel();
+  NGL_ASSERT(pTop);
+  return pTop->StealMouseEvent(this, rInfo);
 }
 
 bool nuiWidget::Grab()
@@ -2028,7 +2167,10 @@ float nuiWidget::GetAlpha() const
 void nuiWidget::SetAlpha(float Alpha)
 {
   CheckValid();
-  mAlpha = nuiClamp(Alpha, 0.0f, 1.0f);
+  const float a = nuiClamp(Alpha, 0.0f, 1.0f);
+  if (mAlpha == a)
+    return;
+  mAlpha = a;
   Invalidate();
   DebugRefreshInfo();
 }
@@ -2037,6 +2179,11 @@ void nuiWidget::CallOnTrash()
 {
   CheckValid();
   mTrashed = true;
+
+  while (!mHotKeyEvents.empty())
+  {
+    DelHotKey(mHotKeyEvents.begin()->first);
+  }
 
   nuiTopLevel* pRoot = GetTopLevel();
   if (pRoot)
@@ -2066,10 +2213,11 @@ bool nuiWidget::Trash()
     CallOnTrash();
     TrashRequested();
   }
-  nuiAnimation* pAnim = GetAnimation(_T("TRASH"));
+
+  nuiAnimation* pAnim = GetAnimation("TRASH");
   if (pAnim && (pAnim->GetTime()==0 && pAnim->GetDuration()>0))
   {
-    StartAnimation(_T("TRASH"));
+    StartAnimation("TRASH");
   }
   else
   {
@@ -2079,29 +2227,12 @@ bool nuiWidget::Trash()
       return false;
 
     mDoneTrashed = true;
-
-    nuiTopLevel* pRoot = GetTopLevel();
-
-    if (!pRoot)
-    {
-      if (mpParent)
-        mpParent->DelChild(this);
-      return true;
-    }
-		
-    while (!mHotKeyEvents.empty())
-    {
-      DelHotKey(mHotKeyEvents.begin()->first);
-    }
-    
-    pRoot->Trash(this);
     Trashed();
-    Invalidate();
-
-    NGL_ASSERT(!HasGrab()); /// done with CallOnTrash
-//    pRoot->AdviseObjectDeath(this); /// done with CallOnTrash
 
     DebugRefreshInfo();
+    if (mpParent)
+      mpParent->DelChild(this);
+    return true;
   }
 
   return true;
@@ -2336,7 +2467,10 @@ void nuiWidget::SetVisible(bool Visible)
 {
   CheckValid();
   //NGL_OUT(_T("(%p) nuiWidget::SetVisible(%s) '%s' / '%s'\n"), this, TRUEFALSE(Visible), GetObjectClass().GetChars(), GetObjectName().GetChars());
-  
+
+  if (IsVisible(false) == Visible)
+    return;
+
   nuiAnimation* pHideAnim = GetAnimation(_T("HIDE"));
   nuiAnimation* pShowAnim = GetAnimation(_T("SHOW"));
   
@@ -2850,7 +2984,9 @@ bool nuiWidget::SetRect(const nuiRect& rRect)
     mRect.Set(rRect.Left(), rRect.Top(), mIdealRect.GetWidth(), mIdealRect.GetHeight());
   else 
     mRect = rRect;
-  mVisibleRect = GetOverDrawRect(true, true);
+
+  if (!mOverrideVisibleRect)
+    mVisibleRect = GetOverDrawRect(true, true);
   
   if (inval)
     Invalidate();
@@ -3028,10 +3164,12 @@ void nuiWidget::GetBorder(nuiSize& rLeft, nuiSize& rRight, nuiSize& rTop, nuiSiz
 void nuiWidget::SetVisibleRect(const nuiRect& rRect)
 {
   CheckValid();
+  nuiRect temp = mVisibleRect;
   if (mVisibleRect == rRect)
     return;
   
   mVisibleRect = rRect;
+  mOverrideVisibleRect = true;
   Invalidate();
 }
 
@@ -3042,9 +3180,17 @@ void nuiWidget::SilentSetVisibleRect(const nuiRect& rRect)
     return;
   
   mVisibleRect = rRect;
+  mOverrideVisibleRect = true;
   SilentInvalidate();
 }
 
+void nuiWidget::ResetVisibleRect()
+{
+  if (!mOverrideVisibleRect)
+    return;
+  mOverrideVisibleRect = false;
+  InvalidateLayout();
+}
 const nuiRect& nuiWidget::GetVisibleRect() const
 {
   CheckValid();
@@ -3215,7 +3361,9 @@ void nuiWidget::SetLayout(const nuiRect& rRect)
 {
   if (IsInTransition())
     return;
-  
+
+  mLayoutRect = rRect;
+
   CheckValid();
   nuiRect rect(GetLayoutForRect(rRect));
   
@@ -3241,8 +3389,9 @@ void nuiWidget::InternalSetLayout(const nuiRect& rect)
   mNeedSelfLayout = mNeedSelfLayout || SizeChanged;
   
   InternalSetLayout(rect, PositionChanged, SizeChanged);
-  
-  mVisibleRect = GetOverDrawRect(true, true);
+
+  if (!mOverrideVisibleRect)
+    mVisibleRect = GetOverDrawRect(true, true);
   
   if (PositionChanged && mpParent)
     mpParent->Invalidate();
@@ -3569,7 +3718,9 @@ nuiWidgetPtr nuiWidget::Find(const nglString& rName)
 void nuiWidget::StartAutoDraw()
 {
   CheckValid();
-  mGenericWidgetSink.Connect(nuiAnimation::AcquireTimer()->Tick, &nuiWidget::Animate);
+  if (!mAutoDraw)
+    mGenericWidgetSink.Connect(nuiAnimation::AcquireTimer()->Tick, &nuiWidget::Animate);
+  mAutoDraw = true;
   DebugRefreshInfo();
 }
 
@@ -3589,8 +3740,13 @@ bool nuiWidget::GetAutoDrawAnimateLayout() const
 void nuiWidget::StopAutoDraw()
 {
   CheckValid();
-  mGenericWidgetSink.DisconnectSource(nuiAnimation::GetTimer()->Tick);
-  nuiAnimation::ReleaseTimer();
+  nuiTimer* pTimer = nuiAnimation::GetTimer();
+  if (pTimer && mAutoDraw)
+  {
+    mGenericWidgetSink.DisconnectSource(pTimer->Tick);
+    nuiAnimation::ReleaseTimer();
+  }
+  mAutoDraw = false;
   DebugRefreshInfo();
 }
 
@@ -3639,7 +3795,7 @@ void nuiWidget::AddAnimation(const nglString& rName, nuiAnimation* pAnim, bool T
   mAnimations[rName] = pAnim;
   pAnim->SetDeleteOnStop(false); /// Cancel anim delete on stop or we'll crash as soon as the widget is destroyed or the user starts to play the anim once more.
   if (rName == _T("TRASH"))
-    mGenericWidgetSink.Connect(pAnim->AnimStop, &nuiWidget::AutoTrash);
+    mGenericWidgetSink.Connect(pAnim->AnimStop, &nuiWidget::AutoDestroy);
   if (rName == _T("HIDE"))
     mGenericWidgetSink.Connect(pAnim->AnimStop, &nuiWidget::AutoHide);
   
@@ -3848,6 +4004,7 @@ nuiMatrixNode* nuiWidget::GetMatrixNode(uint32 index) const
   CheckValid();
   if (mpMatrixNodes)
     return mpMatrixNodes->at(index);
+  return nullptr;
 }
 
 
@@ -3892,12 +4049,17 @@ nuiMatrix nuiWidget::GetMatrix() const
   return m;
 }
 
-const nuiMatrix& nuiWidget::_GetMatrix() const
+nuiMatrix nuiWidget::_GetMatrix() const
 {
     CheckValid();
     static nuiMatrix m = GetMatrix();
     
   return m;
+}
+
+void nuiWidget::_SetMatrix(nuiMatrix Matrix)
+{
+  SetMatrix(Matrix);
 }
 
 void nuiWidget::SetMatrix(const nuiMatrix& rMatrix)
@@ -4067,10 +4229,11 @@ nuiTheme* nuiWidget::GetTheme()
   return nuiTheme::GetTheme();
 }
 
-void nuiWidget::AutoTrash(const nuiEvent& rEvent)
+void nuiWidget::AutoDestroy(const nuiEvent& rEvent)
 {
   CheckValid();
-  Trash();
+  NGL_ASSERT(mpParent!= nullptr);
+  mpParent->DelChild(this);
 }
 
 void nuiWidget::AutoHide(const nuiEvent& rEvent)
@@ -4392,17 +4555,32 @@ void nuiWidget::AddEvent(const nglString& rName, nuiEventSource& rEvent)
   mEventMap[rName] = &rEvent;
 }
 
+bool nuiWidget::AddEventAction(const nglString& rEventName, nuiEventActionHolder* pActions)
+{
+  nuiEventSource* pEvent = GetEvent(rEventName);
+  if (!pEvent)
+    return false;
+
+  pActions->Connect(pEvent, this);
+  mEventActions.push_back(pActions);
+  return true;
+}
+
 void nuiWidget::UpdateLayout()
 {
   CheckValid();
   if (IsInSetRect())
     return;
-  GetIdealRect();
-  nuiRect r(GetRect());
-  mInSetRect = true;
-  SetRect(r);
-  mInSetRect = false;
 
+  mNeedSelfLayout = true;
+  mNeedIdealRect = true;
+
+  GetIdealRect();
+//  nuiRect r(GetRect());
+//  mInSetRect = true;
+//  SetRect(r);
+  SetLayout(mLayoutRect);
+//  mInSetRect = false;
   Invalidate();
 }
 
@@ -4906,7 +5084,7 @@ bool nuiWidget::GetClickThru() const
 void nuiWidget::AddInvalidRect(const nuiRect& rRect)
 {
   CheckValid();
-  //printf("+++ AddInvalidRect %s\n", rRect.GetValue().GetChars());
+//  NGL_OUT("+++ AddInvalidRect in %s %s %s\n", GetObjectClass().GetChars(), GetObjectName().GetChars(), rRect.GetValue().GetChars());
   int count = mDirtyRects.size();
   
   nuiRect intersect;
@@ -4930,7 +5108,7 @@ void nuiWidget::AddInvalidRect(const nuiRect& rRect)
   }
   
   // Found no rect to blend into, let's create a new one:
-  //printf("--- AddInvalidRect OK %s\n", rRect.GetValue().GetChars());
+//  NGL_OUT("--- AddInvalidRect OK %s\n", rRect.GetValue().GetChars());
   mDirtyRects.push_back(rRect);
 }
 

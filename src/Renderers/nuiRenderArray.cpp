@@ -13,20 +13,19 @@
 nuiRenderArray::nuiRenderArray(uint32 mode, bool Static, bool _3dmesh, bool _shape)
 {
   Acquire();
+  mDebug = false;
   
   for (uint i = 0; i < 4; i++)
     mEnabled[i] = false;
   mEnabled[eVertex] = true; // Enable Vertices by default
   mStatic = Static;
+  mStatic = true;
   mMode = mode;
 #ifdef GL_RECT
   NGL_ASSERT(mode != GL_RECT); // GL_RECT Can
 #endif
   m3DMesh = _3dmesh;
   mShape = _shape;
-
-  mpCacheHandle = NULL;
-  mpCacheManager = NULL;
 
   mCurrentVertex.mX = 0.0f;
   mCurrentVertex.mY = 0.0f;
@@ -49,7 +48,8 @@ nuiRenderArray::nuiRenderArray(const nuiRenderArray& rArray)
 : mVertices(rArray.mVertices)
 {
   Acquire();
-  
+  mDebug = false;
+
   for (uint i = 0; i < 5; i++)
     mEnabled[i] = rArray.mEnabled[i];
   mStatic = rArray.mStatic;
@@ -57,20 +57,15 @@ nuiRenderArray::nuiRenderArray(const nuiRenderArray& rArray)
   m3DMesh = rArray.m3DMesh;
   mShape = rArray.mShape;
 
-  mpCacheHandle = NULL;
-  mpCacheManager = NULL;
-
   mCurrentVertex = rArray.mCurrentVertex;
 }
 
 nuiRenderArray::~nuiRenderArray()
 {
-  if (mpCacheManager)
-    mpCacheManager->ReleaseCacheObject(mpCacheHandle);
-  mpCacheHandle = NULL;
-  
   for (uint32 i = 0; i < mIndexedArrays.size(); i++)
     delete mIndexedArrays[i];
+
+  nuiPainter::BroadcastDestroyRenderArray(this);
 }
 
 void nuiRenderArray::SetMode(GLenum mode)
@@ -138,17 +133,6 @@ void nuiRenderArray::Resize(uint Count)
 void nuiRenderArray::Reset()
 {
   mVertices.clear();
-}
-
-void* nuiRenderArray::GetCacheHandle(nuiCacheManager* pManager) const
-{
-  return mpCacheHandle;
-}
-
-void nuiRenderArray::SetCacheHandle(nuiCacheManager* pManager, void* pHandle) const
-{
-  mpCacheManager = pManager;
-  mpCacheHandle = pHandle;
 }
 
 uint32 nuiRenderArray::GetTotalSize() const
@@ -591,16 +575,19 @@ nuiRenderArray::StreamDesc::~StreamDesc()
 int32 nuiRenderArray::AddStream(int32 StreamID, int32 count_per_vertex, const float* pData, bool CopyData, bool Normalize)
 {
   mStreams.push_back(new StreamDesc(StreamID, count_per_vertex, GetSize(), pData, CopyData, Normalize));
+  return mStreams.size() - 1;
 }
 
 int32 nuiRenderArray::AddStream(int32 StreamID, int32 count_per_vertex, const int32* pData, bool CopyData, bool Normalize)
 {
   mStreams.push_back(new StreamDesc(StreamID, count_per_vertex, GetSize(), pData, CopyData, Normalize));
+  return mStreams.size() - 1;
 }
 
 int32 nuiRenderArray::AddStream(int32 StreamID, int32 count_per_vertex, const uint8* pData, bool CopyData, bool Normalize)
 {
   mStreams.push_back(new StreamDesc(StreamID, count_per_vertex, GetSize(), pData, CopyData, Normalize));
+  return mStreams.size() - 1;
 }
 
 const nuiRenderArray::StreamDesc& nuiRenderArray::GetStream(int32 index) const
@@ -611,7 +598,102 @@ const nuiRenderArray::StreamDesc& nuiRenderArray::GetStream(int32 index) const
 
 int32 nuiRenderArray::GetStreamCount() const
 {
-  return mStreams.size();
+  return (int32)mStreams.size();
 }
 
+void nuiRenderArray::AddImageRect(nuiTexture* pTexture, const nuiRect& rDest, const nuiRect& rSource, const nuiColor& rColor)
+{
+  float x0 = rDest.mLeft, y0 = rDest.mTop;
+  float x1 = rDest.mRight, y1 = rDest.mTop;
+  float x2 = rDest.mRight, y2 = rDest.mBottom;
+  float x3 = rDest.mLeft, y3 = rDest.mBottom;
+
+  nuiSize tx0,tx1,tx2,tx3;
+  nuiSize ty0,ty1,ty2,ty3;
+
+  tx0 = rSource.mLeft;
+  ty0 = rSource.mTop;
+
+  tx1 = rSource.mRight;
+  ty1 = rSource.mTop;
+
+  tx2 = rSource.mRight;
+  ty2 = rSource.mBottom;
+
+  tx3 = rSource.mLeft;
+  ty3 = rSource.mBottom;
+
+  pTexture->ImageToTextureCoord(tx0, ty0);
+  pTexture->ImageToTextureCoord(tx1, ty1);
+  pTexture->ImageToTextureCoord(tx2, ty2);
+  pTexture->ImageToTextureCoord(tx3, ty3);
+
+  EnableArray(nuiRenderArray::eVertex, true);
+  EnableArray(nuiRenderArray::eTexCoord, true);
+  EnableArray(nuiRenderArray::eColor, true);
+
+//  Reserve(6 + GetSize());
+
+  // 1
+  SetColor(rColor);
+  SetTexCoords(tx0,ty0);
+  SetVertex(x0, y0);
+  PushVertex();
+
+  SetTexCoords(tx3,ty3);
+  SetVertex(x3, y3);
+  PushVertex();
+
+  SetTexCoords(tx1,ty1);
+  SetVertex(x1, y1);
+  PushVertex();
+
+  // 2
+  SetTexCoords(tx1,ty1);
+  SetVertex(x1, y1);
+  PushVertex();
+
+  SetTexCoords(tx3,ty3);
+  SetVertex(x3, y3);
+  PushVertex();
+
+  SetTexCoords(tx2,ty2);
+  SetVertex(x2, y2);
+  PushVertex();
+  
+}
+
+void nuiRenderArray::AddRect(const nuiRect& rDest, const nuiColor& rColor)
+{
+  float x0 = rDest.mLeft, y0 = rDest.mTop;
+  float x1 = rDest.mRight, y1 = rDest.mTop;
+  float x2 = rDest.mRight, y2 = rDest.mBottom;
+  float x3 = rDest.mLeft, y3 = rDest.mBottom;
+
+  EnableArray(nuiRenderArray::eVertex, true);
+  EnableArray(nuiRenderArray::eColor, true);
+
+//  Reserve(6 + GetSize());
+
+  // 1
+  SetColor(rColor);
+  SetVertex(x0, y0);
+  PushVertex();
+
+  SetVertex(x3, y3);
+  PushVertex();
+
+  SetVertex(x1, y1);
+  PushVertex();
+
+  // 2
+  SetVertex(x1, y1);
+  PushVertex();
+
+  SetVertex(x3, y3);
+  PushVertex();
+
+  SetVertex(x2, y2);
+  PushVertex();
+}
 

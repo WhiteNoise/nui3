@@ -14,6 +14,25 @@
 
 class nuiPoint;
 
+float squared_distance(const nglVectorf& p1, const nglVectorf& p2, const nglVectorf& p3)
+{
+  nglVectorf v = p3 - p2;
+  nglVectorf w = p1 - p2;
+
+  float c1 = w * v;
+  float c2 = v * v;
+  float b = c1 / c2;
+
+  nglVectorf Pb = p2 + b * v;
+  return nglVectorf(Pb - p1).SquaredLength();
+}
+
+float distance(const nglVectorf& p1, const nglVectorf& p2, const nglVectorf& p3)
+{
+  return sqrtf(squared_distance(p1, p2, p3));
+}
+
+
 
 GLUtesselator* nuiTessellator::mpTess = NULL;
 uint32 nuiTessellator::mRefs = 0;
@@ -22,6 +41,9 @@ nuiTessellator::nuiTessellator(nuiPathGenerator* pPathGenerator)
 {
   mpPath = pPathGenerator;
   mpShape = NULL;
+  mpObject = NULL;
+  mEdgeFlag = true;
+  mOutline = false;
 
   if (!mpTess)
     mpTess = gluNewTess();
@@ -33,6 +55,9 @@ nuiTessellator::nuiTessellator(nuiShape* pShape)
 {
   mpPath = NULL;
   mpShape = pShape;
+  mpObject = NULL;
+  mEdgeFlag = true;
+  mOutline = false;
 
   if (!mpTess)
     mpTess = gluNewTess();
@@ -52,111 +77,91 @@ nuiTessellator::~nuiTessellator()
   }
 }
 
-class TessellatorInfo
-{
-public:
-
-  TessellatorInfo()
-  {
-    mEdgeFlag = true;
-    mLastEdgeFlag = true;
-    mLastEdgeFlag2 = true;
-    mTex = 0;
-    mpObject = new nuiRenderObject();
-  }
-  ~TessellatorInfo()
-  {
-  }
-
-#ifndef CALLBACK
-  #define CALLBACK
-#endif
-  
-  static GLvoid CALLBACK StaticInternalTessBegin(GLenum type, void * polygon_data);
-  static GLvoid CALLBACK StaticInternalTessEdgeFlag(GLboolean flag, void * polygon_data);
-  static GLvoid CALLBACK StaticInternalTessVertex(void * vertex_data, void * polygon_data);
-  static GLvoid CALLBACK StaticInternalTessEnd(void * polygon_data);
-  static GLvoid CALLBACK StaticInternalTessCombine(GLdouble coords[3], void *vertex_data[4], GLfloat weight[4], void **outData, void * polygon_data);
-  static GLvoid CALLBACK StaticInternalTessError(GLenum ErrNo, void * polygon_data);
-  void InternalTessBegin(GLenum type);
-  void InternalTessEdgeFlag(GLboolean flag);
-  void InternalTessVertex(void* vertex_data);
-  void InternalTessCombine(GLdouble coords[3], void *vertex_data[4], GLfloat weight[4], void **outData);
-  void InternalTessEnd();
-  void InternalTessError(GLenum ErrNo);
-
-  nuiRenderObject* mpObject;
-  nuiPath mTempPoints;
-  bool mOutline;
-
-private:
-  bool mEdgeFlag;
-  bool mLastEdgeFlag;
-  bool mLastEdgeFlag2;
-  float mTex;
-};
-
 nuiRenderObject* nuiTessellator::GenerateFromPath(float Quality)
 {
   nuiPath Points;
 
   mpPath->Tessellate(Points, Quality);
-
+  uint count = Points.GetCount();
+  if (!count)
+    return nullptr;
+  
   gluTessNormal(mpTess, 0,0,1);
   gluTessProperty(mpTess,GLU_TESS_TOLERANCE, 0);
-  gluTessCallback(mpTess, GLU_TESS_BEGIN_DATA,    NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessBegin);
-  gluTessCallback(mpTess, GLU_TESS_EDGE_FLAG_DATA,NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessEdgeFlag);
-  gluTessCallback(mpTess, GLU_TESS_VERTEX_DATA,   NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessVertex);
-  gluTessCallback(mpTess, GLU_TESS_END_DATA,      NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessEnd);
-  gluTessCallback(mpTess, GLU_TESS_COMBINE_DATA,  NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessCombine);
-  gluTessCallback(mpTess, GLU_TESS_ERROR_DATA,    NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessError);
+  gluTessCallback(mpTess, GLU_TESS_BEGIN_DATA,    NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessBegin);
+  gluTessCallback(mpTess, GLU_TESS_EDGE_FLAG_DATA,NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessEdgeFlag);
+  gluTessCallback(mpTess, GLU_TESS_VERTEX_DATA,   NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessVertex);
+  gluTessCallback(mpTess, GLU_TESS_END_DATA,      NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessEnd);
+  gluTessCallback(mpTess, GLU_TESS_COMBINE_DATA,  NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessCombine);
+  gluTessCallback(mpTess, GLU_TESS_ERROR_DATA,    NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessError);
 
-  gluTessProperty(mpTess,GLU_TESS_BOUNDARY_ONLY, mOutLine?GL_TRUE:GL_FALSE);
+  gluTessProperty(mpTess,GLU_TESS_BOUNDARY_ONLY, mOutline?GL_TRUE:GL_FALSE);
   gluTessProperty(mpTess,GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_NONZERO);
 
-  TessellatorInfo Infos;
-  Infos.mOutline = mOutLine;
-  gluTessBeginPolygon(mpTess, &Infos); 
+  mpObject = new nuiRenderObject();
+  mEdgeFlag = true;
 
-  gluTessBeginContour(mpTess);
+  gluTessBeginPolygon(mpTess, this);
 
-  uint count = Points.GetCount();
+  bool beginNext = true;
+
+  //printf("Start tesselation\n");
   for (uint i = 0; i < count; i++)
   {
     nuiPoint& rPoint = Points[i];
-    double vec[4] = { rPoint[0], rPoint[1], rPoint[2], 0 };
-    gluTessVertex(mpTess, vec, (void*)Infos.mTempPoints.AddVertex(rPoint));
+    if (rPoint.GetType() != nuiPointTypeStop)
+    {
+      if (beginNext)
+      {
+        gluTessBeginContour(mpTess);
+        beginNext = false;
+      }
+
+      double vec[4] = { rPoint[0], rPoint[1], rPoint[2], 0 };
+      //printf("%d input %f %f\n", i, vec[0], vec[1]);
+      gluTessVertex(mpTess, vec, (void*)mTempPoints.AddVertex(rPoint));
+    }
+    else
+    {
+      //printf("End Contour\n");
+      gluTessEndContour(mpTess);
+      beginNext = true;
+    }
   }
-  gluTessEndContour(mpTess);
+  if (Points.Back().GetType() != nuiPointTypeStop)
+    gluTessEndContour(mpTess);
 
   gluTessEndPolygon(mpTess); 
 
-  return Infos.mpObject;
+  nuiRenderObject* pObject = mpObject;
+  mpObject = NULL;
+  mTempPoints.Clear();
+  return pObject;
 }
 
 nuiRenderObject* nuiTessellator::GenerateFromShape(float Quality)
 {
   gluTessNormal(mpTess, 0,0,1);
   gluTessProperty(mpTess,GLU_TESS_TOLERANCE, 0);
-  gluTessCallback(mpTess, GLU_TESS_BEGIN_DATA,    NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessBegin);
-  gluTessCallback(mpTess, GLU_TESS_EDGE_FLAG_DATA,NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessEdgeFlag);
-  gluTessCallback(mpTess, GLU_TESS_VERTEX_DATA,   NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessVertex);
-  gluTessCallback(mpTess, GLU_TESS_END_DATA,      NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessEnd);
-  gluTessCallback(mpTess, GLU_TESS_COMBINE_DATA,  NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessCombine);
-  gluTessCallback(mpTess, GLU_TESS_ERROR_DATA,    NUI_GLU_CALLBACK &TessellatorInfo::StaticInternalTessError);
+  gluTessCallback(mpTess, GLU_TESS_BEGIN_DATA,    NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessBegin);
+  gluTessCallback(mpTess, GLU_TESS_EDGE_FLAG_DATA,NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessEdgeFlag);
+  gluTessCallback(mpTess, GLU_TESS_VERTEX_DATA,   NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessVertex);
+  gluTessCallback(mpTess, GLU_TESS_END_DATA,      NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessEnd);
+  gluTessCallback(mpTess, GLU_TESS_COMBINE_DATA,  NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessCombine);
+  gluTessCallback(mpTess, GLU_TESS_ERROR_DATA,    NUI_GLU_CALLBACK &nuiTessellator::StaticInternalTessError);
 
-  gluTessProperty(mpTess,GLU_TESS_BOUNDARY_ONLY, mOutLine?GL_TRUE:GL_FALSE);
+  gluTessProperty(mpTess,GLU_TESS_BOUNDARY_ONLY, mOutline?GL_TRUE:GL_FALSE);
   nuiShape::Winding Winding = mpShape->GetWinding();
   if (Winding == nuiShape::eNone)
     Winding = nuiShape::eNonZero;
   gluTessProperty(mpTess,GLU_TESS_WINDING_RULE, Winding);
 
-  TessellatorInfo Infos;
-  Infos.mOutline = mOutLine;
+  mpObject = new nuiRenderObject();
+  mEdgeFlag = true;
 
   uint32 countours = mpShape->GetContourCount();
 
-  gluTessBeginPolygon(mpTess, &Infos); 
+  gluTessBeginPolygon(mpTess, this);
   
   for (uint32 contour = 0; contour < countours; contour++)
   {
@@ -187,7 +192,7 @@ nuiRenderObject* nuiTessellator::GenerateFromShape(float Quality)
           }
 
           GLdouble vec[3] = { rPoint[0], rPoint[1], rPoint[2] };
-          gluTessVertex(mpTess, vec, (void*)Infos.mTempPoints.AddVertex(rPoint));
+          gluTessVertex(mpTess, vec, (void*)mTempPoints.AddVertex(rPoint));
         }
       }
       gluTessEndContour(mpTess);
@@ -197,7 +202,10 @@ nuiRenderObject* nuiTessellator::GenerateFromShape(float Quality)
 
   gluTessEndPolygon(mpTess); 
 
-  return Infos.mpObject;
+  nuiRenderObject* pObject = mpObject;
+  mpObject = NULL;
+  mTempPoints.Clear();
+  return pObject;
 }
 
 nuiRenderObject* nuiTessellator::Generate(float Quality)
@@ -212,68 +220,74 @@ nuiRenderObject* nuiTessellator::Generate(float Quality)
 
 
 
-GLvoid TessellatorInfo::StaticInternalTessBegin(GLenum type, void * polygon_data)
+GLvoid nuiTessellator::StaticInternalTessBegin(GLenum type, void * polygon_data)
 {
-  ((TessellatorInfo*)polygon_data)->InternalTessBegin(type);
+  ((nuiTessellator*)polygon_data)->InternalTessBegin(type);
 }
 
-GLvoid TessellatorInfo::StaticInternalTessEdgeFlag(GLboolean flag, void * polygon_data)
+GLvoid nuiTessellator::StaticInternalTessEdgeFlag(GLboolean flag, void * polygon_data)
 {
-  ((TessellatorInfo*)polygon_data)->InternalTessEdgeFlag(flag);
+  ((nuiTessellator*)polygon_data)->InternalTessEdgeFlag(flag);
 }
 
-GLvoid TessellatorInfo::StaticInternalTessVertex(void * vertex_data, void * polygon_data)
+GLvoid nuiTessellator::StaticInternalTessVertex(void * vertex_data, void * polygon_data)
 {
-  ((TessellatorInfo*)polygon_data)->InternalTessVertex(vertex_data);
+  ((nuiTessellator*)polygon_data)->InternalTessVertex(vertex_data);
 }
 
-GLvoid TessellatorInfo::StaticInternalTessEnd(void * polygon_data)
+GLvoid nuiTessellator::StaticInternalTessEnd(void * polygon_data)
 {
-  ((TessellatorInfo*)polygon_data)->InternalTessEnd();
+  ((nuiTessellator*)polygon_data)->InternalTessEnd();
 }
 
-GLvoid TessellatorInfo::StaticInternalTessCombine(GLdouble coords[3], void *vertex_data[4], GLfloat weight[4], void **outData, void * polygon_data)
+GLvoid nuiTessellator::StaticInternalTessCombine(GLdouble coords[3], void *vertex_data[4], GLfloat weight[4], void **outData, void * polygon_data)
 {
-  ((TessellatorInfo*)polygon_data)->InternalTessCombine(coords, vertex_data, weight, outData);
+  ((nuiTessellator*)polygon_data)->InternalTessCombine(coords, vertex_data, weight, outData);
 }
 
-GLvoid TessellatorInfo::StaticInternalTessError(GLenum ErrNo, void * polygon_data)
+GLvoid nuiTessellator::StaticInternalTessError(GLenum ErrNo, void * polygon_data)
 {
-  ((TessellatorInfo*)polygon_data)->InternalTessError(ErrNo);
+  ((nuiTessellator*)polygon_data)->InternalTessError(ErrNo);
 }
 
 
-void TessellatorInfo::InternalTessBegin(GLenum type)
+void nuiTessellator::InternalTessBegin(GLenum type)
 {
+  //printf("tess begin %d\n", type);
   nuiRenderArray* pArray = new nuiRenderArray(type, false, false, mOutline);
   pArray->EnableArray(nuiRenderArray::eVertex);
-  //pArray->EnableArray(nuiRenderArray::eEdgeFlag);
   mpObject->AddArray(pArray);
 }
 
-void TessellatorInfo::InternalTessEdgeFlag(GLboolean flag)
+void nuiTessellator::InternalTessEdgeFlag(GLboolean flag)
 {
   mEdgeFlag = flag?true:false;
 }
 
-void TessellatorInfo::InternalTessVertex(void* vertex_data)
+void nuiTessellator::InternalTessVertex(void* vertex_data)
 {
   nuiRenderArray* pArray = mpObject->GetLastArray();
   pArray->SetVertex(mTempPoints[(unsigned long int)vertex_data]);
-  //pArray->SetEdgeFlag(mEdgeFlag);
+//  if (!(pArray->GetSize() % 3))
+//  {
+//    printf("Triangle %d\n", pArray->GetSize()/3);
+//  }
+//  mTempPoints[(unsigned long int)vertex_data].Dump();
   pArray->PushVertex();
 }
 
-void TessellatorInfo::InternalTessCombine(GLdouble coords[3], void *vertex_data[4], GLfloat weight[4], void **outData)
+void nuiTessellator::InternalTessCombine(GLdouble coords[3], void *vertex_data[4], GLfloat weight[4], void **outData)
 {
+  //printf("Combine %f %f\n", coords[0], coords[1]);
   *outData = (void*)mTempPoints.AddVertex(nuiPoint((float)(coords[0]), (float)(coords[1]), (float)(coords[2])));
 }
 
-void TessellatorInfo::InternalTessEnd()
+void nuiTessellator::InternalTessEnd()
 {
+  //printf("tess end\n");
 }
 
-void TessellatorInfo::InternalTessError(GLenum ErrNo)
+void nuiTessellator::InternalTessError(GLenum ErrNo)
 {
 #ifdef __NUI_NO_GL__
   NGL_OUT(_T("nui_glu tessellation error\n"));

@@ -13,7 +13,7 @@
 class nuiFlowView : public nuiSimpleContainer
 {
 public:
-  nuiFlowView(float IdealWidth = 320, float HSpace = 0.0f, float VSpace = 2.0f);
+  nuiFlowView(float IdealWidth = 0, float HSpace = 0.0f, float VSpace = 2.0f);
   ~nuiFlowView();
   
   virtual nuiRect CalcIdealSize();
@@ -31,6 +31,7 @@ protected:
   nuiRect Layout(bool setLayout, float IdealWidth);
   void LayoutLine(nuiWidgetList& line, float& x, float &y, float& w, float& h, float& HSpace, float &VSpace, bool setLayout);
   float mIdealWidth;
+  float mCurrentIdealWidth;
   float mVSpace;
   float mHSpace;
 };

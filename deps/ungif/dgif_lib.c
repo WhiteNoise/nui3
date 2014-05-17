@@ -31,6 +31,7 @@
 #include <string.h>
 #include "gif_lib.h"
 #include "gif_lib_private.h"
+#include "unistd.h"
 
 
 #define COMMENT_EXT_FUNC_CODE	0xfe /* Extension function code for comment. */

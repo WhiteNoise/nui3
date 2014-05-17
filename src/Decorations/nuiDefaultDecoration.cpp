@@ -37,9 +37,6 @@ void nuiDefaultDecoration::Init()
   InitIcons();
   InitImages();
     
-  nuiWidget::SetDefaultDecoration(nuiObject::GetClassNameIndex(_T("nuiWindow")), &nuiDefaultDecoration::Window);
-  nuiWidget::SetDefaultDecoration(nuiObject::GetClassNameIndex(_T("nuiBackgroundPane")), &nuiDefaultDecoration::BackgroundPane);
-
   nuiWidget::SetDefaultDecoration(nuiObject::GetClassNameIndex(_T("nuiLabel")), &nuiDefaultDecoration::Label);
   nuiWidget::SetDefaultDecoration(nuiObject::GetClassNameIndex(_T("nuiEditText")), &nuiDefaultDecoration::EditText);
   nuiWidget::SetDefaultDecoration(nuiObject::GetClassNameIndex(_T("nuiEditLine")), &nuiDefaultDecoration::EditLine);
@@ -364,81 +361,6 @@ nglImage* nuiDefaultDecoration::GetImage(const nglString& rRef)
 
 
 
-//**************************************************************************************************************
-//
-// nuiWindow
-//
-void nuiDefaultDecoration::Window(nuiWidget* pWidget)
-{
-  nuiWindow* pWindow = (nuiWindow*)pWidget;
-  if (pWindow->GetFlags() & nuiWindow::DecoratedBackground)
-  {
-    nuiGradientDecoration* pDeco = (nuiGradientDecoration*)nuiDecoration::Get(_T("nuiDefaultDecorationWindow"));
-    if (!pDeco)
-    {
-      nuiColor color1, color2;
-      nuiColor::GetColor(_T("nuiDefaultClrWindowBkg1"), color1);
-      nuiColor::GetColor(_T("nuiDefaultClrWindowBkg2"), color2);
-      
-      pDeco = new nuiGradientDecoration(_T("nuiDefaultDecorationWindow"), 
-                                        nuiRect(0,0, 0,0), color1, color2, nuiVertical, 1, nuiColor(175,175,175), eStrokeAndFillShape);
-      pDeco->SetOffset1(0.f);
-      pDeco->SetOffset2(0.5f);
-    }
-    pWindow->SetDecoration(pDeco);
-  }
-  else
-  {
-    pWindow->SetColor(eActiveWindowBg, nuiColor(255, 255, 255));
-    pWindow->SetColor(eInactiveWindowBg, nuiColor(200, 200, 200));
-  }
-
-  // see nuiTheme::DrawActiveWindow for the rest
-  
-}
-
-
-
-//**************************************************************************************************************
-//
-// nuiBackgroundPane
-//
-void nuiDefaultDecoration::BackgroundPane(nuiWidget* pWidget)
-{
-  nuiBackgroundPane* pPane = (nuiBackgroundPane*)pWidget;
-
-  nglString decoName;
-  const char* deco;
-  nuiRect rect;
-  
-  if (pPane->GetType() == eOutterBackground)
-  {
-    decoName = _T("nuiDefaultDecorationOutterPane");
-    deco = "PaneOutter";
-    rect = nuiRect(12,12,0,1);
-  }
-  else
-  {
-    decoName = _T("nuiDefaultDecorationInnerPane");
-    deco = "PaneInner";
-    rect = nuiRect(6,6,0,0);
-  }
-  
-  nuiFrame* pFrame = (nuiFrame*)nuiDecoration::Get(decoName);
-  
-  if (!pFrame)
-  {
-    nuiTexture* pTex = nuiTexture::GetTexture(deco);
-    NGL_ASSERT(pTex);
-    pFrame = new nuiFrame(decoName, pTex, rect);
-    pFrame->UseWidgetAlpha(true);
-  }
-  NGL_ASSERT(pFrame);
-  pWidget->SetDecoration(pFrame, eDecorationBorder);
-}
-
-
-
 
 //**************************************************************************************************************
 //
@@ -468,8 +390,6 @@ void nuiDefaultDecoration::EditText(nuiWidget* pWidget)
 //
 void nuiDefaultDecoration::EditLine(nuiWidget* pWidget)
 {
-  nuiBackgroundPane* pPane = (nuiBackgroundPane*)pWidget;
-  
   nglString decoName = _T("nuiDefaultDecorationInnerPane");
   nuiRect rect = nuiRect(6,6,0,0);
   
@@ -1336,6 +1256,10 @@ void nuiDefaultDecoration::TabView_Contents(nuiTabView* pView, nuiWidget* pConte
       decoName = _T("nuiDefaultDecorationTabBottomContents");
       deco = "TabBottomContents";
       frameRect = nuiRect(4,5,2,4);
+      break;
+
+    default:
+      NGL_ASSERT(0);
       break;
   }
   

@@ -11,7 +11,6 @@
 nuiLayoutConstraint::nuiLayoutConstraint()
 : mType(eFreeLayout), mSize(0)
 {
-
 }
 
 nuiLayoutConstraint::~nuiLayoutConstraint()
@@ -381,6 +380,7 @@ bool nuiLayout::AddChild(nuiWidgetPtr pChild)
   if (nuiSimpleContainer::AddChild(pChild))
   {
     SetConstraint(pChild, pChild->GetProperty("Layout"));
+    pChild->SetAutoUpdateLayout(true);
     return true;
   }
 
@@ -1016,8 +1016,10 @@ void nuiLayout::DoLayout(const nuiRect& rRect)
 
   SetHorizontalAnchor("left", 0, eAnchorAbsolute);
   SetHorizontalAnchor("right", width, eAnchorAbsolute);
+  SetHorizontalAnchor("center", width/2, eAnchorAbsolute);
   SetVerticalAnchor("top", 0, eAnchorAbsolute);
   SetVerticalAnchor("bottom", height, eAnchorAbsolute);
+  SetVerticalAnchor("center", height/2, eAnchorAbsolute);
   auto it = mConstraints.begin();
   while (it != mConstraints.end())
   {
@@ -1062,7 +1064,6 @@ bool nuiLayout::MouseClicked(const nglMouseInfo& rInfo)
       mMovingAnchorPos[0] = ComputeAnchorPosition(mMovingAnchor[0], 0, 0, mRect.GetWidth());
     if (!mMovingAnchor[1].IsNull())
       mMovingAnchorPos[1] = ComputeAnchorPosition(mMovingAnchor[1], 1, 0, mRect.GetHeight());
-    Grab();
     return true;
   }
   return false;
@@ -1072,8 +1073,6 @@ bool nuiLayout::MouseUnclicked(const nglMouseInfo& rInfo)
 {
   if (rInfo.Buttons & nglMouseInfo::ButtonLeft)
   {
-    Ungrab();
-
     UpdateLayout();
     return true;
   }

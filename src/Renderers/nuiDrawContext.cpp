@@ -18,6 +18,7 @@ nuiDrawContext::nuiDrawContext(const nuiRect& rRect)
 {
   mWidth = rRect.GetWidth();
   mHeight = rRect.GetHeight();
+  mDebug = false;
 
   mClipOffsetX = mClipOffsetY = 0;
 
@@ -418,6 +419,36 @@ void nuiDrawContext::SetLineWidth(nuiSize Width)
 //  mStateChanges++;
 }
 
+void nuiDrawContext::SetLineJoin(nuiLineJoin join)
+{
+  mCurrentState.mLineJoin = join;
+}
+
+nuiLineJoin nuiDrawContext::GetLineJoin()const
+{
+  return mCurrentState.mLineJoin;
+}
+
+void nuiDrawContext::SetLineCap(nuiLineCap cap)
+{
+  mCurrentState.mLineCap = cap;
+}
+
+nuiLineCap nuiDrawContext::GetLineCap() const
+{
+  return mCurrentState.mLineCap;
+}
+
+void nuiDrawContext::SetMiterLimit(float limit)
+{
+  mCurrentState.mMitterLimit = limit;
+}
+
+float nuiDrawContext::GetMiterLimit() const
+{
+  return mCurrentState.mMitterLimit;
+}
+
 void nuiDrawContext::EnableAntialiasing(bool set)
 {
   if (mCurrentState.mAntialiasing != set)
@@ -473,10 +504,12 @@ void nuiDrawContext::DrawShape(nuiShape* pShape, nuiShapeMode Mode, float Qualit
   {
   case eStrokeShape:
     {
-      nuiRenderObject* pObject = pShape->Outline(Quality, mCurrentState.mLineWidth, mCurrentState.mLineJoin, mCurrentState.mLineCap);
+      nuiRenderObject* pObject = pShape->Outline(Quality, mCurrentState.mLineWidth, mCurrentState.mLineJoin, mCurrentState.mLineCap, mCurrentState.mMitterLimit);
+      if (!pObject)
+        return;
       SetFillColor(GetStrokeColor());
-      SetTexture(mpAATexture);
-      EnableTexturing(true);
+      //SetTexture(mpAATexture);
+      //EnableTexturing(true);
       EnableBlending(true);
       SetBlendFunc(nuiBlendTransp);//GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       DrawObject(*pObject);
@@ -488,7 +521,8 @@ void nuiDrawContext::DrawShape(nuiShape* pShape, nuiShapeMode Mode, float Qualit
       nuiTessellator* pTess = new nuiTessellator(pShape);
       pTess->SetFill(true);
       nuiRenderObject* pObject = pTess->Generate(Quality);
-      DrawObject(*pObject);
+      if (pObject)
+        DrawObject(*pObject);
       delete pObject;
       delete pTess;
     }
@@ -497,18 +531,20 @@ void nuiDrawContext::DrawShape(nuiShape* pShape, nuiShapeMode Mode, float Qualit
     {
       {
         nuiRenderObject* pObject = pShape->Fill(Quality);
-        DrawObject(*pObject);
+        if (pObject)
+          DrawObject(*pObject);
         delete pObject;
       }
 
       {
-        nuiRenderObject* pObject = pShape->Outline(Quality, mCurrentState.mLineWidth, mCurrentState.mLineJoin, mCurrentState.mLineCap);
+        nuiRenderObject* pObject = pShape->Outline(Quality, mCurrentState.mLineWidth, mCurrentState.mLineJoin, mCurrentState.mLineCap, mCurrentState.mMitterLimit);
         SetFillColor(GetStrokeColor());
-        SetTexture(mpAATexture);
-        EnableTexturing(true);
+        //SetTexture(mpAATexture);
+        //EnableTexturing(true);
         EnableBlending(true);
         SetBlendFunc(nuiBlendTransp);//GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        DrawObject(*pObject);
+        if (pObject)
+          DrawObject(*pObject);
         delete pObject;
       }
     }
@@ -1013,6 +1049,8 @@ void nuiDrawContext::DrawPoint(const nuiVector2& rPoint)
 
 void nuiDrawContext::DrawArray(nuiRenderArray* pArray)
 {
+  pArray->SetDebug(mDebug);
+
   uint32 size = pArray->GetSize();
   if (!size)
   {

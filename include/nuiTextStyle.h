@@ -9,21 +9,6 @@
 
 class nuiFontBase;
 
-enum nuiTextDirection
-{
-  nuiLeftToRight,
-  nuiRightToLeft,
-  nuiTopToBottom,
-  nuiBottomToTop
-};
-
-enum nuiTextBaseline
-{
-  nuiTextBaselineNormal,
-  nuiTextBaselineSuperScript,
-  nuiTextBaselineSubScript
-};
-
 class nuiTextStyle
 {
 public:
@@ -52,8 +37,8 @@ public:
   nuiTextBaseline GetBaseline() const;
   void SetDirection(nuiTextDirection set);
   nuiTextDirection GetDirection() const;
-  void SetJustify(bool set);
-  bool GetJustify() const;
+  void SetMode(nuiTextLayoutMode set);
+  nuiTextLayoutMode GetMode() const;
   
 private:
   nuiFontBase* mpFont;
@@ -65,7 +50,7 @@ private:
   bool mUnderline : 1;
   bool mStrikeThrough : 1;
   nuiTextBaseline mBaseline;
-  bool mJustify : 1;
+  nuiTextLayoutMode mMode;
   nuiTextDirection mDirection;
 };
 

@@ -129,13 +129,19 @@ public:
   virtual void SetSurface(nuiSurface* pSurface);
   virtual nuiSurface* GetSurface() const;
 
+  static void BroadcastDestroyTexture(nuiTexture* pTexture);
+  static void BroadcastDestroySurface(nuiSurface* pSurface);
+  static void BroadcastDestroyRenderArray(nuiRenderArray* pArray);
+
   virtual void DestroySurface(nuiSurface* pSurface) = 0;
-  virtual void ResizeSurface(nuiSurface* pSurface, int32 width, int32 height) = 0;
+  virtual void DestroyRenderArray(nuiRenderArray* pSurface) = 0;
 
 protected:
   nuiSurface* mpSurface;
+  std::stack<nuiSurface*> mpSurfaceStack;
 
-  nuiRenderState mState;
+  const nuiRenderState mDefaultState;
+  const nuiRenderState* mpState = &mDefaultState;
   std::stack<nuiClipper> mpClippingStack;
   uint32 mWidth;
   uint32 mHeight;
@@ -159,6 +165,8 @@ protected:
 
   int32 GetCurrentWidth() const;
   int32 GetCurrentHeight() const;
+  virtual void DestroyTexture(nuiTexture* pTexture) = 0;
+  static std::set<nuiPainter*> gpPainters;
 };
 
 #endif

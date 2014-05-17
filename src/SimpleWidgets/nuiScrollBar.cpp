@@ -93,7 +93,7 @@ void nuiScrollBar::SetThumbRect(const nuiRect& rRect)
   nuiRange& rRange = GetRange();
 
   float length = rRange.GetRange();
-  float thumbPosition = 0.0f, thumbLength = 1.0f;
+  float thumbPosition = 0.0f, thumbLength = 0.0f;
 
   if (length <= 0)
   {
@@ -133,8 +133,8 @@ void nuiScrollBar::SetThumbRect(const nuiRect& rRect)
   }
   else
   {
-    mThumbRect.mTop = (nuiSize)ToNearest(rRect.Top() + (thumbPosition* rRect.GetHeight()));
-    mThumbRect.mBottom = (nuiSize)ToNearest(rRect.Top() + ((thumbLength+thumbPosition) * rRect.GetHeight()));
+    mThumbRect.mTop = (nuiSize)ToNearest(rRect.Top() + (thumbPosition * rRect.GetHeight()));
+    mThumbRect.mBottom = (nuiSize)ToNearest(rRect.Top() + ((thumbLength + thumbPosition) * rRect.GetHeight()));
 
     if (mThumbRect.GetHeight() < mThumbMinSize)
       mThumbRect.SetSize(rRect.GetWidth(), mThumbMinSize);
@@ -215,7 +215,6 @@ bool nuiScrollBar::MouseClicked  (nuiSize X, nuiSize Y, nglMouseInfo::Flags Butt
   if (Button & nglMouseInfo::ButtonLeft)
   {
     mClicked = true;
-    Grab();
     Invalidate();
 
     mThumbClicked = false;
@@ -301,7 +300,6 @@ bool nuiScrollBar::MouseUnclicked  (nuiSize X, nuiSize Y, nglMouseInfo::Flags Bu
     mThumbClicked = false;
     mPageUpClicked = false;
     mPageDownClicked = false;
-    Ungrab();
    
     Invalidate();
     return true;

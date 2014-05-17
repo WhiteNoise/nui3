@@ -49,6 +49,24 @@ enum nuiAttributeUnit
   nuiUnitCustom,
 };
 
+// Getter and Setter helpers:
+#define NUI_GETSET(X, Y) \
+X Get##Y() const { return m##Y; } \
+void Set##Y(X val) { m##Y = val; }
+
+#define NUI_GETSETDO(X, Y, Z) \
+X Get##Y() const { return m##Y; } \
+void Set##Y(X val) \
+{\
+  if (m##Y == val)\
+  {\
+    return;\
+  }\
+  m##Y = val;\
+  Z;\
+}
+
+
 
 #ifndef _MINUI3_
 nuiAttributeEditor* nuiCreateGenericAttributeEditor(void* pTarget, nuiAttributeBase* pAttribute);
@@ -408,7 +426,7 @@ public:
       }
     }
 
-    NGL_ASSERT(NULL);
+    NGL_ASSERT(0);
     return *pContents;
   }
 
@@ -926,7 +944,7 @@ public:
       }
     }
 
-    NGL_ASSERT(NULL);
+    NGL_ASSERT(0);
     return *pContents;
   }
 
@@ -2180,6 +2198,7 @@ template <>
 void nuiAttribute<nglMatrixf>::FormatDefault(nglMatrixf value, nglString& string) const;
 
 
+
 //********************************
 //
 // const nglQuaternionf&
@@ -2249,5 +2268,25 @@ void nuiAttribute<nuiExpandMode>::FormatDefault(nuiExpandMode value, nglString& 
 template <>
 nuiAttributeEditor* nuiAttribute<nuiExpandMode>::GetDefaultEditor(void* pTarget);
 #endif
+
+//********************************
+//
+// TextLayoutMode
+//
+
+template <>
+bool nuiAttribute<nuiTextLayoutMode>::ToString(nuiTextLayoutMode Value, nglString& rString) const;
+
+template <>
+bool nuiAttribute<nuiTextLayoutMode>::FromString(nuiTextLayoutMode& rValue, const nglString& rString) const;
+
+template <>
+void nuiAttribute<nuiTextLayoutMode>::FormatDefault(nuiTextLayoutMode value, nglString& string) const;
+
+#ifndef _MINUI3_
+template <>
+nuiAttributeEditor* nuiAttribute<nuiTextLayoutMode>::GetDefaultEditor(void* pTarget);
+#endif
+
 
 #endif

@@ -9,7 +9,13 @@
 
 nuiFlowView::nuiFlowView(float IdealWidth, float HSpace, float VSpace)
 {
+  if (SetObjectClass("nuiFlowView"))
+  {
+
+  }
+
   mIdealWidth = IdealWidth;
+  mCurrentIdealWidth = 0;
   mVSpace = VSpace;
   mHSpace = HSpace;
 }
@@ -21,10 +27,29 @@ nuiFlowView::~nuiFlowView()
 
 nuiRect nuiFlowView::CalcIdealSize()
 {
-  float IdealWidth = mIdealWidth;
-  if (mRect.GetWidth() > 0)
-    IdealWidth = mRect.GetWidth();
-  return Layout(false, mIdealWidth);
+  if (mCurrentIdealWidth == 0)
+  {
+    if (GetObjectName() == "Grid")
+    {
+      NGL_OUT("Flow Layout %p '%s'\n", this, GetObjectName().GetChars());
+    }
+  }
+  if (mIdealWidth > 0)
+  {
+    mCurrentIdealWidth = mIdealWidth;
+  }
+  else if (mRect.GetWidth() > 0)
+  {
+    mCurrentIdealWidth = mRect.GetWidth();
+  }
+  nuiRect idealsize = Layout(false, mCurrentIdealWidth);
+
+  if (GetDebug())
+  {
+    NGL_OUT(_T("nuiFlowView::CalcIdealSize[%f]: %s\n"), mCurrentIdealWidth, idealsize.GetValue().GetChars());
+  }
+
+  return idealsize;
 }
 
 void nuiFlowView::LayoutLine(nuiWidgetList& line, float& x, float &y, float& w, float& h, float& HSpace, float &VSpace, bool setLayout)
@@ -86,19 +111,28 @@ nuiRect nuiFlowView::Layout(bool setLayout, float IdealWidth)
   if (y > 0)
     y -= VSpace;
 
-  return nuiRect(mIdealWidth, y);
+  return nuiRect(IdealWidth, y);
 }
 
 bool nuiFlowView::SetRect(const nuiRect& rRect)
 {
   nuiWidget::SetRect(rRect);
-  Layout(true, rRect.GetWidth());
+  Layout(true, mCurrentIdealWidth);
   return true;
 }
 
 bool nuiFlowView::Draw(nuiDrawContext* pContext)
 {
   nuiSimpleContainer::Draw(pContext);
+  if (mIdealWidth > 0 && mIdealWidth != mCurrentIdealWidth)
+  {
+    InvalidateLayout();
+  }
+  else if (mCurrentIdealWidth != mRect.GetWidth())
+  {
+    InvalidateLayout();
+  }
+
   return true;
 }
 

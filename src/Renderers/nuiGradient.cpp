@@ -228,7 +228,6 @@ void nuiReflection::Recalc()
         delete mpGroundGradient;
     
   mpSkyGradient = new nuiGradient();
-  mpGroundGradient = new nuiGradient();
 
   nuiColor tmp;
   

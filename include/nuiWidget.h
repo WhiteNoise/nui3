@@ -39,6 +39,7 @@ class nuiTheme;
 class nuiRectAttributeAnimation;
 
 class nuiMatrixNode;
+class nuiEventActionHolder;
 
 typedef nuiWidget* nuiWidgetPtr;
 typedef std::vector<nuiWidgetPtr> nuiWidgetList;
@@ -130,7 +131,8 @@ public:
   virtual void SetVisibleRect(const nuiRect& rRect); ///< This sets the rectangle that will actually be displayed in the parent widget (for example in case this widget is inside a nuiScrollView, only a part of it may be visible at once). The rectangle is local to the widget rect.
   void SilentSetVisibleRect(const nuiRect& rRect); ///< This method change the visible rect of the widget without invalidating it. It is useful if you need to change the visible rect from a parent's SetRect method: you allready know that you will need to redraw it. See SetVisibleRect for more information.
   const nuiRect& GetVisibleRect() const; ///< This sets the rectangle that will actually be displayed in the parent widget (for example in case this widget is inside a nuiScrollView, only a part of it may be visible at once). The rectangle is local to the widget rect.
-  
+  void ResetVisibleRect();
+
   void StartTransition(); ///< Signals to this widget that its state is being transitionned and that it should start ignoring layout changes from its parent.
   void StopTransition(); ///<  Signals to this widget that its state transition is done and that must obei to the layout changes from its parent again.
   bool IsInTransition() const;
@@ -251,12 +253,13 @@ public:
 
   /** @name Incomming mouse events */
   //@{
-  virtual bool AcceptsMultipleGrabs() { return false; }
+  virtual bool AcceptsMultipleGrabs() const { return false; }
   // These three methods receive the mouse coordinates in this object referential
   void EnableMouseEvent(bool enable);
   bool MouseEventsEnabled() const;
   virtual bool MouseClicked  (nuiSize X, nuiSize Y, nglMouseInfo::Flags Button);
   virtual bool MouseUnclicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags Button);
+  virtual bool MouseCanceled (nuiSize X, nuiSize Y, nglMouseInfo::Flags Button);
   virtual bool MouseMoved    (nuiSize X, nuiSize Y);
   virtual bool MouseGrabbed();
   virtual bool MouseUngrabbed();
@@ -264,12 +267,14 @@ public:
   // Multitouch interface:
   virtual bool MouseClicked(const nglMouseInfo& rInfo);
   virtual bool MouseUnclicked(const nglMouseInfo& rInfo);
+  virtual bool MouseCanceled(const nglMouseInfo& rInfo);
   virtual bool MouseMoved(const nglMouseInfo& rInfo);
+  virtual bool MouseWheelMoved(const nglMouseInfo& rInfo);
   virtual bool MouseGrabbed(nglTouchId Id);
   virtual bool MouseUngrabbed(nglTouchId Id);
+  virtual const std::map<nglTouchId, nglMouseInfo>& GetMouseStates() const;  //@}
   virtual bool MultiEventsFinished(const nglMouseInfo& rInfo);
   //@}
-
   /** @name Other Incomming events */
   //@{
   virtual void OnSetFocus(nuiWidgetPtr pWidget); ///< Advise the objet of a change of focus object. pWidget can be null.
@@ -284,6 +289,8 @@ public:
   void SetMuteKeyboardFocusDispatch(bool Set); ///< A widget that mutes the keyboard focus will prevent its parent from gaining the focus.
   bool HasGrab();  ///< Ask if this widget has the mouse grab, or any touch grab
   bool HasGrab(nglTouchId TouchId);  ///< Ask if this widget has this touch grab \p TouchID.
+  bool StealMouseEvent(const nglMouseInfo& rInfo); ///< Requests the grab concerning the given mouse info event, cancelling the use of this event in any currently grabbing widget. Returns if the grab was correctly acquired.
+
   bool Grab();  ///< Request the mouse grab
   bool Ungrab(); ///< Release the mouse grab
   bool HasFocus() const; ///< True if the object has the focus.
@@ -377,11 +384,15 @@ public:
 
   nuiMouseClicked PreClicked; ///< Send an event when the widget is clicked. This event is fired before the MouseClicked method is called on the widget.
   nuiMouseUnclicked PreUnclicked; ///< Send an event when the widget is clicked. This event is fired before the MouseUnclicked method is called on the widget.
+  nuiMouseUnclicked PreClickCanceled; ///< Send an event when the widget mouse interaction is canceled. This event is fired before the MouseCanceled method is called on the widget.
   nuiMouseMoved PreMouseMoved; ///< Send an event when the mouse moves over the widget. This event is fired before the MouseMoved method is called on the widget.
+  nuiMouseMoved PreMouseWheelMoved; ///< Send an event when the mouse moves over the widget. This event is fired before the MouseMoved method is called on the widget.
 
   nuiMouseClicked Clicked; ///< Send an event when the widget is clicked. This event is fired after the MouseClicked method is called on the widget.
   nuiMouseUnclicked Unclicked; ///< Send an event when the widget is clicked. This event is fired after the MouseUnclicked method is called on the widget.
+  nuiMouseUnclicked ClickCanceled; ///< Send an event when the widget is clicked. This event is fired after the MouseUnclicked method is called on the widget.
   nuiMouseMoved MovedMouse; ///< Send an event when the mouse moves over the widget. This event is fired after the MouseMoved method is called on the widget.
+  nuiMouseMoved WheelMovedMouse; ///< Send an event when the mouse moves over the widget. This event is fired after the MouseMoved method is called on the widget.
   //@}
 
   /** @name Private event management system (do not override unless you know what you're doing!!!) */
@@ -389,8 +400,10 @@ public:
   /// Beware: these three methods receive the mouse coordinates in the repair of the root object!
   virtual bool DispatchMouseClick(const nglMouseInfo& rInfo);
   virtual bool DispatchMouseUnclick(const nglMouseInfo& rInfo);
+  virtual bool DispatchMouseCanceled(const nglMouseInfo& rInfo);
   virtual nuiWidgetPtr DispatchMouseMove(const nglMouseInfo& rInfo);
-  
+  virtual nuiWidgetPtr DispatchMouseWheelMove(const nglMouseInfo& rInfo);
+
   virtual bool DispatchGrab(nuiWidgetPtr pWidget);
   virtual bool DispatchUngrab(nuiWidgetPtr pWidget);
   virtual bool DispatchHasGrab(nuiWidgetPtr pWidget);
@@ -483,7 +496,7 @@ public:
   void SetTheme(nuiTheme* pTheme);
   nuiTheme* GetTheme();
 
-  void AutoTrash(const nuiEvent& rEvent); ///< This method will destroy the widget whenever it is called. 
+  void AutoDestroy(const nuiEvent& rEvent); ///< This method will destroy the widget whenever it is called.
   bool IsTrashed(bool combined = true) const;
 
   void AutoStartTransition(const nuiEvent& rEvent); ///< This method will destroy the widget whenever it is called. 
@@ -498,7 +511,8 @@ public:
 
   //@}
   
-  
+  NUI_GETSET(bool, AutoUpdateLayout);
+
   /** @name Layout Constraints */
   //@{
   class LayoutConstraint
@@ -540,6 +554,7 @@ public:
   //@{
   nuiEventSource* GetEvent(const nglString& rName);
   void GetEvents(std::vector<nglString>& rNames);
+  bool AddEventAction(const nglString& rEventName, nuiEventActionHolder* pActions);
   //@}
 
   /** @name Decorations */
@@ -576,9 +591,15 @@ public:
   uint32 GetCSSPass() const;
   //@}
 
+  NUI_GETSETDO(bool, ReverseRender, Invalidate());
+
+  static void SetGlobalUseRenderCache(bool set);
+  static bool GetGlobalUseRenderCache();
+
 protected:
   std::map<nglString, nuiEventSource*, nglString::LessFunctor> mEventMap;
-  
+  std::vector<nuiEventActionHolder*> mEventActions;
+
   void AddEvent(const nglString& rName, nuiEventSource& rEvent);
   virtual void BroadcastInvalidate(nuiWidgetPtr pSender);
   virtual void BroadcastInvalidateRect(nuiWidgetPtr pSender, const nuiRect& rRect);
@@ -594,6 +615,7 @@ protected:
 
   float mAlpha; ///< Indicates the transparency level of the object. Optional. 
   nuiRect mRect; ///< The bounding box of the nuiWidget (in coordinates of its parent).
+  nuiRect mLayoutRect; ///< The rect given by the parent (may be different than mRect)
   nuiRect mVisibleRect; ///< The active bounding box of the nuiObject (in local coordinates).
   nuiRect mIdealRect; ///< The ideal bounding box of the nuiObject (in coordinates of its parent) position should be at the origin.
   nuiRect mUserRect; ///< The bounding box of the nuiObject if set by the user (in coordinates of its parent).
@@ -613,7 +635,8 @@ protected:
 
   static nuiMatrix mIdentityMatrix;
   std::vector<nuiMatrixNode*>* mpMatrixNodes;
-  const nuiMatrix& _GetMatrix() const;
+  nuiMatrix _GetMatrix() const;
+  void _SetMatrix(nuiMatrix Matrix);
 
   
   nuiMatrix mSurfaceMatrix;
@@ -649,6 +672,8 @@ protected:
   void DispatchFocus(nuiWidgetPtr pWidget); ///< Advise the objet of a change of focus object. pWidget can be null.
 
   static bool mShowFocusDefault;
+  static bool mGlobalUseRenderCache;
+
 
   bool mAnimateLayout : 1;
   bool mRedrawOnHover : 1;
@@ -690,7 +715,12 @@ protected:
   bool mCanRespectConstraint: 1;
   bool mInSetRect: 1;
   bool mAutoClip: 1;
+  bool mAutoDraw: 1;
   bool mFixedAspectRatio: 1;
+  bool mReverseRender: 1;
+  bool mOverrideVisibleRect : 1;
+  bool mAutoUpdateLayout : 1;
+
 
 
   bool mClickThru: 1;

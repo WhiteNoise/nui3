@@ -68,13 +68,15 @@ void nuiLabel::InitDefaultValues()
   mTextChanged = false;
   mFontChanged = true;
   mOrientation = nuiHorizontal;
+  mTextLayoutMode = nuiTextLayoutLeft;
+
   mpLayout = NULL;
   mpIdealLayout = NULL;
   mpFont = NULL;
   
-  mTextColorSet = false;
-  mBackColorSet = false;  
-  
+  mBackColor = nuiColor(255, 255, 255, 0);
+  mTextColor = nuiColor(0, 0, 0, 255);
+
   mUseEllipsis = false;
   mClearBg = false;
   mTextPosition = nuiLeft;
@@ -82,7 +84,6 @@ void nuiLabel::InitDefaultValues()
   mVMargin = NUI_LABEL_VMARGIN;
   mHMargin = NUI_LABEL_HMARGIN;
   mWrapping = false;
-  mIgnoreState = false; 
 }
 
 
@@ -165,6 +166,11 @@ void nuiLabel::InitAttributes()
                 nuiMakeDelegate(this, &nuiLabel::GetUseEllipsis), 
                 nuiMakeDelegate(this, &nuiLabel::UseEllipsis)));
   
+  AddAttribute(new nuiAttribute<nuiTextLayoutMode>
+               (nglString(_T("TextLayoutMode")), nuiUnitNone,
+                nuiMakeDelegate(this, &nuiLabel::GetTextLayoutMode),
+                nuiMakeDelegate(this, &nuiLabel::SetTextLayoutMode)));
+  
 }
 
 void nuiLabel::InitProperties()
@@ -187,14 +193,12 @@ const nglString& nuiLabel::_GetFont() const
 
 void nuiLabel::SetTextColor(const nuiColor& Color)
 {
-  mTextColorSet = true;
   mTextColor = Color;
   Invalidate();
 }
 
 void nuiLabel::SetBackgroundColor(const nuiColor& Color)
 {
-  mBackColorSet = true;
   mBackColor = Color;
   SetBackground(true);
   Invalidate();
@@ -212,58 +216,14 @@ const nuiColor& nuiLabel::GetBackgroundColor() const
 
 bool nuiLabel::Draw(nuiDrawContext* pContext)
 {
-//  NGL_OUT(_T("Draw 0x%x\n"), this);
+  if (GetDebug())
+    NGL_OUT(_T("Draw 0x%x (%s)\n"), this, mText.GetChars());
   nuiColor Color = GetTextColor();
   nuiColor ColorBg = GetBackgroundColor();
 
   CalcLayout();
 
   pContext->SetFont(mpFont);
-  
-  if (mIgnoreState)
-  {
-    if (!mBackColorSet)
-      ColorBg = GetColor(eNormalTextBg);
-    if (!mTextColorSet)
-      Color = GetColor(eNormalTextFg);
-  }
-  else
-  {
-    if (IsEnabled())
-    {
-      if (IsSelected())
-      {
-        if (!mBackColorSet)
-          ColorBg = GetColor(eSelectedTextBg);
-        if (!mTextColorSet)
-          Color = GetColor(eSelectedTextFg);
-      }
-      else
-      {
-        if (!mBackColorSet)
-          ColorBg = GetColor(eNormalTextBg);
-        if (!mTextColorSet)
-          Color = GetColor(eNormalTextFg);
-      }
-    }
-    else
-    {
-      if (IsSelected())
-      {
-        if (!mBackColorSet)
-          ColorBg = GetColor(eSelectedTextBg);
-        if (!mTextColorSet)
-          Color = GetColor(eDisabledTextFg);
-      }
-      else
-      {
-        if (!mBackColorSet)
-          ColorBg = GetColor(eDisabledTextBg);
-        if (!mTextColorSet)
-          Color = GetColor(eDisabledTextFg);
-      }
-    }
-  }
 
   nuiGlyphInfo GlyphInfo;
   mpLayout->GetMetrics(GlyphInfo);
@@ -281,7 +241,7 @@ bool nuiLabel::Draw(nuiDrawContext* pContext)
   rect.SetPosition(mTextPosition, mRect.Size());
   //pContext->DrawRect(rect, eStrokeShape);
   
-  rect.mTop += (nuiSize)ToNearest(info.Ascender) + mVMargin;
+  rect.mTop += (nuiSize)ToNearest(info.Ascender) + mVMargin + 1;
   rect.mLeft +=  mHMargin;
 
   if (mClearBg)
@@ -335,9 +295,11 @@ void nuiLabel::CalcLayout()
       mpLayout = NULL;
       mpIdealLayout = NULL;
       mpLayout = new nuiTextLayout(mpFont, mOrientation);
+      mpLayout->SetTextLayoutMode(mTextLayoutMode);
       mpLayout->SetUnderline(mUnderline);
       mpLayout->SetStrikeThrough(mStrikeThrough);
       mpIdealLayout = new nuiTextLayout(mpFont, mOrientation);
+      mpIdealLayout->SetTextLayoutMode(mTextLayoutMode);
       mpIdealLayout->SetUnderline(mUnderline);
       mpIdealLayout->SetStrikeThrough(mStrikeThrough);
       mFontChanged = false;
@@ -349,7 +311,7 @@ void nuiLabel::CalcLayout()
       {
         //NGL_OUT(_T("Setting wrapping to %f\n"), mConstraint.mMaxWidth);
         float wrap1 = mConstraint.mMaxWidth;
-        float wrap2 = GetMaxIdealWidth();
+        float wrap2 = MAX(GetMaxIdealWidth(), GetUserWidth());
         float wrap = 0;
         if (wrap1 > 0 && wrap2 > 0)
           wrap = MIN(wrap1, wrap2);
@@ -383,7 +345,7 @@ void nuiLabel::CalcLayout()
 
 nuiRect nuiLabel::CalcIdealSize()
 {
-//  NGL_OUT(_T("Calc 0x%x\n"), this);
+  //NGL_OUT("Calc 0x%x\n", this);
   CalcLayout();
 
   if (mpLayout)
@@ -396,7 +358,7 @@ nuiRect nuiLabel::CalcIdealSize()
   }
 
   mIdealRect.RoundToBiggest();
-  //NGL_OUT(_T("%s [%s]"), mText.GetChars(), mIdealRect.GetValue().GetChars());
+  //NGL_OUT("%s %s", mText.GetChars(), mIdealRect.GetValue().GetChars());
   return mIdealRect;
 }
 
@@ -429,6 +391,9 @@ bool nuiLabel::SetRect(const nuiRect& rRect)
       delete mpLayout;
       mpLayout = new nuiTextLayout(mpFont);
       mpLayout->SetWrapX(0);
+      mpLayout->SetTextLayoutMode(mTextLayoutMode);
+      mpLayout->SetUnderline(mUnderline);
+      mpLayout->SetStrikeThrough(mStrikeThrough);
       mpLayout->Layout(text);
       GetLayoutRect();
     }
@@ -436,11 +401,17 @@ bool nuiLabel::SetRect(const nuiRect& rRect)
     {
       CalcLayout();
       delete mpLayout;
-      mpLayout = new nuiTextLayout(mpFont);
+      mpLayout = new nuiTextLayout(mpFont, mOrientation);
       delete mpIdealLayout;
-      mpIdealLayout = new nuiTextLayout(mpFont);
+      mpIdealLayout = new nuiTextLayout(mpFont, mOrientation);
       mpLayout->SetWrapX(mRect.GetWidth() - mBorderLeft - mBorderRight);
       mpIdealLayout->SetWrapX(mRect.GetWidth() - mBorderLeft - mBorderRight);
+      mpLayout->SetTextLayoutMode(mTextLayoutMode);
+      mpLayout->SetUnderline(mUnderline);
+      mpLayout->SetStrikeThrough(mStrikeThrough);
+      mpIdealLayout->SetTextLayoutMode(mTextLayoutMode);
+      mpIdealLayout->SetUnderline(mUnderline);
+      mpIdealLayout->SetStrikeThrough(mStrikeThrough);
       mpLayout->Layout(mText);
       mpIdealLayout->Layout(mText);
       GetLayoutRect();
@@ -467,9 +438,9 @@ nuiRect nuiLabel::GetLayoutRect()
 //    printf("New layout rect: %s\n", mIdealLayoutRect.GetValue().GetChars());
 //  }
   
-  if (!(mIdealLayoutRect == mIdealRect))
-    InvalidateLayout();
-  
+//  if (!(mIdealLayoutRect == mIdealRect))
+//    InvalidateLayout();
+
   return mIdealLayoutRect;
 }
 
@@ -490,51 +461,6 @@ void nuiLabel::SetText(const nglString& Text)
 const nglString& nuiLabel::GetText() const
 {
   return mText;
-}
-
-void nuiLabel::SetThemeTextColor(const nuiColor& Color, bool Selected, bool Enabled)
-{
-  if (Enabled && !Selected)
-    SetColor(eNormalTextFg, Color);
-  else if (Enabled && Selected)
-    SetColor(eSelectedTextFg, Color);
-  else if (!Enabled)
-    SetColor(eDisabledTextFg, Color);
-  Invalidate();
-}
-
-nuiColor nuiLabel::GetThemeTextColor(bool Selected, bool Enabled)
-{
-  if (Enabled && !Selected)
-    return GetColor(eNormalTextFg);
-  else if (Enabled && Selected)
-    return GetColor(eSelectedTextFg);
-  else if (!Enabled)
-    return GetColor(eDisabledTextFg);
-  return GetColor(eNormalTextFg);
-}
-
-void nuiLabel::SetThemeBackgroundColor(const nuiColor& Color, bool Selected, bool Enabled)
-{
-  SetBackground(true);
-  if (Enabled && !Selected)
-    SetColor(eNormalTextBg, Color);
-  else if (Enabled && Selected)
-    SetColor(eSelectedTextBg, Color);
-  else if (!Enabled)
-    SetColor(eDisabledTextBg, Color);
-  Invalidate();
-}
-
-nuiColor nuiLabel::GetThemeBackgroundColor(bool Selected, bool Enabled)
-{
-  if (Enabled && !Selected)
-    return GetColor(eNormalTextBg);
-  else if (Enabled && Selected)
-    return GetColor(eSelectedTextBg);
-  else if (!Enabled)
-    return GetColor(eDisabledTextBg);
-  return GetColor(eNormalTextBg);
 }
 
 void nuiLabel::SetBackground(bool bg)

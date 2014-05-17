@@ -86,7 +86,7 @@ bool nuiSimpleContainer::LoadChildren(const nuiXMLNode* pNode)
 {
   CheckValid();
 	bool res=true;
-  uint i, count = pNode->GetChildrenCount();
+  int i, count = pNode->GetChildrenCount();
   for (i = 0; i < count; i++)
   {
     nuiXMLNode* pChild = pNode->GetChild(i);
@@ -119,8 +119,12 @@ nuiSimpleContainer::~nuiSimpleContainer()
     nuiWidgetPtr pItem = pIt->GetWidget();
     if (pItem)
     {
-      if (!pItem->IsTrashed(false) && pItem->Release())
+//      if (!pItem->IsTrashed(false) && pItem->Release())
+//        pItem->SetParent(NULL);
+      if (!pItem->IsTrashed(false))
         pItem->SetParent(NULL);
+      pItem->Release();
+
     }
   }
   delete pIt;
@@ -150,8 +154,8 @@ bool nuiSimpleContainer::AddChild(nuiWidgetPtr pChild)
   nuiContainer* pParent = pChild->GetParent();
   NGL_ASSERT(pParent != this);
   
-  uint32 capacity = mpChildren.capacity();
-  uint32 size = mpChildren.size();
+  int32 capacity = mpChildren.capacity();
+  int32 size = mpChildren.size();
   if (size == capacity)
   {
     if (size < 128)
@@ -198,7 +202,7 @@ bool nuiSimpleContainer::DelChild(nuiWidgetPtr pChild)
       if (!pChild->IsTrashed())
       {
         nuiTopLevel* pRoot = GetTopLevel();
-        Trashed();
+        pChild->Trashed();
         Invalidate();
         
         if (pRoot)
@@ -206,7 +210,6 @@ bool nuiSimpleContainer::DelChild(nuiWidgetPtr pChild)
         pChild->SetParent(NULL);
       }
       ChildDeleted(this, pChild);
-      Invalidate();
       InvalidateLayout();
       DebugRefreshInfo();
       pChild->Release();
@@ -217,7 +220,7 @@ bool nuiSimpleContainer::DelChild(nuiWidgetPtr pChild)
   return false;
 }
 
-uint nuiSimpleContainer::GetChildrenCount() const
+int nuiSimpleContainer::GetChildrenCount() const
 {
   CheckValid();
   return mpChildren.size();

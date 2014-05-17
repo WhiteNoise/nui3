@@ -21,262 +21,202 @@
 #define NUI_USE_MULTISAMPLE_AA
 #endif
 
+#ifdef _UIKIT_
+#define glGenVertexArrays glGenVertexArraysOES
+#define glBindVertexArray glBindVertexArrayOES
+#elif defined __APPLE__
+#define glDeleteVertexArrays glDeleteVertexArraysAPPLE
+#define glGenVertexArrays glGenVertexArraysAPPLE
+#define glBindVertexArray glBindVertexArrayAPPLE
+#endif
+
+
 static const char* TextureVertexColor_VTX =
-"attribute vec4 Position;\n\
-attribute vec2 TexCoord;\n\
-attribute vec4 Color;\n\
-uniform mat4 SurfaceMatrix;\n\
-uniform mat4 ModelViewMatrix;\n\
-uniform mat4 ProjectionMatrix;\n\
-uniform vec4 Offset;\n\
-uniform vec2 TextureTranslate;\n\
-uniform vec2 TextureScale;\n\
-varying vec2 TexCoordVar;\n\
-varying vec4 ColorVar;\n\
-void main()\n\
-{\n\
-TexCoordVar = TexCoord * TextureScale + TextureTranslate;\n\
-ColorVar = Color;\n\
-gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));\n\
-}"
-;
+SHADER_STRING (
+  attribute vec4 Position;
+  attribute vec2 TexCoord;
+  attribute vec4 Color;
+  uniform mat4 SurfaceMatrix;
+  uniform mat4 ModelViewMatrix;
+  uniform mat4 ProjectionMatrix;
+  uniform vec4 Offset;
+  uniform vec2 TextureTranslate;
+  uniform vec2 TextureScale;
+  varying vec2 TexCoordVar;
+  varying vec4 ColorVar;
+
+  void main()
+  {
+    TexCoordVar = TexCoord * TextureScale + TextureTranslate;
+    ColorVar = Color;
+    gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));
+  }
+);
 
 static const char* TextureVertexColor_FGT =
-"uniform sampler2D texture;\n\
-varying vec4 ColorVar;\n\
-varying vec2 TexCoordVar;\n\
-void main()\n\
-{\n\
-gl_FragColor = ColorVar * texture2D(texture, TexCoordVar);\n\
-}"
-;
+SHADER_STRING (
+uniform sampler2D texture;
+varying vec4 ColorVar;
+varying vec2 TexCoordVar;
+void main()
+{
+  gl_FragColor = ColorVar * texture2D(texture, TexCoordVar);
+  //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 static const char* TextureAlphaVertexColor_VTX =
-"attribute vec4 Position;\n\
-attribute vec2 TexCoord;\n\
-attribute vec4 Color;\n\
-uniform mat4 SurfaceMatrix;\n\
-uniform mat4 ModelViewMatrix;\n\
-uniform mat4 ProjectionMatrix;\n\
-uniform vec4 Offset;\n\
-uniform vec2 TextureTranslate;\n\
-uniform vec2 TextureScale;\n\
-varying vec2 TexCoordVar;\n\
-varying vec4 ColorVar;\n\
-void main()\n\
-{\n\
-TexCoordVar = TexCoord * TextureScale + TextureTranslate;\n\
-ColorVar = Color;\n\
-gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));\n\
-}"
-;
+SHADER_STRING (
+attribute vec4 Position;
+attribute vec2 TexCoord;
+attribute vec4 Color;
+uniform mat4 SurfaceMatrix;
+uniform mat4 ModelViewMatrix;
+uniform mat4 ProjectionMatrix;
+uniform vec4 Offset;
+uniform vec2 TextureTranslate;
+uniform vec2 TextureScale;
+varying vec2 TexCoordVar;
+varying vec4 ColorVar;
+void main()
+{
+  TexCoordVar = TexCoord * TextureScale + TextureTranslate;
+  ColorVar = Color;
+  gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));
+}
+);
 
 static const char* TextureAlphaVertexColor_FGT =
-"uniform sampler2D texture;\n\
-varying vec4 ColorVar;\n\
-varying vec2 TexCoordVar;\n\
-void main()\n\
-{\n\
-float v = texture2D(texture, TexCoordVar)[3];\
-gl_FragColor = ColorVar * v;\n\
-}"
-;
+SHADER_STRING (
+uniform sampler2D texture;
+varying vec4 ColorVar;
+varying vec2 TexCoordVar;
+void main()
+{
+  float v = texture2D(texture, TexCoordVar)[3];
+  gl_FragColor = ColorVar * v;
+  //gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+}
+);
 
 //////////////////////////////////////////////////////////////////////////////////
 static const char* TextureDifuseColor_VTX =
-"attribute vec4 Position;\n\
-attribute vec2 TexCoord;\n\
-uniform mat4 SurfaceMatrix;\n\
-uniform mat4 ModelViewMatrix;\n\
-uniform mat4 ProjectionMatrix;\n\
-uniform vec4 Offset;\n\
-uniform vec2 TextureTranslate;\n\
-uniform vec2 TextureScale;\n\
-varying vec2 TexCoordVar;\n\
-void main()\n\
-{\n\
-TexCoordVar = TexCoord * TextureScale + TextureTranslate;\n\
-gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));\n\
-}"
-;
+SHADER_STRING (
+attribute vec4 Position;
+attribute vec2 TexCoord;
+uniform mat4 SurfaceMatrix;
+uniform mat4 ModelViewMatrix;
+uniform mat4 ProjectionMatrix;
+uniform vec4 Offset;
+uniform vec2 TextureTranslate;
+uniform vec2 TextureScale;
+varying vec2 TexCoordVar;
+void main()
+{
+  TexCoordVar = TexCoord * TextureScale + TextureTranslate;
+  gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));
+}
+);
 
 static const char* TextureDifuseColor_FGT =
-"uniform sampler2D texture;\n\
-uniform vec4 DifuseColor;\n\
-varying vec2 TexCoordVar;\n\
-void main()\n\
-{\n\
-gl_FragColor = DifuseColor * texture2D(texture, TexCoordVar);\n\
-//gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);\n\
-}"
-;
+SHADER_STRING (
+uniform sampler2D texture;
+uniform vec4 DifuseColor;
+varying vec2 TexCoordVar;
+void main()
+{
+  gl_FragColor = DifuseColor * texture2D(texture, TexCoordVar);
+  //gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+  //gl_FragColor = texture2D(texture, TexCoordVar);
+}
+);
 
 //////////////////////////////////////////////////////////////////////////////////
 static const char* TextureAlphaDifuseColor_VTX =
-"attribute vec4 Position;\n\
-attribute vec2 TexCoord;\n\
-uniform mat4 SurfaceMatrix;\n\
-uniform mat4 ModelViewMatrix;\n\
-uniform mat4 ProjectionMatrix;\n\
-uniform vec4 Offset;\n\
-uniform vec2 TextureTranslate;\n\
-uniform vec2 TextureScale;\n\
-varying vec2 TexCoordVar;\n\
-void main()\n\
-{\n\
-TexCoordVar = TexCoord * TextureScale + TextureTranslate;\n\
-gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));\n\
-}"
-;
+SHADER_STRING (
+attribute vec4 Position;
+attribute vec2 TexCoord;
+uniform mat4 SurfaceMatrix;
+uniform mat4 ModelViewMatrix;
+uniform mat4 ProjectionMatrix;
+uniform vec4 Offset;
+uniform vec2 TextureTranslate;
+uniform vec2 TextureScale;
+varying vec2 TexCoordVar;
+void main()
+{
+TexCoordVar = TexCoord * TextureScale + TextureTranslate;
+gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));
+}
+);
 
 static const char* TextureAlphaDifuseColor_FGT =
-"uniform sampler2D texture;\n\
-uniform vec4 DifuseColor;\n\
-varying vec2 TexCoordVar;\n\
-void main()\n\
-{\n\
-float v = texture2D(texture, TexCoordVar)[3];\
-gl_FragColor = DifuseColor * vec4(v, v, v, v);\n\
-//gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);\n\
-}"
-;
+SHADER_STRING (
+uniform sampler2D texture;
+uniform vec4 DifuseColor;
+varying vec2 TexCoordVar;
+void main()
+{
+  float v = texture2D(texture, TexCoordVar)[3];\
+  gl_FragColor = DifuseColor * vec4(v, v, v, v);
+}
+);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // No texture cases:
 static const char* VertexColor_VTX =
-"attribute vec4 Position;\n\
-attribute vec4 Color;\n\
-uniform mat4 SurfaceMatrix;\n\
-uniform mat4 ModelViewMatrix;\n\
-uniform mat4 ProjectionMatrix;\n\
-uniform vec4 Offset;\n\
-varying vec4 ColorVar;\n\
-void main()\n\
-{\n\
-ColorVar = Color;\n\
-gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));\n\
-}"
-;
+SHADER_STRING (
+attribute vec4 Position;
+attribute vec4 Color;
+uniform mat4 SurfaceMatrix;
+uniform mat4 ModelViewMatrix;
+uniform mat4 ProjectionMatrix;
+uniform vec4 Offset;
+varying vec4 ColorVar;
+void main()
+{
+  ColorVar = Color;
+  gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));
+}
+);
 
 static const char* VertexColor_FGT =
-"varying vec4 ColorVar;\n\
-void main()\n\
-{\n\
-gl_FragColor = ColorVar;\n\
-}"
-;
+SHADER_STRING (
+varying vec4 ColorVar;
+void main()
+{
+  gl_FragColor = ColorVar;
+}
+);
 
 //////////////////////////////////////////////////////////////////////////////////
 static const char* DifuseColor_VTX =
-"attribute vec4 Position;\n\
-uniform mat4 SurfaceMatrix;\n\
-uniform mat4 ModelViewMatrix;\n\
-uniform mat4 ProjectionMatrix;\n\
-uniform vec4 Offset;\n\
-uniform vec4 DifuseColor;\n\
-varying vec4 ColorVar;\n\
-void main()\n\
-{\n\
-ColorVar = DifuseColor;\n\
-gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));\n\
-}"
-;
+SHADER_STRING (
+  attribute vec4 Position;
+  uniform mat4 SurfaceMatrix;
+  uniform mat4 ModelViewMatrix;
+  uniform mat4 ProjectionMatrix;
+  uniform vec4 Offset;
+  uniform vec4 DifuseColor;
+  varying vec4 ColorVar;
+
+  void main()
+  {
+    ColorVar = DifuseColor;
+    gl_Position = (SurfaceMatrix * ProjectionMatrix * ModelViewMatrix * (Position  + Offset));
+  }
+);
 
 static const char* DifuseColor_FGT =
-"uniform sampler2D texture;\n\
-varying vec4 ColorVar;\n\
-void main()\n\
-{\n\
-gl_FragColor = ColorVar;\n\
-}"
-;
-
-
-
-
-#ifdef _OPENGL_ES_
-
-#define glCheckFramebufferStatusNUI   glCheckFramebufferStatusOES
-#define glFramebufferRenderbufferNUI  glFramebufferRenderbufferOES
-#define glRenderbufferStorageNUI      glRenderbufferStorageOES
-#define glGenFramebuffersNUI          glGenFramebuffersOES
-#define glDeleteFramebuffersNUI       glDeleteFramebuffersOES
-#define glBindFramebufferNUI          glBindFramebufferOES
-#define glGenRenderbuffersNUI         glGenRenderbuffersOES
-#define glDeleteRenderbuffersNUI      glDeleteRenderbuffersOES
-#define glBindRenderbufferNUI         glBindRenderbufferOES
-#define glFramebufferTexture2DNUI     glFramebufferTexture2DOES
-
-#define GL_FRAMEBUFFER_NUI                                GL_FRAMEBUFFER_OES
-#define GL_RENDERBUFFER_NUI                               GL_RENDERBUFFER_OES
-#define GL_FRAMEBUFFER_BINDING_NUI                        GL_FRAMEBUFFER_BINDING_OES
-#define GL_RENDERBUFFER_BINDING_NUI                       GL_RENDERBUFFER_BINDING_OES
-
-// FBO attachement points
-#define GL_STENCIL_ATTACHMENT_NUI                         GL_STENCIL_ATTACHMENT_OES
-#define GL_DEPTH_ATTACHMENT_NUI                           GL_DEPTH_ATTACHMENT_OES
-#define GL_COLOR_ATTACHMENT0_NUI                          GL_COLOR_ATTACHMENT0_OES
-
-// FBO errors:
-#define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_NUI          GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES
-#define GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_NUI  GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES
-#define GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_NUI          GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES
-#define GL_FRAMEBUFFER_INCOMPLETE_FORMATS_NUI             GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES
-#define GL_FRAMEBUFFER_UNSUPPORTED_NUI                    GL_FRAMEBUFFER_UNSUPPORTED_OES
-#define GL_FRAMEBUFFER_COMPLETE_NUI                       GL_FRAMEBUFFER_COMPLETE_OES
-
-#define GL_DEPTH_COMPONENT16                              GL_DEPTH_COMPONENT16_OES
-#define GL_DEPTH_COMPONENT24                              GL_DEPTH_COMPONENT24_OES
-
-//#elif defined(_OPENGL_)
-#else
-
-#ifdef _MACOSX_
-#define glCheckFramebufferStatusNUI   glCheckFramebufferStatusEXT
-#define glFramebufferRenderbufferNUI  glFramebufferRenderbufferEXT
-#define glRenderbufferStorageNUI      glRenderbufferStorageEXT
-#define glGenFramebuffersNUI          glGenFramebuffersEXT
-#define glDeleteFramebuffersNUI       glDeleteFramebuffersEXT
-#define glBindFramebufferNUI          glBindFramebufferEXT
-#define glGenRenderbuffersNUI         glGenRenderbuffersEXT
-#define glDeleteRenderbuffersNUI      glDeleteRenderbuffersEXT
-#define glBindRenderbufferNUI         glBindRenderbufferEXT
-#define glFramebufferTexture2DNUI     glFramebufferTexture2DEXT
-#else
-#define glCheckFramebufferStatusNUI   mpContext->glCheckFramebufferStatusEXT
-#define glFramebufferRenderbufferNUI  mpContext->glFramebufferRenderbufferEXT
-#define glRenderbufferStorageNUI      mpContext->glRenderbufferStorageEXT
-#define glGenFramebuffersNUI          mpContext->glGenFramebuffersEXT
-#define glDeleteFramebuffersNUI       mpContext->glDeleteFramebuffersEXT
-#define glBindFramebufferNUI          mpContext->glBindFramebufferEXT
-#define glGenRenderbuffersNUI         mpContext->glGenRenderbuffersEXT
-#define glDeleteRenderbuffersNUI      mpContext->glDeleteRenderbuffersEXT
-#define glBindRenderbufferNUI         mpContext->glBindRenderbufferEXT
-#define glFramebufferTexture2DNUI     mpContext->glFramebufferTexture2DEXT
-#endif
-
-#define GL_FRAMEBUFFER_NUI                                GL_FRAMEBUFFER_EXT
-#define GL_RENDERBUFFER_NUI                               GL_RENDERBUFFER_EXT
-#define GL_FRAMEBUFFER_BINDING_NUI                        GL_FRAMEBUFFER_BINDING_EXT
-#define GL_RENDERBUFFER_BINDING_NUI                       GL_RENDERBUFFER_BINDING_EXT
-
-// FBO attachement points
-#define GL_STENCIL_ATTACHMENT_NUI                         GL_STENCIL_ATTACHMENT_EXT
-#define GL_DEPTH_ATTACHMENT_NUI                           GL_DEPTH_ATTACHMENT_EXT
-#define GL_COLOR_ATTACHMENT0_NUI                          GL_COLOR_ATTACHMENT0_EXT
-
-// FBO errors:
-#define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_NUI          GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT
-#define GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_NUI  GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT
-#define GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_NUI          GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT
-#define GL_FRAMEBUFFER_INCOMPLETE_FORMATS_NUI             GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT
-#define GL_FRAMEBUFFER_UNSUPPORTED_NUI                    GL_FRAMEBUFFER_UNSUPPORTED_EXT
-#define GL_FRAMEBUFFER_COMPLETE_NUI                       GL_FRAMEBUFFER_COMPLETE_EXT
-
-//#else
-//#error "bleh"
-#endif
+SHADER_STRING (
+  uniform sampler2D texture;
+  varying vec4 ColorVar;
+  void main()
+  {
+    gl_FragColor = ColorVar;
+  }
+);
 
 static uint32 mins = 30000;
 static uint32 maxs = 0;
@@ -286,6 +226,7 @@ static uint32 total = 0;
 nuiGL2Painter::nuiGL2Painter(nglContext* pContext)
 : nuiGLPainter(pContext)
 {
+  nuiCheckForGLErrors();
   mUseShaders = true;
 
   mpShader_TextureVertexColor = nuiShaderProgram::GetProgram("TextureVertexColor");
@@ -299,6 +240,7 @@ nuiGL2Painter::nuiGL2Painter(nglContext* pContext)
     mpShader_TextureVertexColor->GetCurrentState()->Set("Offset", 0.0f, 0.0f);
     mpShader_TextureVertexColor->GetCurrentState()->Set("texture", 0);
   }
+  nuiCheckForGLErrors();
   
   mpShader_TextureAlphaVertexColor = nuiShaderProgram::GetProgram("TextureAlphaVertexColor");
   if (!mpShader_TextureAlphaVertexColor)
@@ -311,6 +253,7 @@ nuiGL2Painter::nuiGL2Painter(nglContext* pContext)
     mpShader_TextureAlphaVertexColor->GetCurrentState()->Set("Offset", 0.0f, 0.0f);
     mpShader_TextureAlphaVertexColor->GetCurrentState()->Set("texture", 0);
   }
+  nuiCheckForGLErrors();
 
   mpShader_TextureDifuseColor = nuiShaderProgram::GetProgram("TextureDiffuseColor");
   if (!mpShader_TextureDifuseColor)
@@ -324,6 +267,7 @@ nuiGL2Painter::nuiGL2Painter(nglContext* pContext)
     mpShader_TextureDifuseColor->GetCurrentState()->Set("Offset", 0.0f, 0.0f);
     mpShader_TextureDifuseColor->GetCurrentState()->Set("texture", 0);
   }
+  nuiCheckForGLErrors();
 
   mpShader_TextureAlphaDifuseColor = nuiShaderProgram::GetProgram("TextureAlphaDifuseColor");
   if (!mpShader_TextureAlphaDifuseColor)
@@ -337,6 +281,7 @@ nuiGL2Painter::nuiGL2Painter(nglContext* pContext)
     mpShader_TextureAlphaDifuseColor->GetCurrentState()->Set("Offset", 0.0f, 0.0f);
     mpShader_TextureAlphaDifuseColor->GetCurrentState()->Set("texture", 0);
   }
+  nuiCheckForGLErrors();
 
   mpShader_VertexColor = nuiShaderProgram::GetProgram("VertexColor");
   if (!mpShader_VertexColor)
@@ -348,6 +293,7 @@ nuiGL2Painter::nuiGL2Painter(nglContext* pContext)
     mpShader_VertexColor->Link();
     mpShader_VertexColor->GetCurrentState()->Set("Offset", 0.0f, 0.0f);
   }
+  nuiCheckForGLErrors();
 
   mpShader_DifuseColor = nuiShaderProgram::GetProgram("DifuseColor");
   if (!mpShader_DifuseColor)
@@ -360,8 +306,10 @@ nuiGL2Painter::nuiGL2Painter(nglContext* pContext)
     mpShader_DifuseColor->GetCurrentState()->Set("DifuseColor", nuiColor(255, 255, 255, 255));
     mpShader_DifuseColor->GetCurrentState()->Set("Offset", 0.0f, 0.0f);
   }
+  nuiCheckForGLErrors();
 
-  mpCurrentVertexBufferInfo = NULL;
+
+  mpCurrentRenderArrayInfo = NULL;
   mpLastArray = NULL;
 }
 
@@ -383,26 +331,26 @@ void nuiGL2Painter::SetViewport()
   GLint Height = GetCurrentHeight();
   const nuiRect& rViewport(mProjectionViewportStack.top());
   const nuiMatrix& rMatrix = mProjectionMatrixStack.top();
-  
+
+  //NGL_DEBUG(NGL_OUT("nuiGL2Painter::SetViewPort(%d, %d)\n", Width, Height);)
+
   uint32 x, y, w, h;
   
   nuiRect r(rViewport);
-  if (Angle == 90 || Angle == 270)
-  {
-    uint32 tmp = Width;
-    Width = Height;
-    Height = tmp;
-    r.Set(r.Top(), r.Left(), r.GetHeight(), r.GetWidth());
-  }
-  
+//  if (Angle == 90 || Angle == 270)
+//  {
+//    uint32 tmp = Width;
+//    Width = Height;
+//    Height = tmp;
+//    r.Set(r.Top(), r.Left(), r.GetHeight(), r.GetWidth());
+//  }
+
   
   x = ToBelow(r.Left());
   w = ToBelow(r.GetWidth());
   y = Height - ToBelow(r.Bottom());
   h = ToBelow(r.GetHeight());
-  
-  //printf("set projection matrix (%d %d - %d %d)\n", x, y, w, h);
-  //if (!mpSurface)
+
   {
     const float scale = mpContext->GetScale();
     x *= scale;
@@ -410,18 +358,9 @@ void nuiGL2Painter::SetViewport()
     w *= scale;
     h *= scale;
   }
-//  else
-//    glViewport(x, y, w, h);
 
-//  if (mViewPort[0] != x || mViewPort[1] != y || mViewPort[2] != w || mViewPort[3] != h)
   nuiCheckForGLErrors();
-  {
-    mViewPort[0] = x;
-    mViewPort[1] = y;
-    mViewPort[2] = w;
-    mViewPort[3] = h;
-    glViewport(mViewPort[0], mViewPort[1], mViewPort[2], mViewPort[3]);
-  }
+  glViewport(x, y, w, h);
 
   if (mpSurface)
   {
@@ -433,10 +372,10 @@ void nuiGL2Painter::SetViewport()
   }
 
   float angle = GetAngle();
-  if (angle != 0.0f)
-  {
-    mSurfaceMatrix.Rotate(angle, 0 ,0, 1);
-  }
+//  if (angle != 0.0f)
+//  {
+//    mSurfaceMatrix.Rotate(angle, 0 ,0, 1);
+//  }
 
   nuiCheckForGLErrors();
 }
@@ -483,7 +422,7 @@ void nuiGL2Painter::ResetOpenGLState()
 //  mTextureScale = nglVector2f(1, 1);
 
   mFinalState = nuiRenderState();
-  mState = nuiRenderState();
+  mpState = &mDefaultState;
   mpLastArray = NULL;
 
   nuiCheckForGLErrors();
@@ -500,6 +439,12 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
   {
     pArray->Release();
     return;
+  }
+
+  if (pArray->GetDebug())
+  {
+    NGL_OUT("Texturing %s (%p)\n", YESNO(mFinalState.mTexturing), mFinalState.mpTexture[0]);
+    pArray->Dump();
   }
 
 #ifdef DEBUG
@@ -562,7 +507,10 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
   }
 
   // Shader selection:
-  if (mState.mpShader == NULL)
+  mpShader = mpState->mpShader;
+  mpShaderState = mpState->mpShaderState;
+
+  if (mpShader == NULL)
   {
     nuiShaderProgram* pShader = NULL;
     if (pArray->IsArrayEnabled(nuiRenderArray::eColor))
@@ -571,7 +519,7 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
       if (pArray->IsArrayEnabled(nuiRenderArray::eTexCoord))
       {
         // texture on
-        if (mState.mpTexture[0]->GetPixelFormat() == eImagePixelAlpha)
+        if (mpState->mpTexture[0]->GetPixelFormat() == eImagePixelAlpha)
           pShader = mpShader_TextureAlphaVertexColor;
         else
           pShader = mpShader_TextureVertexColor;
@@ -587,7 +535,7 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
       if (pArray->IsArrayEnabled(nuiRenderArray::eTexCoord))
       {
         // texture on
-        if (mState.mpTexture[0]->GetPixelFormat() == eImagePixelAlpha)
+        if (mpState->mpTexture[0]->GetPixelFormat() == eImagePixelAlpha)
           pShader = mpShader_TextureAlphaDifuseColor;
         else
           pShader = mpShader_TextureDifuseColor;
@@ -599,14 +547,18 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
     }
 
     pShader->Acquire();
-    mState.mpShader = pShader;
-    mState.mpShaderState = pShader->GetCurrentState();
-    mState.mpShaderState->Acquire();
+    mpShader = pShader;
+    mpShaderState = pShader->GetCurrentState();
+    mpShaderState->Acquire();
   }
 
-  NGL_ASSERT(mState.mpShader != NULL);
+  NGL_ASSERT(mpShader != NULL);
 
-  ApplyState(mState, mForceApply);
+  ApplyState(*mpState, mForceApply);
+  pArray->Acquire();
+  mFrameArrays.push_back(pArray);
+
+
 
   if (mFinalState.mpTexture && pArray->IsArrayEnabled(nuiRenderArray::eTexCoord))
   {
@@ -664,26 +616,26 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
     hackX = ratio;
     hackY = ratio;
 #else
-    if (mAngle == 0)
+//    if (mAngle == 0)
     {
       hackX = ratio;
       hackY = ratio;
     }
-    else if (mAngle == 90)
-    {
-      hackX = 0;
-      hackY = ratio;
-    }
-    else if (mAngle == 180)
-    {
-      hackX = 0;
-      hackY = 0;
-    }
-    else/*mAngle == 270*/
-    {
-      hackX = ratio;
-      hackY = 0;
-    }
+//    else if (mAngle == 90)
+//    {
+//      hackX = 0;
+//      hackY = ratio;
+//    }
+//    else if (mAngle == 180)
+//    {
+//      hackX = 0;
+//      hackY = 0;
+//    }
+//    else/*mAngle == 270*/
+//    {
+//      hackX = ratio;
+//      hackY = 0;
+//    }
 #endif
   }
 
@@ -721,17 +673,18 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
   }
 
   mFinalState.mpShader->SetState(*mFinalState.mpShaderState, true);
+
   if (pArray->IsStatic())
   {
-    auto it = mVertexBuffers.find(pArray);
-    if (it == mVertexBuffers.end())
+    auto it = mRenderArrays.find(pArray);
+    if (it == mRenderArrays.end())
     {
-      mVertexBuffers[pArray] = VertexBufferInfo(pArray);
-      it = mVertexBuffers.find(pArray);
+      mRenderArrays[pArray] = RenderArrayInfo::Create(pArray);
+      it = mRenderArrays.find(pArray);
     }
-    NGL_ASSERT(it != mVertexBuffers.end());
-    mpCurrentVertexBufferInfo = &it->second;
-    const VertexBufferInfo& rInfo(it->second);
+    NGL_ASSERT(it != mRenderArrays.end());
+    mpCurrentRenderArrayInfo = it->second;
+    RenderArrayInfo& rInfo(*it->second);
 
     if (mpLastArray != pArray)
     {
@@ -743,11 +696,11 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
   {
     if (mpLastArray != pArray)
     {
-      if (mpCurrentVertexBufferInfo)
+      if (mpCurrentRenderArrayInfo)
       {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        mpCurrentVertexBufferInfo = NULL;
+        mpCurrentRenderArrayInfo = NULL;
       }
       SetVertexPointers(*pArray);
       mpLastArray = pArray;
@@ -771,7 +724,7 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
       {
         nuiRenderArray::IndexArray& array(pArray->GetIndexArray(i));
 #if (defined _UIKIT_) || (defined _ANDROID_)
-        glDrawElements(array.mMode, array.mIndices.size(), GL_UNSIGNED_SHORT, &(array.mIndices[0]));
+        glDrawElements(array.mMode, (GLsizei)array.mIndices.size(), GL_UNSIGNED_SHORT, &(array.mIndices[0]));
 #else
         glDrawElements(array.mMode, array.mIndices.size(), GL_UNSIGNED_INT, &(array.mIndices[0]));
 #endif
@@ -791,7 +744,7 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
       {
         nuiRenderArray::IndexArray& array(pArray->GetIndexArray(i));
 #if (defined _UIKIT_) || (defined _ANDROID_)
-        glDrawElements(array.mMode, array.mIndices.size(), GL_UNSIGNED_SHORT, &(array.mIndices[0]));
+        glDrawElements(array.mMode, (GLsizei)array.mIndices.size(), GL_UNSIGNED_SHORT, &(array.mIndices[0]));
 #else
         glDrawElements(array.mMode, array.mIndices.size(), GL_UNSIGNED_INT, &(array.mIndices[0]));
 #endif
@@ -817,7 +770,7 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
       {
         nuiRenderArray::IndexArray& array(pArray->GetIndexArray(i));
 #if (defined _UIKIT_) || (defined _ANDROID_)
-        glDrawElements(array.mMode, array.mIndices.size(), GL_UNSIGNED_SHORT, &(array.mIndices[0]));
+        glDrawElements(array.mMode, (GLsizei)array.mIndices.size(), GL_UNSIGNED_SHORT, &(array.mIndices[0]));
 #else
         glDrawElements(array.mMode, array.mIndices.size(), GL_UNSIGNED_INT, &(array.mIndices[0]));
 #endif
@@ -826,8 +779,9 @@ void nuiGL2Painter::DrawArray(nuiRenderArray* pArray)
     }
   }
   
-  
-  //ResetVertexPointers(*pArray);
+  glBindVertexArray(0);
+
+//  ResetVertexPointers(*pArray);
   pArray->Release();
   nuiCheckForGLErrors();
 }
@@ -925,62 +879,113 @@ void nuiGL2Painter::SetVertexPointers(const nuiRenderArray& rArray)
   }
 }
 
-void nuiGL2Painter::SetVertexBuffersPointers(const nuiRenderArray& rArray, const VertexBufferInfo& rInfo)
+void nuiGL2Painter::SetVertexBuffersPointers(const nuiRenderArray& rArray, RenderArrayInfo& rInfo)
 {
+  static int64 created = 0;
+  static int64 bound = 0;
+  total++;
   nuiShaderProgram* pPgm = mFinalState.mpShader;
-  GLint Position = pPgm->GetVAPositionLocation();
-  GLint TexCoord = pPgm->GetVATexCoordLocation();
-  GLint Color = pPgm->GetVAColorLocation();
-  GLint Normal = pPgm->GetVANormalLocation();
 
-  rInfo.BindVertices();
-  if (Position != -1)
+  // Look for VAO:
+  auto it = rInfo.mVAOs.find(pPgm);
+  if (it == rInfo.mVAOs.end())
   {
-    glEnableVertexAttribArray(Position);
-    glVertexAttribPointer(Position, 3, GL_FLOAT, GL_FALSE, sizeof(nuiRenderArray::Vertex), (void*)offsetof(nuiRenderArray::Vertex, mX));
-  }
-  else
-  {
-    //glDisableVertexAttribArray(Position);
+    created++;
+
+    // Create this VAO:
+    GLint vao = 0;
+    glGenVertexArrays(1, (GLuint*)&vao);
+    nuiCheckForGLErrors();
+    rInfo.mVAOs[pPgm] = vao;
+
+    glBindVertexArray(vao);
+    nuiCheckForGLErrors();
+
+    GLint Position = pPgm->GetVAPositionLocation();
+    GLint TexCoord = pPgm->GetVATexCoordLocation();
+    GLint Color = pPgm->GetVAColorLocation();
+    GLint Normal = pPgm->GetVANormalLocation();
+
+    rInfo.BindVertices();
+    if (Position != -1)
+    {
+      glVertexAttribPointer(Position, 3, GL_FLOAT, GL_FALSE, sizeof(nuiRenderArray::Vertex), (void*)offsetof(nuiRenderArray::Vertex, mX));
+      nuiCheckForGLErrors();
+      glEnableVertexAttribArray(Position);
+      nuiCheckForGLErrors();
+    }
+    else
+    {
+      //glDisableVertexAttribArray(Position);
+    }
+
+    if (TexCoord != -1)
+    {
+      glVertexAttribPointer(TexCoord, 2, GL_FLOAT, GL_FALSE, sizeof(nuiRenderArray::Vertex), (void*)offsetof(nuiRenderArray::Vertex, mTX));
+      nuiCheckForGLErrors();
+      glEnableVertexAttribArray(TexCoord);
+      nuiCheckForGLErrors();
+    }
+    else
+    {
+      //glDisableVertexAttribArray(TexCoord);
+    }
+
+    if (Color != -1)
+    {
+      glVertexAttribPointer(Color, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(nuiRenderArray::Vertex), (void*)offsetof(nuiRenderArray::Vertex, mR));
+      nuiCheckForGLErrors();
+      glEnableVertexAttribArray(Color);
+      nuiCheckForGLErrors();
+    }
+    else
+    {
+      //glDisableVertexAttribArray(Color);
+    }
+
+    if (Normal != -1)
+    {
+      glVertexAttribPointer(Normal, 3, GL_FLOAT, GL_FALSE, sizeof(nuiRenderArray::Vertex), (void*)offsetof(nuiRenderArray::Vertex, mNX));
+      nuiCheckForGLErrors();
+      glEnableVertexAttribArray(Normal);
+      nuiCheckForGLErrors();
+    }
+    else
+    {
+      //glDisableVertexAttribArray(Normal);
+    }
+
+    for (int i = 0; i < rArray.GetStreamCount(); i++)
+    {
+      SetStreamBuffersPointers(rArray, rInfo, i);
+    }
+
+    return;
   }
 
-  if (TexCoord != -1)
+  bound++;
+
+  if (bound % 10000 == 0)
   {
-    glEnableVertexAttribArray(TexCoord);
-    glVertexAttribPointer(TexCoord, 2, GL_FLOAT, GL_FALSE, sizeof(nuiRenderArray::Vertex), (void*)offsetof(nuiRenderArray::Vertex, mTX));
-  }
-  else
-  {
-    //glDisableVertexAttribArray(TexCoord);
+    NGL_OUT("VAO/VBO %lld created %lld bound (%f cache hit)\n", created, bound, (float)bound / (float)created);
   }
 
-  if (Color != -1)
-  {
-    glEnableVertexAttribArray(Color);
-    glVertexAttribPointer(Color, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(nuiRenderArray::Vertex), (void*)offsetof(nuiRenderArray::Vertex, mR));
-  }
-  else
-  {
-    //glDisableVertexAttribArray(Color);
-  }
+  NGL_ASSERT(it != rInfo.mVAOs.end());
 
-  if (Normal != -1)
-  {
-    glEnableVertexAttribArray(Normal);
-    glVertexAttribPointer(Normal, 3, GL_FLOAT, GL_FALSE, sizeof(nuiRenderArray::Vertex), (void*)offsetof(nuiRenderArray::Vertex, mNX));
-  }
-  else
-  {
-    //glDisableVertexAttribArray(Normal);
-  }
+  GLint vao = it->second;
+  glBindVertexArray(vao);
+  nuiCheckForGLErrors();
+
 }
 
-void nuiGL2Painter::SetStreamBuffersPointers(const nuiRenderArray& rArray, const VertexBufferInfo& rInfo, int index)
+void nuiGL2Painter::SetStreamBuffersPointers(const nuiRenderArray& rArray, const RenderArrayInfo& rInfo, int index)
 {
   rInfo.BindStream(index);
   const nuiRenderArray::StreamDesc& rDesc(rArray.GetStream(index));
-  glEnableVertexAttribArray(rDesc.mStreamID);
   glVertexAttribPointer(rDesc.mStreamID, rDesc.mCount, rDesc.mType, rDesc.mNormalize ? GL_TRUE : GL_FALSE, 0, NULL);
+  nuiCheckForGLErrors();
+  glEnableVertexAttribArray(rDesc.mStreamID);
+  nuiCheckForGLErrors();
 }
 
 
@@ -995,21 +1000,25 @@ void nuiGL2Painter::ResetVertexPointers(const nuiRenderArray& rArray)
   if (Position != -1)
   {
     glDisableVertexAttribArray(Position);
+    nuiCheckForGLErrors();
   }
 
   if (TexCoord != -1)
   {
     glDisableVertexAttribArray(TexCoord);
+    nuiCheckForGLErrors();
   }
 
   if (Color != -1)
   {
     glDisableVertexAttribArray(Color);
+    nuiCheckForGLErrors();
   }
 
   if (Normal != -1)
   {
     glDisableVertexAttribArray(Normal);
+    nuiCheckForGLErrors();
   }
 
   int stream_count = rArray.GetStreamCount();
@@ -1017,6 +1026,7 @@ void nuiGL2Painter::ResetVertexPointers(const nuiRenderArray& rArray)
   {
     const nuiRenderArray::StreamDesc& rDesc(rArray.GetStream(i));
     glDisableVertexAttribArray(rDesc.mStreamID);
+    nuiCheckForGLErrors();
   }
 }
 
@@ -1026,6 +1036,19 @@ void nuiGL2Painter::ResetVertexPointers(const nuiRenderArray& rArray)
 #undef glDeleteBuffersARB
 #endif
 
+
+void nuiGL2Painter::DestroyRenderArray(nuiRenderArray* pArray)
+{
+  auto it = mRenderArrays.find(pArray);
+  if (it == mRenderArrays.end())
+    return; // This render array was not stored here
+
+  RenderArrayInfo* info(it->second);
+
+  RenderArrayInfo::Recycle(info);
+
+  mRenderArrays.erase(it);
+}
 
 
 #endif //   #ifndef __NUI_NO_GL__

@@ -5,9 +5,11 @@
  licence: see nui3/LICENCE.TXT
  */
 
+#include "nui.h"
 #include "nuiAudioDevice.h"
 #include "nuiAudioDevice_AudioUnit.h"
-
+#import <UIKit/UIKit.h>
+#import <Accelerate/Accelerate.h>
 
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
@@ -64,25 +66,41 @@ void audioRouteChangeListenerCallback (void                   *inUserData,      
                                        const void             *inPropertyValue                             // 4
                                        )
 {
-    if (inPropertyID != kAudioSessionProperty_AudioRouteChange)
-        return;
+  if (inPropertyID != kAudioSessionProperty_AudioRouteChange)
+    return;
+  
+  printf("Audio Route change\n");
+  nuiAudioDevice_AudioUnit *pDevice = (nuiAudioDevice_AudioUnit*) inUserData;
 
+  CFDictionaryRef routeChangeDictionary = (CFDictionaryRef)inPropertyValue;
+  CFNumberRef routeChangeReasonRef = (CFNumberRef)CFDictionaryGetValue(routeChangeDictionary, CFSTR (kAudioSession_AudioRouteChangeKey_Reason));
 
-    nuiAudioDevice_AudioUnit *pDevice = (nuiAudioDevice_AudioUnit*) inUserData;
+  SInt32 routeChangeReason;
+  CFNumberGetValue(routeChangeReasonRef, kCFNumberSInt32Type, &routeChangeReason);
 
-    CFDictionaryRef routeChangeDictionary = (CFDictionaryRef)inPropertyValue;
-    CFNumberRef routeChangeReasonRef = (CFNumberRef)CFDictionaryGetValue(routeChangeDictionary, CFSTR(kAudioSession_AudioRouteChangeKey_Reason));
+  CFStringRef oldRouteRef = (CFStringRef)CFDictionaryGetValue(routeChangeDictionary, CFSTR (kAudioSession_AudioRouteChangeKey_OldRoute));
+  NSString *oldRouteString = (NSString *)oldRouteRef;
 
-    SInt32 routeChangeReason;
-    CFNumberGetValue(routeChangeReasonRef, kCFNumberSInt32Type, &routeChangeReason);
+  UInt32 value = 0;
 
-    if (routeChangeReason == kAudioSessionRouteChangeReason_OldDeviceUnavailable)
+  if (routeChangeReason == kAudioSessionRouteChangeReason_NewDeviceAvailable)
+  {
+    if ([oldRouteString isEqualToString:@"Speaker"])
     {
-        printf("Audio Route change reason: Old Device unavailable\n");
+      value = kAudioSessionOverrideAudioRoute_None;
     }
-    printf("Audio Route change %l\n", routeChangeReason);
-    AudioSessionSetActive(false);
-    AudioSessionSetActive(true);
+  }
+
+  if (routeChangeReason ==
+      kAudioSessionRouteChangeReason_OldDeviceUnavailable)
+  {
+    if (([oldRouteString isEqualToString:@"Headphone"]) ||
+         ([oldRouteString isEqualToString:@"LineOut"]))
+    {
+      value = kAudioSessionOverrideAudioRoute_Speaker;
+    }
+  }
+
 }
 
 
@@ -348,7 +366,8 @@ void nuiAudioDevice_AudioUnit::Process(uint uNumFrames, AudioBufferList* ioData)
       const float* ptr0 = mOutputBuffers[0];
       const float* ptr1 = mOutputBuffers[1];
       
-      const int32 mult = ((1 << 15) - 1);
+      const float mult = ((1 << 15) - 1);
+#if 1
       for (int32 s = 0; s < uNumFrames; s++)
       {
         const float sl = nuiClamp(*ptr0, -1.0f, 1.0f);
@@ -363,6 +382,19 @@ void nuiAudioDevice_AudioUnit::Process(uint uNumFrames, AudioBufferList* ioData)
         ptr0++;
         ptr1++;
       }
+#else
+      float splitdest[uNumFrames * 2];
+      float dest[uNumFrames * 2];
+      const float minusone = -1;
+      const float one = 1;
+      vDSP_vclip(ptr0, 1, &minusone, &one, splitdest, 1, uNumFrames);
+      vDSP_vclip(ptr1, 1, &minusone, &one, splitdest + uNumFrames, 1, uNumFrames);
+
+      vDSP_vsmul(splitdest, 1, &mult, dest, 1, uNumFrames * 2);
+
+      vDSP_vfix16(dest, 2, dst0, 2, uNumFrames);
+      vDSP_vfix16(dest + 1, 2, dst0 + 1, 2, uNumFrames);
+#endif
     }
   }
 } 
@@ -453,16 +485,14 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
     mOutputBuffers[i] = (float*)malloc(mBufferSize * sizeof(float));
   
   {
-//    UInt32 size = sizeof (UInt32);
-//    UInt32 value = kAudioSessionOverrideAudioRoute_None;
-//    AudioSessionSetProperty(kAudioSessionProperty_OverrideAudioRoute, size, &value);
     
-    AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, audioRouteChangeListenerCallback, this);
+    
+    //AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, audioRouteChangeListenerCallback, this);
     
     
     // Set the category
-    UInt32 uCategory = kAudioSessionCategory_LiveAudio;
-    if (HasAudioInput())
+    UInt32 uCategory = kAudioSessionCategory_MediaPlayback;
+    if (HasAudioInput() && !rInputChannels.empty())
       uCategory = kAudioSessionCategory_PlayAndRecord;
     
     err = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(UInt32), &uCategory);
@@ -471,6 +501,20 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
     //    NGL_ASSERT(0);
     //    return false;
     //  } 		
+
+    UInt32 size = sizeof (UInt32);
+    //UInt32 value = kAudioSessionOverrideAudioRoute_None;
+//    UInt32 value = kAudioSessionOverrideAudioRoute_Speaker;
+//    err = AudioSessionSetProperty(kAudioSessionProperty_OverrideAudioRoute, size, &value);
+//    if (err != noErr)
+//    {
+//      NGL_OUT("nuiAudioDevice_AudioUnit error overriding the audio route\n");
+//    }
+
+    UInt32 doChangeDefaultRoute = 1;
+    AudioSessionSetProperty(kAudioSessionProperty_OverrideCategoryDefaultToSpeaker, sizeof(doChangeDefaultRoute), &doChangeDefaultRoute);
+
+    AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange, audioRouteChangeListenerCallback, this);
   }
   
 
@@ -734,13 +778,13 @@ bool nuiAudioDevice_AudioUnit::Open(std::vector<int32>& rInputChannels, std::vec
 	
 	err = AudioUnitInitialize(mAudioUnit);
   
-    uint32 count = 4;
-    while (err == -12983 && count--)
-    {
-        nglThread::MsSleep(100);
-        err = AudioUnitInitialize(mAudioUnit);
-    }
-   
+  int32 count = 4;
+
+  while (err == -12983 && count--)
+  {
+    nglThread::MsSleep(100);
+    err = AudioUnitInitialize(mAudioUnit);
+  }
 
 	if (err != noErr)
     {

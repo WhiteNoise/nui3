@@ -42,9 +42,6 @@ void nuiContainer::SetObjectName(const nglString& rName)
 bool nuiContainer::Trash()
 {
   nuiAutoRef;
-    
-
-    
   return nuiWidget::Trash();
 }
 
@@ -371,13 +368,27 @@ bool nuiContainer::DrawChildren(nuiDrawContext* pContext)
 {
   CheckValid();
   IteratorPtr pIt;
-  for (pIt = GetFirstChild(); pIt && pIt->IsValid(); GetNextChild(pIt))
+
+  if (mReverseRender)
   {
-    nuiWidgetPtr pItem = pIt->GetWidget();
-    if (pItem)
-      DrawChild(pContext, pItem);
+    for (pIt = GetLastChild(); pIt && pIt->IsValid(); GetPreviousChild(pIt))
+    {
+      nuiWidgetPtr pItem = pIt->GetWidget();
+      if (pItem)
+        DrawChild(pContext, pItem);
+    }
+    delete pIt;
   }
-  delete pIt;
+  else
+  {
+    for (pIt = GetFirstChild(); pIt && pIt->IsValid(); GetNextChild(pIt))
+    {
+      nuiWidgetPtr pItem = pIt->GetWidget();
+      if (pItem)
+        DrawChild(pContext, pItem);
+    }
+    delete pIt;
+  }
   return true;
 }
 
@@ -416,23 +427,26 @@ bool nuiContainer::DispatchMouseClick(const nglMouseInfo& rInfo)
   CheckValid();
   nuiAutoRef;
   if (!mMouseEventEnabled || mTrashed)
-    return false;
+  return false;
 
   bool hasgrab = HasGrab(rInfo.TouchId);
   if (IsDisabled() && !hasgrab)
-    return false;
+  return false;
 
   nglMouseInfo info(rInfo);
   GlobalToLocal(info.X, info.Y);
 
   // Get a chance to preempt the mouse event before the children get it:
   if (PreMouseClicked(info))
+  {
+    Grab();
     return true;
-  
+  }
+
   if (IsInsideFromRoot(rInfo.X, rInfo.Y) || hasgrab)
   {
     if (!hasgrab)
-    {      
+    {
       IteratorPtr pIt;
       for (pIt = GetLastChild(false); pIt && pIt->IsValid(); GetPreviousChild(pIt))
       {
@@ -455,12 +469,53 @@ bool nuiContainer::DispatchMouseClick(const nglMouseInfo& rInfo)
     nglMouseInfo info(rInfo);
     GlobalToLocal(info.X, info.Y);
     if (PreClicked(info))
+    {
+      Grab();
       return true;
+    }
     bool ret = MouseClicked(info);
     ret |= Clicked(info);
-    return ret | (!mClickThru);
+    ret = ret | (!mClickThru);
+    if (ret)
+    Grab();
+
+    return ret;
   }
   return false;
+}
+
+bool nuiContainer::DispatchMouseCanceled(const nglMouseInfo& rInfo)
+{
+  CheckValid();
+  nuiAutoRef;
+  if (mTrashed)
+    return false;
+
+  bool hasgrab = HasGrab(rInfo.TouchId);
+
+  nglMouseInfo info(rInfo);
+  GlobalToLocal(info.X, info.Y);
+
+  // Get a chance to preempt the mouse event before the children get it:
+  PreClickCanceled(info);
+
+  IteratorPtr pIt;
+  for (pIt = GetLastChild(false); pIt && pIt->IsValid(); GetPreviousChild(pIt))
+  {
+    nuiWidgetPtr pItem = pIt->GetWidget();
+    if (pItem)
+    {
+      pItem->DispatchMouseCanceled(rInfo);
+    }
+  }
+  delete pIt;
+
+  GlobalToLocal(info.X, info.Y);
+  PreClickCanceled(info);
+  bool ret = MouseCanceled(info);
+  ret |= ClickCanceled(info);
+  ret = ret | (!mClickThru);
+  return ret;
 }
 
 bool nuiContainer::DispatchMouseUnclick(const nglMouseInfo& rInfo)
@@ -478,7 +533,10 @@ bool nuiContainer::DispatchMouseUnclick(const nglMouseInfo& rInfo)
   GlobalToLocal(info.X, info.Y);
   // Get a chance to preempt the mouse event before the children get it:
   if (PreMouseUnclicked(info))
+  {
+    Ungrab();
     return true;
+  }
   
   if (IsInsideFromRoot(rInfo.X, rInfo.Y) || hasgrab)
   {
@@ -510,7 +568,10 @@ bool nuiContainer::DispatchMouseUnclick(const nglMouseInfo& rInfo)
       res |= Unclicked(info);
     }
 
-    return res | (!mClickThru);
+    res = res | (!mClickThru);
+    if (res)
+      Ungrab();
+    return res;
   }
   return false;
 }
@@ -604,6 +665,82 @@ nuiWidgetPtr nuiContainer::DispatchMultiEventsFinished(const nglMouseInfo& rInfo
     return NULL;
 }
 
+nuiWidgetPtr nuiContainer::DispatchMouseWheelMove(const nglMouseInfo& rInfo)
+{
+  CheckValid();
+  nuiAutoRef;
+  if (!mMouseEventEnabled || mTrashed)
+    return NULL;
+
+  nuiWidgetPtr pHandled=NULL;
+  bool inside=false,res=false;
+  bool hasgrab = HasGrab(rInfo.TouchId);
+
+  if (IsDisabled() && !hasgrab)
+    return NULL;
+
+  nglMouseInfo info(rInfo);
+  GlobalToLocal(info.X, info.Y);
+
+  // Get a chance to preempt the mouse event before the children get it:
+  if (PreMouseWheelMoved(info))
+    return this;
+
+  if (IsInsideFromRoot(rInfo.X, rInfo.Y) || hasgrab)
+  {
+    inside = true;
+
+    // If the object has the grab we should not try to notify its children of mouse events!
+    if (!hasgrab)
+    {
+
+      IteratorPtr pIt;
+      for (pIt = GetLastChild(false); pIt && pIt->IsValid(); GetPreviousChild(pIt))
+      {
+        nuiWidgetPtr pItem = pIt->GetWidget();
+        if (pItem)
+        {
+          if (pItem->IsVisible())
+          {
+            pHandled = pItem->DispatchMouseWheelMove(rInfo);
+          }
+        }
+        if (pHandled)
+        {
+          // stop as soon as someone caught the event
+          delete pIt;
+          return pHandled;
+        }
+      }
+      delete pIt;
+    }
+
+    res = MouseWheelMoved(info);
+    res |= WheelMovedMouse(info);
+  }
+  else
+  {
+    if (GetHover())
+    {
+      res = MouseWheelMoved(info);
+      res |= WheelMovedMouse(info);
+    }
+  }
+
+  if (!pHandled && (res | (!mClickThru)) && inside)
+  {
+    nuiTopLevelPtr pRoot = GetTopLevel();
+    if (pRoot)
+      return this;
+  }
+
+  if (pHandled)
+    return pHandled;
+
+  return (res && inside) ? this : NULL;
+}
+
+
 void nuiContainer::SetAlpha(float Alpha)
 {
   CheckValid();
@@ -633,6 +770,9 @@ void nuiContainer::SetSelected(bool set)
 void nuiContainer::SetVisible(bool Visible)
 {
   CheckValid();
+  if (IsVisible(false) == Visible)
+    return;
+
   nuiWidget::SetVisible(Visible);
   if (mVisible)
     BroadcastVisible();
@@ -702,6 +842,7 @@ bool nuiContainer::SetRect(const nuiRect& rRect)
 void nuiContainer::InternalSetLayout(const nuiRect& rect, bool PositionChanged, bool SizeChanged)
 {
   CheckValid();
+
   if (mNeedSelfLayout || SizeChanged)
   {
     mInSetRect = true;
@@ -1053,6 +1194,13 @@ bool nuiContainer::PreMouseMoved(const nglMouseInfo& rInfo)
   CheckValid();
   return false;
 }
+
+bool nuiContainer::PreMouseWheelMoved(const nglMouseInfo& rInfo)
+{
+  CheckValid();
+  return false;
+}
+
 
 void nuiContainer::GetHoverList(nuiSize X, nuiSize Y, std::set<nuiWidget*>& rHoverSet, std::list<nuiWidget*>& rHoverList) const
 {

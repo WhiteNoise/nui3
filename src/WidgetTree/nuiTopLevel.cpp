@@ -8,9 +8,9 @@
 #include "nui.h"
 #include <iterator>
 
-#define PARTIAL_REDRAW_DEFAULT false
+#define PARTIAL_REDRAW_DEFAULT true
 
-#if 0//defined(_MULTI_TOUCHES_) && defined(_DEBUG_)
+#if 0 //defined(_MULTI_TOUCHES_) && defined(_DEBUG_)
 # define NGL_TOUCHES_DEBUG(X) (X)
 # define _NGL_DEBUG_TOUCHES_
 #else//!_MULTI_TOUCHES_
@@ -34,6 +34,36 @@
 #else
 #define PRINT_GRAB_IDS() {}
 #endif
+
+// Simple helper class that can prevents deleting a while subtree while doing event propagation (maintely for grab and ungrab)
+class WidgetBranchGuard
+{
+public:
+  WidgetBranchGuard(nuiWidgetPtr pWidget)
+  {
+    NGL_ASSERT(pWidget);
+    nuiTopLevel* pTop = pWidget->GetTopLevel();
+    NGL_ASSERT(pTop);
+    while (pWidget != pTop)
+    {
+      pWidget->Acquire();
+      mBranch.push_back(pWidget);
+      pWidget = pWidget->GetParent();
+    }
+  }
+
+  ~WidgetBranchGuard()
+  {
+    for (auto w : mBranch)
+    {
+      w->Release();
+    }
+  }
+
+private:
+  std::vector<nuiWidgetPtr> mBranch;
+};
+
 
 
 #ifndef DISABLE_TOOLTIP
@@ -72,6 +102,7 @@ nuiToolTip::nuiToolTip()
   mpLabel = new nuiLabel(nglString::Empty);
   mpLabel->SetWrapping(true);
   mpLabel->SetObjectName(_T("ToolTipLabel"));
+  mpLabel->Acquire();
   AddChild(mpLabel);
 }
 
@@ -120,6 +151,7 @@ bool nuiToolTip::Draw(nuiDrawContext* pContext)
   pContext->EnableBlending(false);
 
   DrawChildren(pContext);
+
   return true;
 }
 
@@ -168,6 +200,7 @@ nuiTopLevel::nuiTopLevel(const nglPath& rResPath)
   mDisplayToolTip = false;
   mpToolTipSource = NULL;
   mpToolTipLabel = new nuiToolTip();
+  mpToolTipLabel->Acquire();
   AddChild(mpToolTipLabel);
 
   mTopLevelSink.Connect(mToolTipTimerOn.Tick, &nuiTopLevel::ToolTipOn);
@@ -178,6 +211,7 @@ nuiTopLevel::nuiTopLevel(const nglPath& rResPath)
   mpInfoLabel = NULL;
 
   mpGrab.clear();
+  mpGrabAcquired.clear();
   mMouseInfo.TouchId = -1;
   mpFocus = NULL;
   mpUnderMouse = NULL;
@@ -213,10 +247,9 @@ void nuiTopLevel::Exit()
   mpToolTipLabel = NULL;
 #endif
   mpGrab.clear();
+  mpGrabAcquired.clear();
   mpFocus = NULL;
   mpUnderMouse = NULL;
-  
-  EmptyTrash();
 
   nuiWidgetList wlist(mpChildren);
   nuiWidgetList::iterator wit = wlist.begin();
@@ -260,63 +293,7 @@ void nuiTopLevel::Exit()
 void nuiTopLevel::DisconnectWidget(nuiWidget* pWidget)
 {
   CheckValid();
-  mpTrash.remove(pWidget);
   AdviseObjectDeath(pWidget);
-}
-
-void nuiTopLevel::Trash(nuiWidgetPtr pWidget)
-{
-  CheckValid();
-  mpTrash.remove(pWidget);
-  mpTrash.push_back(pWidget);
-}
-
-bool nuiTopLevel::IsTrashFilling() const
-{
-  CheckValid();
-  return mFillTrash;
-}
-
-void nuiTopLevel::FillTrash()
-{
-  CheckValid();
-  EmptyTrash();
-  mFillTrash = true;
-}
-
-void nuiTopLevel::EmptyTrash()
-{
-  CheckValid();
-  //BroadcastQueuedNotifications();
-  UpdateWidgetsCSS();
-
-  mFillTrash = false;
-
-  std::list<nuiWidgetPtr>::iterator it = mpTrash.begin();
-  std::list<nuiWidgetPtr>::iterator end = mpTrash.end();
-  nuiWidgetPtr pItem = NULL;
-
-  // Do the "DeleteWidget" opcode
-  for (; it != end; ++it)
-  {
-    pItem = *it;
-
-    AdviseSubTreeDeath(pItem);
-    nuiContainerPtr pParent = pItem->GetParent();
-    if (pParent)
-      pParent->DelChild(pItem);
-  }
-
-  if (mpTrash.size()) // If we removed anything from the active objects then we have to redraw...
-    Invalidate();
-
-  mpTrash.clear();
-  
-//  if (IsTrashed(false))
-//  {
-//    mTrashed = false;
-//    delete this;
-//  }
 }
 
 void nuiTopLevel::AdviseObjectDeath(nuiWidgetPtr pWidget)
@@ -325,16 +302,25 @@ void nuiTopLevel::AdviseObjectDeath(nuiWidgetPtr pWidget)
   if (mpWatchedWidget == pWidget)
     mpWatchedWidget = NULL;
   
+  pWidget->StopAutoDraw();
   mHoveredWidgets.erase(pWidget);
 
   nuiGrabMap::iterator it2 = mpGrab.begin();
   while (it2 != mpGrab.end())
   {
     if (pWidget == it2->second)
+    {
       it2->second = NULL;
+      auto found = mpGrabAcquired.find(it2->first);
+      if (found != mpGrabAcquired.end())
+      {
+        mpGrabAcquired.erase(found);
+        NGL_TOUCHES_DEBUG( NGL_OUT("Released acquired grab (in AdviseObjectDeath)\n"));
+      }
+    }
     ++it2;
   }
-  
+
   if (mpFocus == pWidget)
   {
     mpFocus = NULL;
@@ -486,8 +472,7 @@ bool nuiTopLevel::Grab(nuiWidgetPtr pWidget)
     return false;
   }
   
-  if (pWidget && !pWidget->AcceptsMultipleGrabs()
-///< Checks if the Widget has been grabbed by another touches
+  if (pWidget && !pWidget->AcceptsMultipleGrabs() ///< Checks if the Widget has been grabbed by another touches
       && HasGrab(pWidget))
   {
 
@@ -514,6 +499,7 @@ bool nuiTopLevel::Grab(nuiWidgetPtr pWidget)
 
   pGrab = pWidget;
   mpGrab[touchId] = pWidget;
+
   if (pGrab)
     pGrab->MouseGrabbed(touchId);
 
@@ -527,6 +513,7 @@ bool nuiTopLevel::Grab(nuiWidgetPtr pWidget)
     mDisplayToolTip = false;
 #endif
 
+  UpdateWidgetsCSS();
   return true;
 }
 
@@ -552,6 +539,7 @@ bool nuiTopLevel::Ungrab(nuiWidgetPtr pWidget)
 
   Grab(NULL);
 
+  UpdateWidgetsCSS();
   return true;
 }
 
@@ -579,6 +567,38 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CancelGrab()\n")) );
     }
   }
   mpGrab.clear();
+  mpGrabAcquired.clear();
+  UpdateWidgetsCSS();
+  return true;
+}
+
+bool nuiTopLevel::StealMouseEvent(nuiWidgetPtr pWidget, const nglMouseInfo& rInfo)
+{
+  NGL_ASSERT(pWidget);
+
+  auto acquired = mpGrabAcquired.find(rInfo.TouchId);
+  if (acquired != mpGrabAcquired.end() && acquired->second == true)
+  {
+    //NGL_OUT("Refused Grab requested by %s %s\n", pWidget->GetObjectClass().GetChars(), pWidget->GetObjectName().GetChars());
+    return false;
+  }
+
+  nuiWidgetPtr oldgrab = GetGrab(rInfo.TouchId);
+//  if (oldgrab && oldgrab != pWidget)
+//  {
+//    NGL_TOUCHES_DEBUG( NGL_OUT("cancel touch on oldgrab = %p\n", oldgrab));
+//    oldgrab->MouseCanceled(rInfo);
+//  }
+  DispatchMouseCanceled(rInfo);
+
+  NGL_TOUCHES_DEBUG( NGL_OUT("Accepted Grab requested by %s %s (%p)\n", pWidget->GetObjectClass().GetChars(), pWidget->GetObjectName().GetChars(), pWidget));
+//  pWidget->DispatchMouseCanceled(rInfo);
+  pWidget->MouseClicked(rInfo);
+
+  mpGrab[rInfo.TouchId] = pWidget;
+  mpGrabAcquired[rInfo.TouchId] = true;
+  NGL_TOUCHES_DEBUG( NGL_OUT("Grabs %d - %d\n", (uint32)mpGrabAcquired.size(), (uint32)mpGrab.size()));
+  UpdateWidgetsCSS();
   return true;
 }
 
@@ -643,6 +663,7 @@ bool nuiTopLevel::SetFocus(nuiWidgetPtr pWidget)
     }
     mpFocus->SetHotRect(hotrect);
   }
+  UpdateWidgetsCSS();
   return true;
 }
 
@@ -674,6 +695,7 @@ bool nuiTopLevel::ActivateToolTip(nuiWidgetPtr pWidget, bool Now)
     ToolTipOn(NULL);
   }
 
+  UpdateWidgetsCSS();
   return true;
 }
 
@@ -691,7 +713,8 @@ bool nuiTopLevel::ReleaseToolTip(nuiWidgetPtr pWidget)
     }
     mpToolTipSource = NULL;
     //Invalidate();
-    mpToolTipLabel->Invalidate();
+    if (mpToolTipLabel)
+      mpToolTipLabel->Invalidate();
   }
 
   return true;
@@ -768,26 +791,35 @@ void nuiTopLevel::CallTextCompositionStarted()
   nuiAutoRef;
   if (mpFocus)
     mpFocus->TextCompositionStarted();
+  UpdateWidgetsCSS();
 }
+
 void nuiTopLevel::CallTextCompositionConfirmed()
 {
   nuiAutoRef;
   if (mpFocus)
     mpFocus->TextCompositionConfirmed();
+  UpdateWidgetsCSS();
 }
 
 void nuiTopLevel::CallTextCompositionCanceled()
 {
   nuiAutoRef;
   if (mpFocus)
+  {
     mpFocus->TextCompositionCanceled();
+    UpdateWidgetsCSS();
+  }
 }
 
 void nuiTopLevel::CallTextCompositionUpdated(const nglString& rString, int32 CursorPosition)
 {
   nuiAutoRef;
   if (mpFocus)
+  {
     mpFocus->TextCompositionUpdated(rString, CursorPosition);
+    UpdateWidgetsCSS();
+  }
 }
 
 nglString nuiTopLevel::CallGetTextComposition() const
@@ -816,15 +848,20 @@ bool nuiTopLevel::CallTextInput (const nglString& rUnicodeText)
   {
     if (mpFocus->DispatchTextInput(rUnicodeText))
     {
+      UpdateWidgetsCSS();
       return true;
     }
   }
   else
   {
     if (DispatchTextInput(rUnicodeText))
+    {
+      UpdateWidgetsCSS();
       return true;
+    }
   }
   
+  UpdateWidgetsCSS();
   return false;
 }
 
@@ -840,6 +877,7 @@ void nuiTopLevel::CallTextInputCancelled ()
   {
     DispatchTextInputCancelled();
   }
+  UpdateWidgetsCSS();
 }
 
 ////////////////// FOCUS UTILITY FUNCTIONS:
@@ -906,11 +944,13 @@ nuiWidgetPtr GetNextFocussableWidget(nuiWidgetPtr pWidget)
     if (dynamic_cast<nuiModalContainer*>(pNextWidget))
       return DeepSearchNextFocussableWidget(pNextWidget, true);
   }
-  
-  nuiTopLevel* pTop = pWidget->GetTopLevel();
-  if (pTop != pWidget)
-    return GetNextFocussableWidget(pTop);
-  
+
+  if (pWidget)
+  {
+    nuiTopLevel* pTop = pWidget->GetTopLevel();
+    if (pTop != pWidget)
+      return GetNextFocussableWidget(pTop);
+  }
   return NULL;
 }
 
@@ -978,6 +1018,7 @@ bool nuiTopLevel::CallKeyDown (const nglKeyEvent& rEvent)
     {
       if (mpFocus->DispatchKeyDown(rEvent, mHotKeyMask))
       {
+        UpdateWidgetsCSS();
         return true;
       }
     }
@@ -985,7 +1026,10 @@ bool nuiTopLevel::CallKeyDown (const nglKeyEvent& rEvent)
   else
   {
     if (DispatchKeyDown(rEvent, mHotKeyMask))
+    {
+      UpdateWidgetsCSS();
       return true;
+    }
   }
 
   if (rEvent.mKey == NK_TAB)
@@ -1007,17 +1051,19 @@ bool nuiTopLevel::CallKeyDown (const nglKeyEvent& rEvent)
     {
       // Forward
       pNext = GetTabForward(pFocus);
-      if (!pNext && pFocus->GetParent())
+      if (!pNext && pFocus && pFocus->GetParent())
         pNext = GetNextFocussableWidget(pFocus);
     }
     
     if (pNext)
       pNext->Focus();
     
+    UpdateWidgetsCSS();
     return true;
   }
   
   
+  UpdateWidgetsCSS();
   return false;
 }
 
@@ -1029,16 +1075,26 @@ bool nuiTopLevel::CallKeyUp (const nglKeyEvent& rEvent)
   {
     if (mpFocus->DispatchKeyUp(rEvent, mHotKeyMask))
     {
+      UpdateWidgetsCSS();
       return true;
     }
   }
   else
   {
     if (DispatchKeyUp(rEvent, mHotKeyMask))
+    {
+      UpdateWidgetsCSS();
       return true;
+    }
   }
 
+  UpdateWidgetsCSS();
   return false;
+}
+
+const std::map<nglTouchId, nglMouseInfo>& nuiTopLevel::GetMouseStates() const
+{
+  return mMouseStates;
 }
 
 bool nuiTopLevel::CallMouseClick (nglMouseInfo& rInfo)
@@ -1047,7 +1103,9 @@ bool nuiTopLevel::CallMouseClick (nglMouseInfo& rInfo)
   nuiAutoRef;
   
   mMouseClickedEvents[rInfo.TouchId] = rInfo;
-  
+  mMouseStates[rInfo.TouchId] = rInfo;
+  //NGL_OUT("Added %x\n", rInfo.TouchId);
+
   mMouseInfo.X = rInfo.X;
   mMouseInfo.Y = rInfo.Y;
   mMouseInfo.Buttons |= rInfo.Buttons;
@@ -1061,6 +1119,8 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseClick [%d] BEGIN\n"), rInfo.TouchId) );
   nuiWidgetPtr pGrab = GetGrab();
   if (pGrab)
   {
+    NGL_TOUCHES_DEBUG( NGL_OUT(_T("  destination %p %s %s\n"), pGrab, pGrab->GetObjectClass().GetChars(), pGrab->GetObjectName().GetChars()) );
+    WidgetBranchGuard guard(pGrab);
     std::vector<nuiContainerPtr> containers;
     nuiContainerPtr pParent = pGrab->GetParent();
     while (pParent)
@@ -1086,6 +1146,7 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseClick [%d] BEGIN\n"), rInfo.TouchId) );
 PRINT_GRAB_IDS();
 NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseClick [%d] END\n"), rInfo.TouchId) );
 
+    UpdateWidgetsCSS();
     return res;
   }
 
@@ -1098,8 +1159,9 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseClick [%d] END\n"), rInfo.TouchId) );
     DispatchKeyboardFocus(widgets);
 
 PRINT_GRAB_IDS();
-NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseClick [%d] END\n"), rInfo.TouchId) );
+NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseClick [%d] END2\n"), rInfo.TouchId) );
 
+  UpdateWidgetsCSS();
 	return res;
 }
 
@@ -1148,12 +1210,14 @@ void nuiTopLevel::DispatchKeyboardFocus(const nuiWidgetList& rWidgets)
     {
       // Focus this widget
       pWidget->Focus();
+      UpdateWidgetsCSS();
       return;
     }
     
     if (pWidget->GetMuteKeyboardFocusDispatch())
     {
       // Stop looking for focussed widgets now
+      UpdateWidgetsCSS();
       return;
     }
     
@@ -1162,9 +1226,8 @@ void nuiTopLevel::DispatchKeyboardFocus(const nuiWidgetList& rWidgets)
  
   if (!mpFocus)
     Focus();
+  UpdateWidgetsCSS();
 }
-
-
 
 bool nuiTopLevel::CallMouseUnclick(nglMouseInfo& rInfo)
 {
@@ -1175,8 +1238,24 @@ bool nuiTopLevel::CallMouseUnclick(nglMouseInfo& rInfo)
   // Update counterpart:
   std::map<nglTouchId, nglMouseInfo>::iterator it = mMouseClickedEvents.find(rInfo.TouchId);
   if (it != mMouseClickedEvents.end())
+  {
     rInfo.Counterpart = &it->second;
-  
+    // Update state:
+    auto i = mMouseStates.find(rInfo.TouchId);
+    if (i != mMouseStates.end())
+      mMouseStates.erase(i);
+
+    //NGL_OUT("Removed %x\n", rInfo.TouchId);
+  }
+
+  {
+    auto it = mpGrabAcquired.find(rInfo.TouchId);
+    if (it != mpGrabAcquired.end())
+    {
+      mpGrabAcquired.erase(it);
+    }
+  }
+
   mMouseInfo.X = rInfo.X;
   mMouseInfo.Y = rInfo.Y;
   mMouseInfo.Buttons &= ~rInfo.Buttons;
@@ -1187,7 +1266,10 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseUnclick [%d] BEGIN\n"), rInfo.TouchId) )
   nuiWidgetPtr pGrab = GetGrab();
   if (pGrab)
   {
+    NGL_TOUCHES_DEBUG( NGL_OUT(_T("  destination %p %s %s\n"), pGrab, pGrab->GetObjectClass().GetChars(), pGrab->GetObjectName().GetChars()) );
+    WidgetBranchGuard guard(pGrab);
     NGL_ASSERT(!pGrab->IsTrashed(true));
+    pGrab->Acquire();
 
     std::vector<nuiContainerPtr> containers;
     nuiContainerPtr pParent = pGrab->GetParent();
@@ -1212,6 +1294,31 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseUnclick [%d] BEGIN\n"), rInfo.TouchId) )
     }
 PRINT_GRAB_IDS();
 NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseUnclick [%d] END\n"), rInfo.TouchId) );
+
+    {
+      auto it = mpGrab.find(rInfo.TouchId);
+      if (it != mpGrab.end())
+      {
+        if (it->second)
+        it->second->DispatchUngrab(it->second);
+        mpGrab.erase(it);
+      }
+    }
+    
+    if (it != mMouseClickedEvents.end())
+      mMouseClickedEvents.erase(it);
+
+    NGL_TOUCHES_DEBUG( NGL_OUT("Released acquired grab1: Grabs %d - %d (from %p)\n", (uint32)mpGrabAcquired.size(), (uint32)mpGrab.size(), pGrab));
+#ifdef _NGL_DEBUG_TOUCHES_
+    if (pGrab)
+    {
+      NGL_OUT("  from widget: %s / %s\n", pGrab->GetObjectClass().GetChars(), pGrab->GetObjectName().GetChars());
+    }
+#endif
+
+    pGrab->Release();
+
+    UpdateWidgetsCSS();
     return res ;
   }
 
@@ -1224,6 +1331,10 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseUnclick [%d] END\n"), rInfo.TouchId) );
 PRINT_GRAB_IDS();
 NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseUnclick [%d] END\n"), rInfo.TouchId) );
 
+  if (it != mMouseClickedEvents.end())
+    mMouseClickedEvents.erase(it);
+  NGL_TOUCHES_DEBUG( NGL_OUT("Released acquired grab2: Grabs %d - %d\n", (uint32)mpGrabAcquired.size(), (uint32)mpGrab.size()));
+  UpdateWidgetsCSS();
 	return res;
 }
 
@@ -1284,13 +1395,13 @@ void nuiTopLevel::UpdateHoverList(nglMouseInfo& rInfo)
   std::list<nuiWidget*>::iterator tt = HoverList.begin();
   std::list<nuiWidget*>::iterator ttend = HoverList.end();
 
-  //printf("\nHover list\n");
+  //NGL_OUT("\nHover list\n");
   bool res = false;
   while ((tt != ttend) && !res)
   {
     nuiWidget* pWidget = *tt;
     res = pWidget->ActivateToolTip(pWidget);
-    //printf("%3ls - %s\n", YESNO(res), pWidget->GetObjectClass().GetChars());
+    //NGL_OUT("%3ls - %s\n", YESNO(res), pWidget->GetObjectClass().GetChars());
     ++tt;
   }
   if (!res && mpToolTipSource)
@@ -1309,12 +1420,21 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("nuiTopLevel::CallMouseMove X:%d Y:%d\n"), rInfo.X
   std::map<nglTouchId, nglMouseInfo>::iterator it = mMouseClickedEvents.find(rInfo.TouchId);
   if (it != mMouseClickedEvents.end())
     rInfo.Counterpart = &it->second;
+  // Update state:
+
+  if (mMouseStates.find(rInfo.TouchId) != mMouseStates.end())
+  {
+    NGL_TOUCHES_DEBUG( NGL_OUT("Found %x\n", rInfo.TouchId) );
+    // Only update the mouse state if there was an existing touch already registered.
+    // On a desktop computer with a mouse, when you move the mouse of the window with no button down there is no existing state to update.
+    mMouseStates[rInfo.TouchId] = rInfo;
+  }
 
   mMouseInfo.X = rInfo.X;
   mMouseInfo.Y = rInfo.Y;
 
   mMouseInfo.TouchId = rInfo.TouchId;
-NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] BEGIN\n"), rInfo.TouchId) );
+  NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] BEGIN\n"), rInfo.TouchId) );
 
   nuiWidgetPtr pWidget = NULL;
   nuiWidgetPtr pWidgetUnder = NULL;
@@ -1332,6 +1452,8 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] BEGIN\n"), rInfo.TouchId) );
   nuiWidgetPtr pGrab = GetGrab();
   if (pGrab)
   {
+    NGL_TOUCHES_DEBUG( NGL_OUT(_T("  destination %p %s %s\n"), pGrab, pGrab->GetObjectClass().GetChars(), pGrab->GetObjectName().GetChars()) );
+    WidgetBranchGuard guard(pGrab);
     std::vector<nuiContainerPtr> containers;
     nuiContainerPtr pParent = pGrab->GetParent();
     while (pParent)
@@ -1375,12 +1497,13 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] BEGIN\n"), rInfo.TouchId) );
     SetToolTipRect();
 #endif
 
-//NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] END\n"), rInfo.TouchId) );
+    NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] END1\n"), rInfo.TouchId) );
+    UpdateWidgetsCSS();
     return pHandled != NULL;
   }
   else
   { /// this is a mouse over event
-//    UpdateHoverList(rInfo);
+    UpdateHoverList(rInfo);
     nuiSize x,y;
 
     IteratorPtr pIt;
@@ -1437,8 +1560,202 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] BEGIN\n"), rInfo.TouchId) );
 #ifndef DISABLE_TOOLTIP
   SetToolTipRect();
 #endif
-//NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] END\n"), rInfo.TouchId) );
+  NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseMove [%d] END2\n"), rInfo.TouchId) );
+  UpdateWidgetsCSS();
   return pHandled != NULL;
+}
+
+bool nuiTopLevel::CallMouseWheel (nglMouseInfo& rInfo)
+{
+  CheckValid();
+  nuiAutoRef;
+  //NGL_TOUCHES_DEBUG( NGL_OUT(_T("nuiTopLevel::CallMouseWheel X:%d Y:%d\n"), rInfo.X, rInfo.Y) );
+
+  // Update counterpart:
+  std::map<nglTouchId, nglMouseInfo>::iterator it = mMouseClickedEvents.find(rInfo.TouchId);
+  if (it != mMouseClickedEvents.end())
+    rInfo.Counterpart = &it->second;
+  // Update state:
+
+  if (mMouseStates.find(rInfo.TouchId) != mMouseStates.end())
+  {
+    //NGL_OUT("Found %x\n", rInfo.TouchId);
+    // Only update the mouse state if there was an existing touch already registered.
+    // On a desktop computer with a mouse, when you move the mouse of the window with no button down there is no existing state to update.
+    mMouseStates[rInfo.TouchId] = rInfo;
+  }
+
+  mMouseInfo.X = rInfo.X;
+  mMouseInfo.Y = rInfo.Y;
+
+  mMouseInfo.TouchId = rInfo.TouchId;
+  //NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseWheel [%d] BEGIN\n"), rInfo.TouchId) );
+
+  nuiWidgetPtr pWidget = NULL;
+  nuiWidgetPtr pWidgetUnder = NULL;
+
+#ifndef DISABLE_TOOLTIP
+  if (mToolTipTimerOn.IsRunning())
+  {
+    mToolTipTimerOn.Stop();
+    mToolTipTimerOn.Start(false);
+  }
+#endif
+	nuiWidgetPtr pHandled = NULL;
+
+  // If there is a grab on the mouse serve the grabbing widget and only this one:
+  nuiWidgetPtr pGrab = GetGrab();
+  if (pGrab)
+  {
+    WidgetBranchGuard guard(pGrab);
+    std::vector<nuiContainerPtr> containers;
+    nuiContainerPtr pParent = pGrab->GetParent();
+    while (pParent)
+    {
+      containers.push_back(pParent);
+      pParent = pParent->GetParent();
+    }
+
+    bool hook = false;
+    for (int32 i = containers.size() - 1; i >= 0 && !hook; i--)
+    {
+      nglMouseInfo info(rInfo);
+      containers[i]->GlobalToLocal(info.X, info.Y);
+      hook = containers[i]->PreMouseWheelMoved(info);
+      if (hook)
+        pHandled = containers[i];
+    }
+
+    //NGL_OUT(_T("grabbed mouse wheel move on '%s' / '%s'\n"), mpGrab->GetObjectClass().GetChars(), mpGrab->GetObjectName().GetChars());
+    NGL_ASSERT(mpGrab[mMouseInfo.TouchId]);
+    if (mpGrab[mMouseInfo.TouchId]->MouseEventsEnabled() && !hook)
+    {
+      pHandled = pGrab->DispatchMouseWheelMove(rInfo);
+    }
+
+    nuiWidgetPtr pChild = NULL;
+    // There might be no grab object left after the mouse wheel move event!
+    if (pGrab)
+      pChild = pGrab;
+    else
+      pChild = GetChild((nuiSize)rInfo.X, (nuiSize)rInfo.Y);
+
+    NGL_ASSERT(pChild);
+
+    // Set the mouse cursor to the right object:
+    nuiWidgetList widgets;
+    GetChildren(rInfo.X, rInfo.Y, widgets, true);
+    UpdateMouseCursor(widgets);
+
+#ifndef DISABLE_TOOLTIP
+    SetToolTipRect();
+#endif
+
+    //NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseWheel [%d] END\n"), rInfo.TouchId) );
+    UpdateWidgetsCSS();
+    return pHandled != NULL;
+  }
+  else
+  { /// this is a mouse over event
+    UpdateHoverList(rInfo);
+    nuiSize x,y;
+
+    IteratorPtr pIt;
+    for (pIt = GetLastChild(false); pIt && pIt->IsValid() && !pHandled; GetPreviousChild(pIt))
+    {
+      // First find the widget directly under the mouse:
+      nuiWidgetPtr pPtr = pIt->GetWidget();
+
+      pWidgetUnder = pPtr->GetChild((nuiSize)rInfo.X, (nuiSize)rInfo.Y);
+      pWidget = pWidgetUnder;
+      if (pWidget)
+      {
+        // As long as there is no widget that handles the event, try to find one:
+        while (pWidget && !pHandled)
+        {
+          if (pWidget->MouseEventsEnabled())
+          {
+            pHandled = pWidget->DispatchMouseWheelMove(rInfo);
+          }
+          if (!pHandled)
+            pWidget = pWidget->GetParent();
+          else
+          {
+            pWidgetUnder = pWidget = pHandled;
+            break;
+          }
+        }
+      }
+    }
+    delete pIt;
+
+    if (mpUnderMouse && mpUnderMouse != pWidget)
+    {
+      if (mpUnderMouse->MouseEventsEnabled())
+      {
+        mpUnderMouse->DispatchMouseWheelMove(rInfo);
+      }
+    }
+
+    //if (pHandled)
+    {
+      if (mpUnderMouse != pWidget)
+      {
+        mpUnderMouse = pWidget;
+        GlobalHoverChanged();
+      }
+    }
+  }
+
+  nuiWidgetList widgets;
+  GetChildren(rInfo.X, rInfo.Y, widgets, true);
+  UpdateMouseCursor(widgets);
+
+#ifndef DISABLE_TOOLTIP
+  SetToolTipRect();
+#endif
+  //NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseWheel [%d] END\n"), rInfo.TouchId) );
+  UpdateWidgetsCSS();
+  return pHandled != NULL;
+}
+
+
+bool nuiTopLevel::CallMouseCancel(nglMouseInfo& rInfo)
+{
+  DispatchMouseCanceled(rInfo);
+
+  {
+    auto it = mpGrabAcquired.find(rInfo.TouchId);
+    if (it != mpGrabAcquired.end())
+    {
+      mpGrabAcquired.erase(it);
+    }
+  }
+
+  {
+    auto it = mpGrab.find(rInfo.TouchId);
+    if (it != mpGrab.end())
+    {
+      mpGrab.erase(it);
+    }
+  }
+
+  {
+    auto it = mMouseClickedEvents.find(rInfo.TouchId);
+    if (it != mMouseClickedEvents.end())
+      mMouseClickedEvents.erase(it);
+  }
+
+  {
+    auto it = mMouseStates.find(rInfo.TouchId);
+    if (it != mMouseStates.end())
+      mMouseStates.erase(it);
+  }
+
+  NGL_TOUCHES_DEBUG( NGL_OUT("CallMouseCancel: Grabs %d - %d / clicks %d / states %d\n", (uint32)mpGrabAcquired.size(), (uint32)mpGrab.size(), (uint32)mMouseClickedEvents.size(), (uint32)mMouseStates.size()));
+
+  UpdateWidgetsCSS();
+  return true;
 }
 
 void nuiTopLevel::SetDragFeedbackRect(int X, int Y)
@@ -1452,6 +1769,7 @@ void nuiTopLevel::SetDragFeedbackRect(int X, int Y)
   r.Move(X-r.GetWidth(), Y-r.GetHeight());
   mpDragFeedback->SetLayout(r);
   InvalidateRect(r);
+  UpdateWidgetsCSS();
 }
 
 bool nuiTopLevel::CallMultiEventsFinished (nglMouseInfo& rInfo)
@@ -1642,6 +1960,7 @@ bool nuiTopLevel::DrawTree(class nuiDrawContext *pContext)
 
   CheckValid();
   //nuiStopWatch watch(_T("nuiTopLevel::DrawTree"));
+  UpdateWidgetsCSS();
 
   uint32 clipWidth, clipHeight;
   {
@@ -1658,11 +1977,11 @@ bool nuiTopLevel::DrawTree(class nuiDrawContext *pContext)
 
     int count = mDirtyRects.size();
 
-//    printf("drawing %d partial rects\n", count);
-    
+//    NGL_OUT("drawing %d partial rects\n", count);
+
     for (int i = 0; i < count; i++)
     {
-//      printf("\t%d: %s\n", i, mDirtyRects[i].GetValue().GetChars());
+//      NGL_OUT("\tDirty Rect: %d: %s\n", i, mDirtyRects[i].GetValue().GetChars());
       pContext->ResetState();
       pContext->ResetClipRect();
       pContext->Clip(mDirtyRects[i]);
@@ -1770,9 +2089,22 @@ nglPath nuiTopLevel::GetResourcePath() const
   return mResPath;
 }
 
+nuiSize nuiTopLevel::GetStatusBarSize() const
+{
+  return 0;
+}
+
 
 void nuiTopLevel::BroadcastInvalidateRect(nuiWidgetPtr pSender, const nuiRect& rRect)
 {
+//  nglString senderclass = pSender->GetObjectClass();
+//  if (senderclass == "nuiMainWindow"
+//      || senderclass == "nuiNavigationController"
+//      || senderclass == "MainViewInstance"
+//      )
+//  {
+//    printf("");
+//  }
   //NGL_ASSERT(!mIsDrawing);
   CheckValid();
   nuiRect r = rRect;
@@ -1793,22 +2125,28 @@ void nuiTopLevel::BroadcastInvalidateRect(nuiWidgetPtr pSender, const nuiRect& r
 
   r.Set(vec1[0], vec1[1], vec2[0], vec2[1], false);
 
-//  printf("nuiTopLevel::BroadcastInvalidateRect %s / %s / 0x%x RECT:%s\n", pSender->GetObjectClass().GetChars(), pSender->GetObjectName().GetChars(), pSender, rRect.GetValue().GetChars());
+//  NGL_OUT("nuiTopLevel::BroadcastInvalidateRect %s / %s / 0x%x RECT:%s\n", pSender->GetObjectClass().GetChars(), pSender->GetObjectName().GetChars(), pSender, rRect.GetValue().GetChars());
   AddInvalidRect(r);
   mNeedRender = true;
   DebugRefreshInfo();
 }
 
+//#define _DEBUG_LAYOUT
 bool nuiTopLevel::SetRect(const nuiRect& rRect)
 {
   CheckValid();
   #ifdef _DEBUG_LAYOUT
   if (GetDebug())
-    printf("toplevel set rect %f %f %f %f\n", rRect.Left(), rRect.Top(), rRect.GetWidth(), rRect.GetHeight());
+    NGL_OUT("toplevel set rect %f %f %f %f\n", rRect.Left(), rRect.Top(), rRect.GetWidth(), rRect.GetHeight());
   #endif
   
   nuiWidget::SetRect(rRect);
-  nuiRect rect(mRect.Size());
+
+  nuiRect rectfull(mRect.Size());
+  nuiRect rect(rectfull);
+  float barsize = GetStatusBarSize();
+  rect.SetHeight(rect.GetHeight() -  barsize);
+  rect.Move(0, barsize);
 
   IteratorPtr pIt;
   for (pIt = GetFirstChild(false); pIt && pIt->IsValid(); GetNextChild(pIt))
@@ -1821,7 +2159,10 @@ bool nuiTopLevel::SetRect(const nuiRect& rRect)
     if (pItem != mpDragFeedback)
     {
       pItem->GetIdealRect();
-      pItem->SetLayout(rect);
+      if (pItem->GetProperty("Layout").ToLower() == "fullscreen")
+        pItem->SetLayout(rectfull);
+      else
+        pItem->SetLayout(rect);
     }
   }
   delete pIt;
@@ -2095,12 +2436,6 @@ void nuiTopLevel::PrintHotKeyMap(const nglString& rText)
   NGL_OUT(_T("\n"));
 }
 
-
-bool nuiTopLevel::IsTrashFull() const
-{
-  CheckValid();
-  return !mpTrash.empty();
-}
 
 void nuiTopLevel::SetWatchedWidget(nuiWidget* pWatchedWidget)
 {

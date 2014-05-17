@@ -1,7 +1,6 @@
 #include "nui.h"
 
 nuiSurfaceMap nuiSurface::mpSurfaces;
-nuiSurfaceCacheSet nuiSurface::mpSurfaceCaches;
 
 nuiSurface* nuiSurface::GetSurface (const nglString& rName, bool Acquired)
 {
@@ -65,7 +64,8 @@ nuiSurface::nuiSurface(const nglString& rName, int32 Width, int32 Height, nglIma
   mpTexture = nuiTexture::GetTexture(this);
   mpTexture->Acquire();
   
-//  NGL_OUT(_T("nuiSurface CTOR [0x%x] SIZE[%dx%d]\n"), this, Width, Height);
+  //NGL_OUT(_T("nuiSurface CTOR [0x%x] SIZE[%dx%d]\n"), this, Width, Height);
+  //SetTrace(true);
 }
 
 nuiSurface::~nuiSurface()
@@ -73,18 +73,13 @@ nuiSurface::~nuiSurface()
   mpSurfaces.erase(GetObjectName());
 
   if (mpTexture)
-    mpTexture->Release();
-//  NGL_OUT(_T("nuiSurface DTOR [0x%x] NAME: [%s] COUNT [%d]\n"), this, GetObjectName().GetChars(), mpSurfaces.size());
-
-  auto it = mPainters.begin();
-  auto end = mPainters.end();
-
-  while (it != end)
   {
-    nuiPainter* pPainter = *it;
-    pPainter->DestroySurface(this);
-    ++it;
+    mpTexture->DetachSurface();
+    mpTexture->Release();
   }
+  //NGL_OUT(_T("nuiSurface DTOR [0x%x] NAME: [%s] COUNT [%d]\n"), this, GetObjectName().GetChars(), mpSurfaces.size());
+
+  nuiPainter::BroadcastDestroySurface(this);
 }
 
 int32 nuiSurface::GetWidth() const
@@ -133,16 +128,6 @@ nuiTexture* nuiSurface::GetTexture() const
 }
 
 
-void nuiSurface::AddCache(nuiSurfaceCache* pCache)
-{
-  mpSurfaceCaches.insert(pCache);
-}
-
-void nuiSurface::DelCache(nuiSurfaceCache* pCache)
-{
-  mpSurfaceCaches.erase(pCache);
-}
-
 void nuiSurface::SetPermanent(bool Permanent)
 {
   if (Permanent)
@@ -166,30 +151,3 @@ bool nuiSurface::IsPermanent()
   return mPermanent;
 }
 
-void nuiSurface::Resize(int32 width, int32 height)
-{
-  auto it = mPainters.begin();
-  auto end = mPainters.end();
-
-  while (it != end)
-  {
-    nuiPainter* pPainter = *it;
-    pPainter->ResizeSurface(this, width, height);
-    ++it;
-  }
-
-  mWidth = width;
-  mHeight = height;
-
-  mpTexture->ResizeSurface(width, height);
-}
-
-void nuiSurface::AddPainter(nuiPainter* pPainter)
-{
-  mPainters.insert(pPainter);
-}
-
-void nuiSurface::DelPainter(nuiPainter* pPainter)
-{
-  mPainters.erase(pPainter);
-}

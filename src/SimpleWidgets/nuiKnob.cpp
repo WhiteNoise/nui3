@@ -84,13 +84,15 @@ void nuiKnob::InitAttributes()
 // attributes
 const nglPath& nuiKnob::GetSequencePath() const
 {
-    if (mpImageSequence)
-        return mpImageSequence->GetTexturePath();
-    
+  if (mpImageSequence)
+    return mpImageSequence->GetTexturePath();
+
     // else someone did something dumb..
-    static const nglPath dummyPath;
+//    static const nglPath dummyPath;
     
-    return dummyPath;
+//    return dummyPath;
+
+  return nglPath::EmptyPath;
 }
 
 void nuiKnob::SetSequencePath(const nglPath& rPath)
@@ -258,7 +260,6 @@ bool nuiKnob::MouseClicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags Button)
   else if (Button & nglMouseInfo::ButtonLeft)
   {
     mClicked = true;
-    Grab();
     Invalidate();
     mClickValue = mRange.GetUnitValue();
     
@@ -305,8 +306,6 @@ bool nuiKnob::MouseUnclicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags Button)
   {
     mClicked = false;
 
-    Ungrab();
-    
     Invalidate();
     return true;
   }

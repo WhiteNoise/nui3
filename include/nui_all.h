@@ -51,6 +51,19 @@ typedef double nuiSize;
 #include "nglMath.h"
 #include "nuiSingleton.h"
 
+#include "nuiSampleInfo.h"
+#include "nuiSampleReader.h"
+#include "nuiChunkSampleReader.h"
+#include "nuiSampleWriter.h"
+#include "nuiWaveReader.h"
+#include "nuiAiffReader.h"
+#include "nuiAudioDecoder.h"
+#include "nuiWaveWriter.h"
+#include "nuiSample.h"
+#include "nuiAudioConvert.h"
+#include "nuiAiffWriter.h"
+
+
 #ifndef _MINUI3_
 #include "nuiPoint.h"
 #include "nuiPath.h"
@@ -85,10 +98,6 @@ typedef double nuiSize;
 #include "nuiMidi.h"
 #include "nuiAudioDevice.h"
 #include "nuiAudioDb.h"
-#include "nuiSampleInfo.h"
-#include "nuiSampleReader.h"
-#include "nuiChunkSampleReader.h"
-#include "nuiSampleWriter.h"
 #include "nuiSound.h"
 #include "nuiVoice.h"
 #include "nuiAudioEngine.h"
@@ -101,16 +110,8 @@ typedef double nuiSize;
 #include "nuiSynthVoice.h"
 #include "nuiFileSound.h"
 #include "nuiFileVoice.h"
-#include "nuiWaveReader.h"
-#include "nuiAiffReader.h"
-#include "nuiAudioDecoder.h"
-#include "nuiWaveWriter.h"
-#include "nuiSample.h"
-#include "nuiAudioConvert.h"
-#include "nuiAiffWriter.h"
 
 #include "nuiStringTemplate.h"
-#include "nuiFormater.h"
 
 #include "nuiCommand.h"
 #include "nuiCommandContainer.h"
@@ -118,6 +119,7 @@ typedef double nuiSize;
 
 
 #include "nuiTask.h"
+#include "nuiTaskThread.h"
 #include "nuiAttributeAnimation.h"
 #include "nuiLocale.h"
 #include "nuiMessageQueue.h"
@@ -184,8 +186,6 @@ typedef double nuiSize;
 
   #include "nuiDecoration.h"
   #include "nuiBorderDecoration.h"
-  #include "nuiCheckerboardDecoration.h"
-  #include "nuiNavigationViewDecoration.h"
   #include "nuiColorDecoration.h"
   #include "nuiGradientDecoration.h"
   #include "nuiMetaDecoration.h"
@@ -216,7 +216,6 @@ typedef double nuiSize;
   #include "nuiFileList.h"
   #include "nuiFileSelector.h"
   #include "nuiFixed.h"
-  #include "nuiGladeLoader.h"
   #include "nuiImage.h"
   #include "nuiHugeImage.h"
   #include "nuiLabel.h"
@@ -230,11 +229,7 @@ typedef double nuiSize;
   #include "nuiText.h"
   #include "nuiTexture.h"
   #include "nuiUserArea.h"
-  #include "nuiWindow.h"
   #include "nuiPane.h"
-
-  #include "nuiStateDummy.h"
-  #include "nuiHoverDummy.h"
 
 
   #include "nuiImageDropZone.h"
@@ -243,8 +238,6 @@ typedef double nuiSize;
 
   #include "nuiTabView.h"
   #include "nuiKnob.h"
-  #include "nuiWindowManager.h"
-  #include "nuiAnimView.h"
   #include "nuiScrollView.h"
   #include "nuiFileTree.h"
   #include "nuiZoomView.h"
@@ -254,7 +247,7 @@ typedef double nuiSize;
   #include "nuiApplication.h"
   #include "nuiZoomBar.h"
   #include "nuiColorSelector.h"
-  #include "nuiFormatedLabel.h"
+  #include "nuiDrawerView.h"
 
   #include "nuiNavigationBar.h"
   #include "nuiNavigationController.h"
@@ -290,24 +283,17 @@ typedef double nuiSize;
   #include "nuiLabelAttribute.h"
   #include "nuiTitledPane.h"
   #include "nuiFolderPane.h"
-  #include "nuiSVGShape.h"
-  #include "nuiSVGView.h"
   #include "nuiProgressBar.h"
-  #include "nuiBackgroundPane.h"
   #include "nuiFlowView.h"
-  #include "nuiMatrixView.h"
   #include "nuiCoverFlow.h"
   #include "nuiFontBrowser.h"
   #include "nuiFrameView.h"
   #include "nuiHotKeyEditor.h"
-  #include "nuiRectView.h"
   #include "nuiRSS.h"
   #include "nuiRSSView.h"
   #include "nuiHyperLink.h"
   #include "nuiHTML.h"
   #include "nuiHTMLView.h"
-  #include "nuiScrollingLabel.h"
-  #include "nuiSpinnerLabel.h"
 
 
   #include "nuiScriptEngine.h"
@@ -320,7 +306,6 @@ typedef double nuiSize;
 
 
   #include "nuiIntrospector.h"
-  #include "nuiSeparator.h"
   #include "nuiWidgetInspector.h"
   #include "nuiThreadInspector.h"
   #include "nuiFontInspector.h"

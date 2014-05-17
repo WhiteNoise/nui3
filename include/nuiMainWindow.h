@@ -41,9 +41,6 @@ public:
 
   virtual ~nuiMainWindow();
 
-  //virtual nuiXMLNode* Serialize(nuiXMLNode* pParentNode, bool Recursive) const;
-
-
   bool virtual IsKeyDown (nglKeyCode Key) const;
 //  void GetMouseInfo(nglMouseInfo& rMouseInfo);
 
@@ -96,6 +93,8 @@ public:
   uint GetError() const;               ///< Retrieve the current error code
   const nglChar* GetErrorStr() const;            ///< Retrieve the current error message
   const nglChar* GetErrorStr(uint Error) const;  ///< Retrieve error message by code
+  nuiSize GetStatusBarSize() const;
+
 
   virtual void OnDragEnter();
   virtual void OnDragLeave();
@@ -150,6 +149,9 @@ public:
   
   static void DestroyAllWindows();
 
+  NUI_GETSETDO(bool, DrawDirtyRects, Invalidate());
+  NUI_GETSETDO(bool, DrawToSurface, Invalidate());
+
 private:
   void Register();
   void Unregister();
@@ -181,8 +183,11 @@ protected:
   virtual bool OnKeyUp       (const nglKeyEvent& rEvent);
   virtual bool OnMouseClick  (nglMouseInfo& rInfo);
   virtual bool OnMouseUnclick(nglMouseInfo& rInfo);
+  virtual bool OnMouseWheel  (nglMouseInfo& rInfo);
   virtual bool OnMouseMove   (nglMouseInfo& rInfo);
+virtual bool OnMouseCanceled(nglMouseInfo& rInfo);
   virtual bool OnMultiEventsFinished (nglMouseInfo &rInfo);
+
   virtual bool OnRotation    (uint Angle);
   //@}
 
@@ -241,8 +246,11 @@ private:
     virtual bool OnKeyUp(const nglKeyEvent& rEvent);
     virtual bool OnMouseClick(nglMouseInfo& rInfo);
     virtual bool OnMouseUnclick(nglMouseInfo& rInfo);
+    virtual bool OnMouseWheel (nglMouseInfo& rInfo);
     virtual bool OnMouseMove(nglMouseInfo& rInfo);
-    virtual bool OnMultiEventsFinished(nglMouseInfo& rInfo);
+virtual bool OnMouseCanceled(nglMouseInfo& rInfo);
+virtual bool OnMultiEventsFinished(nglMouseInfo& rInfo);
+
     virtual bool OnRotation(uint Angle);
 
     virtual void OnTextCompositionStarted(); ///< Tells the widget that a complex text input session is starting (mostly used to enter diacritics with dead keys and complex scripts like east asian glyphs)
@@ -279,6 +287,10 @@ private:
   double mFPSDelay;
   uint32 mFPSCount;
   float mFPS;
+
+  bool mDrawDirtyRects = false;
+  bool mDrawToSurface = false;
+
   CreateDragFeedbackDelegate mCreateDragFeedbackDelegate;
 };
 

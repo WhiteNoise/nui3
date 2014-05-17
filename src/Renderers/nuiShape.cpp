@@ -10,13 +10,11 @@
 
 // class nuiShape
 nuiShape::nuiShape()
-: mEventSink(this)
 {
   mWinding = eNone;
 }
 
 nuiShape::nuiShape(const nuiShape& rShape)
-: mEventSink(this)
 {
   NGL_ASSERT(0);
 }
@@ -50,16 +48,12 @@ void nuiShape::Clear()
 void nuiShape::AddContour(nuiContour* pContour)
 {
   mpContours.push_back(pContour);
-  //Changed();
-  mEventSink.Connect( pContour->Changed, &nuiShape::ElementChanged, pContour);
 }
 
 void nuiShape::AddContour()
 {
   nuiContour* pContour = new nuiContour();
   mpContours.push_back(pContour);
-  //Changed();
-  mEventSink.Connect( pContour->Changed, &nuiShape::ElementChanged, pContour);
 }
 
 void nuiShape::CloseContour()
@@ -179,12 +173,6 @@ void nuiShape::EmptyCaches()
 }
 
 
-
-void nuiShape::ElementChanged(const nuiEvent& rEvent)
-{
-  EmptyCaches();
-  //Changed();
-}
 
 #define CIRCLE_FACTOR (1.0/3.5)
 
@@ -342,25 +330,20 @@ nuiRenderObject* nuiShape::Fill(float Quality)
 
 nuiRenderObject* nuiShape::Outline(float Quality, float LineWidth, nuiLineJoin LineJoin, nuiLineCap LineCap, float MiterLimit)
 {
-  nuiOutliner* pOutliner = new nuiOutliner(NULL, LineWidth);
-  pOutliner->SetLineJoin(LineJoin);
-  pOutliner->SetLineCap(LineCap);
-  pOutliner->SetMiterLimit(MiterLimit);
+  nuiOutliner Outliner(this, LineWidth);
+  Outliner.SetLineJoin(LineJoin);
+  Outliner.SetLineCap(LineCap);
+  Outliner.SetMiterLimit(MiterLimit);
 
-  nuiRenderObject* pObj = new nuiRenderObject();
+  nuiPath outline;
+  Outliner.Tessellate(outline, 1.0);
 
-  uint32 contours = GetContourCount();
-  for (uint32 i = 0; i < contours; i++)
-  {
-    nuiContour* pContour = GetContour(i);
+  nuiPolyLine polyline(outline);
+  nuiTessellator tesselator(&polyline);
+  nuiRenderObject* pObject = tesselator.Generate();
 
-    pOutliner->SetPath(pContour);
-    pOutliner->TessellateObj(*pObj, Quality);
-  }
+  return pObject;
 
-  delete pOutliner;
-
-  return pObj;
 }
 
 /*

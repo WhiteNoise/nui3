@@ -21,6 +21,11 @@ and in NGL user application code.
 #define USE_WCHAR
 #define __NUI_NO_SOFTWARE__
 
+#if (defined _DEBUG) || (defined DEBUG)
+  #if !(defined _DEBUG_)
+    #define _DEBUG_
+  #endif
+#endif
 
 /*
  * Platform detection
@@ -40,15 +45,6 @@ and in NGL user application code.
 #  ifndef _WIN32_
 #    define _WIN32_
 #    define _WIN32_WINNT 0x0502
-#  endif
-#  ifdef _DEBUG
-//#    define _CRTDBG_MAP_ALLOC // Use the CRT debug mallocs & new
-//#    include "crtdbg.h"
-#    define _DEBUG_
-//#    define NGL_DEBUG_CLIENTBLOCK   new( _CLIENT_BLOCK, __FILE__, __LINE__)
-//#    define new new(_CLIENT_BLOCK, __FILE__, __LINE__)
-#  else
-//#    define NGL_DEBUG_CLIENTBLOCK
 #  endif
 #endif // _WIN32_
 
@@ -77,40 +73,31 @@ and in NGL user application code.
 
 // Include conditionals
 	#include <TargetConditionals.h>
+  #define _CORE_FOUNDATION_
+  #include <CoreFoundation/CoreFoundation.h>
 
 	// Using UIKit for iPhone and iPhone simulator
 	#if (TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE)
-//#error "Shouldn't go there (TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE)"
     #define NUI_IOS
     #define _UIKIT_
-    #define _CORE_FOUNDATION_
 
-    #include <CoreFoundation/CoreFoundation.h>
+  #elif (defined _CARBON_)
+    #ifdef __GNUC__
+      #define __MACHO__
+      #define __NGL_MACHO__
+    #endif // __GNUC__
 
-  #elif (defined _COCOA_)
-//#error "Should go there!!! (defined _COCOA_)"
-    #define _CORE_FOUNDATION_
+  //#elif (defined _COCOA_)
+  #else // Make Cocoa the default choice when compiling on a Mac, even when using gcc
+    #ifndef _COCOA_
+        #define _COCOA_
+    #endif
     #define __MACHO__
     #define __NGL_MACHO__
-    #include <CoreFoundation/CoreFoundation.h>
     #if !__LP64__
       #include <CoreServices/CoreServices.h>
     #endif
-
-// Make Carbon the default choice when compiling on a Mac, even when using gcc
-//#elif (!defined(_CARBON_) && !defined(_DARWIN_) && !defined(_COCOA_))
-  #else
-    #ifndef _CARBON_
-      #define _CARBON_
-    #endif
-    #define _CORE_FOUNDATION_
-    #include <CoreFoundation/CoreFoundation.h>
   #endif
-
-  #ifdef __GNUC__
-    #define __MACHO__
-    #define __NGL_MACHO__
-  #endif // __GNUC__
 #endif
 
   #define __NGL_MACHO__
@@ -221,9 +208,6 @@ and in NGL user application code.
 #endif
 
 #ifdef _UNIX_
-	#if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_))
-	  # define _DEBUG_
-	#endif
   #ifndef _GNU_SOURCE
   #define _GNU_SOURCE
   #endif
@@ -249,10 +233,6 @@ and in NGL user application code.
  MacOS/UIKit
  */
 #ifdef _UIKIT_
-  #if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_))
-    #define _DEBUG_
-  #endif
-
   #ifndef __cplusplus
 //  #if defined(_OBJC_)
 		#include <UIKit/UIKit.h>
@@ -277,10 +257,6 @@ and in NGL user application code.
  MacOS/Cocoa
  */
 #ifdef _COCOA_
-  #if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_))
-  #define _DEBUG_
-  #endif
-
   #ifndef __cplusplus
   //  #if defined(_OBJC_)
   #include <Cocoa/Cocoa.h>
@@ -310,10 +286,6 @@ and in NGL user application code.
  MacOS/Carbon
  */
 #ifdef _CARBON_
-  #if (((defined _DEBUG) || (defined DEBUG)) && !(defined _DEBUG_))
-  # define _DEBUG_
-  #endif
-
   #define __PRINTCORE__
   #define __PMAPPLICATION__
   #define __PMAPPLICATION_DEPRECATED__
@@ -408,7 +380,6 @@ typedef wchar_t nglUChar;
 /* Multitouch support is now always on
  */
 #define _MULTI_TOUCHES_
-#define _NUI_MAX_TOUCHES_ 20
 
 /* At last, include GL and GLU headers if necessary
  */
@@ -494,6 +465,9 @@ typedef wchar_t nglUChar;
 
 
 #  elif defined _CARBON_
+#    undef __NUI_NO_GLES__
+#    define __NUI_NO_D3D__
+#    undef __NUI_NO_GL__
 #    if defined(__MWERKS__)
 #      if macintosh == 0
 #        include <AGL/agl.h>
@@ -610,6 +584,31 @@ typedef unsigned int GLhandleARB;  /* shader object handle */
 
 #ifdef _ANDROID_
 #include "android/log.h"
+#include <EGL/egl.h>
+#include <GLES/gl.h>
+
+#include <android/sensor.h>
+#include <android/log.h>
+#include <android_native_app_glue.h>
+#include <android/window.h>
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
+#include <android/bitmap.h>
+#include <android/configuration.h>
+#include <android/input.h>
+#include <android/keycodes.h>
+#include <android/looper.h>
+#include <android/native_activity.h>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
+#include <android/obb.h>
+#include <android/rect.h>
+#include <android/storage_manager.h>
+//#include <android/tts.h>
+
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/time.h>
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "nui", __VA_ARGS__))
 #else
 #define LOGI

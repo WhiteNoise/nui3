@@ -390,13 +390,13 @@ bool nuiColumnTreeView::KeyDown (const nglKeyEvent& rEvent)
       nuiTreeNodePtr pParent = GetParentNode(mpTree, mpSelectedNode);
       if (pParent)
       {
-        uint size = pParent->GetChildrenCount();
+        int size = pParent->GetChildrenCount();
         nuiTreeNode* pNext = NULL;
         nuiTreeNode* pCurrent = NULL;
         nuiTreeNode* pLast = NULL;
         if (size)
         {
-          for (uint i = size-1; i>=0 && !pNext; i--)
+          for (int i = size-1; i >= 0 && !pNext; i--)
           {
             pCurrent = checked_cast<nuiTreeNode*>(pParent->GetChild(i));
             if (pCurrent == mpSelectedNode)
@@ -566,7 +566,6 @@ bool nuiColumnTreeView::MouseClicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags B
         if (r.IsInside(X,Y))
         {
           mActivateOnUnclick = true;
-          Grab();
           return true;
         }
       }
@@ -633,7 +632,6 @@ bool nuiColumnTreeView::MouseUnclicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags
   if (mActivateOnUnclick)
   {
     mActivateOnUnclick = false;
-    Ungrab();
     Activated();
   }
 

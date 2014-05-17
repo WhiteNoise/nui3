@@ -14,7 +14,9 @@
 #include "nuiDrawContext.h"
 #include "nuiNotification.h"
 
+#if defined _ANDROID_ || defined _UIKIT_
 #define DISABLE_TOOLTIP
+#endif
 
 class nuiLabel;
 class nuiCSS;
@@ -31,12 +33,8 @@ public:
 
   /* @name Trash management */
   //@{
-  virtual void FillTrash(); ///< Marks the start of a trash filling period: we collect all the movement going on in the widget tree.
-  virtual bool IsTrashFilling() const; ///< Are we collecting change in the widget tree right now?
-  virtual void EmptyTrash(); ///< Empties the object trash: all the objects that have been placed in the trash (with the Trash() method) will be delete an removed from the trash. This method should be called after processing any event (comming from nglWindow).
   virtual void AdviseObjectDeath(nuiWidgetPtr pWidget); ///< Any nuiWidget will call this method when dying. Don't forget to call this version in any overriden AdviseObjectDeath you make.
   void AdviseSubTreeDeath(nuiWidgetPtr pWidget);
-  virtual void Trash(nuiWidgetPtr pWidget); ///< Ask for the destruction of this object as soon as possible.
   void DisconnectWidget(nuiWidget* pWidget);
 
   //@}
@@ -69,6 +67,7 @@ public:
   virtual bool Ungrab(nuiWidgetPtr pWidget); ///< Stop redirecting all mouse event to the given grab object.
   virtual nuiWidgetPtr GetGrab() const; ///< Returns the object that currently has the mouse focus.
   virtual bool CancelGrab(); ///< Cancel any current ongoing grab action and empty the grab stack.
+  bool StealMouseEvent(nuiWidgetPtr pWidget, const nglMouseInfo& rInfo); ///< Try to assign the mouse/touch grab for the given mouse event to the given widget, canceling the event if necessary. If a widget already has acquired the grab it is refused and the function returns false.
 
   virtual bool SetFocus(nuiWidgetPtr pWidget); ///< Redirect all keyboard events to this object.
   virtual nuiWidgetPtr GetFocus() const; ///< Returns the object that currently has the keyboard focus.
@@ -90,8 +89,8 @@ public:
   virtual void ToolTipOn(const nuiEvent& rEvent);
   virtual void ToolTipOff(const nuiEvent& rEvent);
 #else
-  virtual bool ActivateToolTip(nuiWidgetPtr pWidget, bool Now = false) {} ///< nuiMainWindow override the default tool-tip mechanism to actually display them.
-  virtual bool ReleaseToolTip(nuiWidgetPtr pWidget) {} ///< Remove the current tool-tip for the given widget. 
+  virtual bool ActivateToolTip(nuiWidgetPtr pWidget, bool Now = false) { return false; } ///< nuiMainWindow override the default tool-tip mechanism to actually display them.
+  virtual bool ReleaseToolTip(nuiWidgetPtr pWidget) { return false; } ///< Remove the current tool-tip for the given widget.
 #endif
   //@}
 
@@ -110,8 +109,11 @@ public:
   bool CallKeyUp (const nglKeyEvent& rEvent);
   bool CallMouseClick (nglMouseInfo& rInfo);
   bool CallMouseUnclick(nglMouseInfo& rInfo);
+  bool CallMouseWheel (nglMouseInfo& rInfo);
   bool CallMouseMove (nglMouseInfo& rInfo);
-  bool CallMultiEventsFinished(nglMouseInfo& rInfo);
+bool CallMouseCancel(nglMouseInfo& rInfo);
+bool CallMultiEventsFinished(nglMouseInfo& rInfo);
+
   void GetMouseInfo(nglMouseInfo& rMouseInfo) const;
   nuiWidget* GetWidgetUnderMouse() { return mpUnderMouse; }
 
@@ -164,7 +166,9 @@ public:
   void RegisterObserver(const nglString& rNotificationName, nuiNotificationObserver* pObserver); ///< Register an observer for the given notification type. If the type is nglString::Empty, all the notifications will be sent to the observer.
   void UnregisterObserver(nuiNotificationObserver* pObserver, const nglString& rNotificationName = nglString::Null); ///< Unregister pObserver so that it doesn't receive the given notification. By default it is removed from all notification types (nglString::Null).
   
-  
+  virtual const std::map<nglTouchId, nglMouseInfo>& GetMouseStates() const;
+  virtual nuiSize GetStatusBarSize() const;
+
 protected:
   void Exit();
   void SetDrawContext(nuiDrawContext* pDrawContext);
@@ -191,17 +195,17 @@ protected:
 
   typedef std::map<nglTouchId, nuiWidgetPtr> nuiGrabMap;
   nuiGrabMap mpGrab;
+  std::map<nglTouchId, bool> mpGrabAcquired;
   bool HasGrab(nuiWidgetPtr pWidget); ///< Returns true if this \p pWidget has been grabbed by any touch
   nuiWidgetPtr GetGrab(nglTouchId touchId) const;  ///< Returns the Widget that has been grabbed by this \p touchId, NULL otherwise
   std::map<nglTouchId, nglMouseInfo> mMouseClickedEvents;
+  std::map<nglTouchId, nglMouseInfo> mMouseStates;
 
   nglPath mResPath;
 
   bool mClearBackground;
 
   nglMouseInfo mMouseInfo;
-  
-  bool IsTrashFull() const;
   
   nuiWidgetPtr mpWatchedWidget;
 
@@ -214,8 +218,6 @@ protected:
   //@{
   bool mFillTrash;
   bool mReleased;
-
-  std::list<nuiWidgetPtr> mpTrash;
   //@}
 
   nuiDrawContext* mpDrawContext;

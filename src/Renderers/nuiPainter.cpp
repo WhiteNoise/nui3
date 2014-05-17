@@ -9,8 +9,12 @@
 
 ///////////////////////////////////
 // nuiPainter implementation:
+
+std::set<nuiPainter*> nuiPainter::gpPainters;
+
 nuiPainter::nuiPainter(nglContext* pContext)
 {
+  gpPainters.insert(this);
   ResetStats();
   mWidth = 0;
   mHeight = 0;
@@ -30,6 +34,7 @@ nuiPainter::~nuiPainter()
 {
   // Empty the clip stack:
   mpClippingStack = std::stack<nuiClipper>();
+  gpPainters.erase(this);
 }
 
 void nuiPainter::StartRendering()
@@ -255,6 +260,23 @@ void nuiPainter::DelNeedTextureBackingStore()
 
 void nuiPainter::SetSurface(nuiSurface* pSurface)
 {
+  NGL_OUT("nuiPainter::SetSurface %p\n", pSurface);
+  if (pSurface)
+  {
+    if (mpSurface)
+    {
+      mpSurface->Acquire();
+      mpSurfaceStack.push(mpSurface);
+    }
+  }
+  else
+  {
+    NGL_ASSERT(!mpSurfaceStack.empty());
+    pSurface = mpSurfaceStack.top();
+    pSurface->Release();
+    mpSurfaceStack.pop();
+  }
+
   if (pSurface == mpSurface)
     return;
   
@@ -280,7 +302,7 @@ void nuiPainter::GetSize(uint32& rX, uint32& rY) const
 
 const nuiRenderState& nuiPainter::GetState() const
 {
-  return mState;
+  return *mpState;
 }
 
 void nuiPainter::SetDummyMode(bool set)
@@ -295,9 +317,10 @@ bool nuiPainter::GetDummyMode() const
 
 void nuiPainter::SetAngle(int32 Angle)
 {
-  mAngle = Angle % 360;
-  while (mAngle < 0)
-    mAngle += 360;
+  Angle = Angle % 360;
+  while (Angle < 0)
+    Angle += 360;
+  mAngle = Angle;
 }
 
 int32 nuiPainter::GetAngle() const
@@ -326,5 +349,29 @@ int32 nuiPainter::GetCurrentHeight() const
 void nuiPainter::AddBreakPoint()
 {
   // do nothing by default, this is only used to debug defered rendering (i.e. nuiMetaPainter).
+}
+
+void nuiPainter::BroadcastDestroyTexture(nuiTexture* pTexture)
+{
+  for (auto pPainter : gpPainters)
+  {
+    pPainter->DestroyTexture(pTexture);
+  }
+}
+
+void nuiPainter::BroadcastDestroySurface(nuiSurface* pSurface)
+{
+  for (auto pPainter : gpPainters)
+  {
+    pPainter->DestroySurface(pSurface);
+  }
+}
+
+void nuiPainter::BroadcastDestroyRenderArray(nuiRenderArray* pArray)
+{
+  for (auto pPainter : gpPainters)
+  {
+    pPainter->DestroyRenderArray(pArray);
+  }
 }
 

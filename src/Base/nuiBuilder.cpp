@@ -30,15 +30,12 @@ void nuiBuilder::Init()
 {
   NUI_ADD_WIDGET_CREATOR(nuiWidget, "Widget");
   NUI_ADD_WIDGET_CREATOR(nuiSimpleContainer, "Container");
-  NUI_ADD_WIDGET_CREATOR(nuiWindow,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiSplitter,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiPopupMenu,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiList,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiScrollBar,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiFixed,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiMainWindow,"Container");
-  NUI_ADD_WIDGET_CREATOR(nuiStateDummy,"Container");
-  NUI_ADD_WIDGET_CREATOR(nuiHoverDummy,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiScrollView,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiZoomView,"Container");
   NUI_ADD_WIDGET_CREATOR(nuiTabBar,"Container");
@@ -59,21 +56,16 @@ void nuiBuilder::Init()
   NUI_ADD_WIDGET_CREATOR(nuiToggleButton,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiRadioButton,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiImage,"Widget");
-  NUI_ADD_WIDGET_CREATOR(nuiSVGView,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiTab,"Widget");
   NUI_ADD_WIDGET_CREATOR(nuiProgressBar,"Widget");
-  NUI_ADD_WIDGET_CREATOR(nuiFormatedLabel,"Widget");
   
   //NUI_ADD_WIDGET_CREATOR(nuiMessageBox,"Dialog");
   //NUI_ADD_WIDGET_CREATOR(nuiDialogSelectDirectory,"Dialog");
   //NUI_ADD_WIDGET_CREATOR(nuiDialogSelectFile,"Dialog");
   
-  NUI_ADD_WIDGET_CREATOR(nuiAnimView, "Container");
-  NUI_ADD_WIDGET_CREATOR(nuiBackgroundPane, "Container");
   //NUI_ADD_WIDGET_CREATOR(nuiDialog, "Dialog");
   NUI_ADD_WIDGET_CREATOR(nuiFlowView, "Container");
   //NUI_ADD_WIDGET_CREATOR(nuiImageSequence, "Container");
-  NUI_ADD_WIDGET_CREATOR(nuiMatrixView, "Container");
   NUI_ADD_WIDGET_CREATOR(nuiModalContainer, "Container");
   //NUI_ADD_WIDGET_CREATOR(nuiOffscreenView, "Container");
   //NUI_ADD_WIDGET_CREATOR(nuiPopupView, "Container");
@@ -91,7 +83,6 @@ void nuiBuilder::Init()
   NUI_ADD_WIDGET_CREATOR(nuiFrameView, "Widget");
   NUI_ADD_WIDGET_CREATOR(nuiHotKeyEditor, "Widget");
   //NUI_ADD_WIDGET_CREATOR(nuiImageDropZone, "Widget");
-  NUI_ADD_WIDGET_CREATOR(nuiRectView, "Widget");
   //NUI_ADD_WIDGET_CREATOR(nuiShapeView, "Widget");
   //NUI_ADD_WIDGET_CREATOR(nuiZoomBar, "Widget");
   NUI_ADD_WIDGET_CREATOR(nuiRSSView, "Widget");
@@ -100,8 +91,6 @@ void nuiBuilder::Init()
   //NUI_ADD_WIDGET_CREATOR(nuiLabelAttribute, "Widget");
   //NUI_ADD_WIDGET_CREATOR(nuiLabelRenamer, "Widget");
   NUI_ADD_WIDGET_CREATOR(nuiHTMLView, "Widget");
-  NUI_ADD_WIDGET_CREATOR(nuiScrollingLabel, "Widget");
-  NUI_ADD_WIDGET_CREATOR(nuiSpinnerLabel, "Widget");
 
   NUI_ADD_WIDGET_CREATOR(nuiNavigationBar, "Widget");
   NUI_ADD_WIDGET_CREATOR(nuiNavigationController, "Widget");
@@ -109,6 +98,7 @@ void nuiBuilder::Init()
   NUI_ADD_WIDGET_CREATOR(nuiViewController, "Widget");
 
   NUI_ADD_WIDGET_CREATOR(nuiLayout, "Container");
+  NUI_ADD_WIDGET_CREATOR(nuiDrawerView, "Widget");
 
 #ifndef _OPENGL_ES_
   NUI_ADD_WIDGET_CREATOR(nuiUserArea,"Widget");
@@ -264,6 +254,11 @@ const nglString& nuiWidgetCreator::LookUp(const std::map<nglString, nglString>& 
   return rString;
 }
 
+void nuiWidgetCreator::SetObjectNameIsClass()
+{
+  mObjectNameIsClass = true;
+}
+
 nuiWidget* nuiWidgetCreator::Create(const std::map<nglString, nglString>& rParamDictionary, const nuiBuilder* pBuilder) const
 {
   if (!pBuilder)
@@ -293,7 +288,10 @@ nuiWidget* nuiWidgetCreator::Create(const std::map<nglString, nglString>& rParam
             classname.GetChars(), objectname.GetChars());
     return NULL;
   }
-  
+
+  if (mObjectNameIsClass)
+    pWidget->SetObjectClass(mObjectName);
+
   if (!objectname.IsEmpty())
     pWidget->SetObjectName(objectname);
   
@@ -383,6 +381,11 @@ nuiWidget* nuiWidgetCreator::Create(const std::map<nglString, nglString>& rParam
     }
   }
 
+  for (const auto& eventaction : mEventActions)
+  {
+    pWidget->AddEventAction(eventaction.first, eventaction.second);
+  }
+
   if (pWidget)
     pWidget->Built();
   return pWidget;
@@ -445,5 +448,10 @@ const std::map<nglString, nglString>& nuiWidgetCreator::GetDefaultDictionary() c
 std::map<nglString, nglString>& nuiWidgetCreator::GetDefaultDictionary()
 {
   return mDefaultDictionary;
+}
+
+void nuiWidgetCreator::SetActions(const std::vector<std::pair<nglString, nuiEventActionHolder*> >& rEventActions)
+{
+  mEventActions = rEventActions;
 }
 

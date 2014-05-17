@@ -9,12 +9,6 @@
 
 #include "nui.h"
 
-//#define STUPID
-//#define STUPIDBASE
-#ifdef STUPID
-#define STUPIDBASE
-#endif
-
 using namespace std;
 
 #define NUI_MULTISAMPLES 0
@@ -168,10 +162,19 @@ nuiMainWindow::~nuiMainWindow()
 void nuiMainWindow::InitAttributes()
 {
   AddAttribute(new nuiAttribute<nuiRect>
-               (nglString(_T("WindowRect")), nuiUnitNone,
+               (nglString("WindowRect"), nuiUnitNone,
                 nuiMakeDelegate(this, &nuiMainWindow::GetWindowRect),
                 nuiMakeDelegate(this, &nuiMainWindow::SetWindowRect)));
   
+  AddAttribute(new nuiAttribute<bool>
+               (nglString("DrawToSurface"), nuiUnitNone,
+                nuiMakeDelegate(this, &nuiMainWindow::GetDrawToSurface),
+                nuiMakeDelegate(this, &nuiMainWindow::SetDrawToSurface)));
+
+  AddAttribute(new nuiAttribute<bool>
+               (nglString("DrawDirtyRects"), nuiUnitNone,
+                nuiMakeDelegate(this, &nuiMainWindow::GetDrawDirtyRects),
+                nuiMakeDelegate(this, &nuiMainWindow::SetDrawDirtyRects)));
 }
 
 void nuiMainWindow::OnPaint()
@@ -189,6 +192,11 @@ void nuiMainWindow::LazyPaint()
   }
 }
 
+nuiSize nuiMainWindow::GetStatusBarSize() const
+{
+  return mpNGLWindow->GetStatusBarSize();
+}
+
 static float Gx = 0;
 
 void nuiMainWindow::Paint()
@@ -198,23 +206,17 @@ void nuiMainWindow::Paint()
   
   mLastEventTime = nglTime();
   //nuiStopWatch watch(_T("nuiMainWindow::Paint"));
-  do 
-  {
-
-    FillTrash();
-    
+//  do 
+//  {
     GetIdealRect();
     SetLayout(nuiRect(0, 0, mpNGLWindow->GetWidth(), mpNGLWindow->GetHeight()));
     
-    EmptyTrash();
-  } while (IsTrashFull());
+//  } while (IsTrashFull());
 
   if (!mInvalidatePosted)
   {
     return;
   }
-  
-  FillTrash();
 
   //watch.AddIntermediate(_T("After FillTrash()"));
   
@@ -233,6 +235,31 @@ void nuiMainWindow::Paint()
   mpNGLWindow->BeginSession();
 
   pContext->StartRendering();
+
+  if (mDrawToSurface)
+  {
+    if (mpSurface)
+    {
+      if (mpSurface->GetWidth() != GetWidth() || mpSurface->GetHeight() != GetHeight() )
+      {
+        mpSurface->Release();
+        mpSurface = nullptr;
+      }
+    }
+
+    if (!mpSurface)
+    {
+      nglString name;
+      static int count = 0;
+      name.CFormat("nuiMainWindow %p %d", this, count++);
+      mpSurface = nuiSurface::CreateSurface(name, GetWidth(), GetHeight());
+      name.CFormat("nuiMainWindow_Texture %p %d", this, count++);
+      mpSurface->GetTexture()->SetSource(name);
+    }
+
+    pContext->SetSurface(mpSurface);
+  }
+
   pContext->Set2DProjectionMatrix(GetRect().Size());
   bool DrawFullFrame = !mInvalidatePosted || (mFullFrameRedraw > 0);
   bool RestorePartial = IsPartialRedrawEnabled();
@@ -279,9 +306,24 @@ void nuiMainWindow::Paint()
 //  {
 //    
 //  }
-  
+
+  if (mDrawToSurface)
+  {
+    pContext->SetSurface(nullptr);
+
+  //  pContext->StartRendering();
+    pContext->Set2DProjectionMatrix(GetRect().Size());
+    nuiTexture* pTex = mpSurface->GetTexture();
+    pContext->SetTexture(pTex);
+    pContext->EnableTexturing(true);
+    pContext->SetFillColor(nuiColor(255, 255, 255));
+    pContext->ResetClipRect();
+    pContext->EnableClipping(false);
+    nuiRect r((int)pTex->GetWidth(), (int)pTex->GetHeight());
+    pContext->DrawImage(r,  r);
+  }
+
   pContext->StopRendering();
-  EmptyTrash();
 
 #ifndef __NUI_NO_SOFTWARE__
   if (pCTX)
@@ -298,6 +340,15 @@ void nuiMainWindow::Paint()
   }
 #endif//__NUI_NO_SOFTWARE__
 
+  if (mDrawDirtyRects)
+  {
+    pContext->SetFillColor(nuiColor(255, 255, 255, 100));
+    pContext->SetStrokeColor(nuiColor(255, 255, 255, 182));
+    pContext->EnableBlending(true);
+    for (uint i = 0; i < RedrawList.size(); i++)
+      pContext->DrawRect(RedrawList[i], eStrokeAndFillShape);
+  }
+
   //watch.AddIntermediate(_T("Before EndSession()"));
   pContext->EndSession();
   //watch.AddIntermediate(_T("Before End()"));
@@ -312,8 +363,7 @@ void nuiMainWindow::Paint()
   //printf("Frame stats | RenderOps: %d | Vertices %d | Batches %d\n", rops, verts, batches);
   
   //Invalidate();
-  
-  
+
   if (mDebugSlowRedraw)
   {
     nglThread::Sleep(1);
@@ -322,10 +372,7 @@ void nuiMainWindow::Paint()
 
 void nuiMainWindow::OnResize(uint Width, uint Height)
 {
-  FillTrash();
-  nuiRect Rect;
-  Rect.mRight=(nuiSize)Width;
-  Rect.mBottom=(nuiSize)Height;
+  nuiRect Rect((nuiSize)Width, (nuiSize)Height);
   //SetLayout(Rect);
 
   //NGL_OUT(_T("(OnResize)nglWindow::Invalidate()\n"));;
@@ -334,19 +381,15 @@ void nuiMainWindow::OnResize(uint Width, uint Height)
   mFullFrameRedraw++;
   mLastEventTime = nglTime();
   mLastInteractiveEventTime = nglTime();
-  
-  EmptyTrash();
 }
 
 void nuiMainWindow::OnCreation()
 {
-  EmptyTrash();
 }
 
 void nuiMainWindow::OnDestruction()
 {
   //NGL_OUT(_T("OnDestruction\n"));
-  EmptyTrash();
 }
 
 void nuiMainWindow::OnActivation()
@@ -354,7 +397,6 @@ void nuiMainWindow::OnActivation()
   mLastEventTime = nglTime();
   mLastInteractiveEventTime = nglTime();
   //OUT("OnActivation\n");
-  EmptyTrash();
   CancelGrab();
   mMouseInfo.Buttons = 0;
 }
@@ -364,7 +406,6 @@ void nuiMainWindow::OnDesactivation()
   mLastEventTime = nglTime();
   mLastInteractiveEventTime = nglTime();
   //OUT("OnDesactivation\n");
-  EmptyTrash();
   CancelGrab();
   mMouseInfo.Buttons = 0;
 }
@@ -383,7 +424,6 @@ void nuiMainWindow::OnState (nglWindow::StateInfo State)
   //OUT("OnState\n");
   mLastEventTime = nglTime();
   mLastInteractiveEventTime = nglTime();
-  EmptyTrash();
 }
 
 
@@ -412,9 +452,18 @@ void nuiMainWindow::BroadcastInvalidateRect(nuiWidgetPtr pSender, const nuiRect&
 
 void nuiMainWindow::BroadcastInvalidateLayout(nuiWidgetPtr pSender, bool BroadCastOnly)
 {
+//  nglString senderclass = pSender->GetObjectClass();
+//  if (senderclass == "nuiMainWindow"
+//      || senderclass == "nuiNavigationController"
+//      || senderclass == "MainViewInstance"
+//      )
+//  {
+//    printf("");
+//  }
+//  NGL_OUT(_T("(Invalidate)BroadcastInvalidateLayout(%s)\n"), pSender->GetObjectClass().GetChars());
+
   nuiTopLevel::BroadcastInvalidateLayout(pSender, BroadCastOnly);
 
-  //NGL_OUT(_T("(Invalidate)BroadcastInvalidateLayout(%s)\n"), pSender->GetObjectClass().GetChars());
   mInvalidatePosted = true;
 }
 
@@ -585,11 +634,25 @@ bool nuiMainWindow::OnMouseMove(nglMouseInfo& rInfo)
   return CallMouseMove(rInfo);
 }
 
+bool nuiMainWindow::OnMouseCanceled (nglMouseInfo& rInfo)
+{
+  mLastEventTime = nglTime();
+  mLastInteractiveEventTime = nglTime();
+  return CallMouseCancel(rInfo);
+}
+
 bool nuiMainWindow::OnMouseClick(nglMouseInfo& rInfo)
 {
   mLastEventTime = nglTime();
   mLastInteractiveEventTime = nglTime();
   return CallMouseClick(rInfo);
+}
+
+bool nuiMainWindow::OnMouseWheel(nglMouseInfo& rInfo)
+{
+  mLastEventTime = nglTime();
+  mLastInteractiveEventTime = nglTime();
+  return CallMouseWheel(rInfo);
 }
 
 bool nuiMainWindow::OnMouseUnclick(nglMouseInfo& rInfo)
@@ -1023,12 +1086,14 @@ void nuiMainWindow::NGLWindow::OnDestruction()
 
 void nuiMainWindow::NGLWindow::OnActivation()
 {
+  mpMainWindow->SetPaintEnabled(true);
   mpMainWindow->OnActivation();
 }
 
 void nuiMainWindow::NGLWindow::OnDesactivation()
 {
   mpMainWindow->OnDesactivation();
+  mpMainWindow->SetPaintEnabled(false);
 }
 
 void nuiMainWindow::NGLWindow::OnClose()
@@ -1081,6 +1146,16 @@ bool nuiMainWindow::NGLWindow::OnMultiEventsFinished(nglMouseInfo& rInfo)
     return mpMainWindow->OnMultiEventsFinished(rInfo);
 }
 
+
+bool nuiMainWindow::NGLWindow::OnMouseWheel(nglMouseInfo& rInfo)
+{
+  return mpMainWindow->OnMouseWheel(rInfo);
+}
+
+bool nuiMainWindow::NGLWindow::OnMouseCanceled (nglMouseInfo& rInfo)
+{
+  return mpMainWindow->OnMouseCanceled(rInfo);
+}
 bool nuiMainWindow::NGLWindow::OnRotation(uint Angle)
 {
   return mpMainWindow->OnRotation(Angle);
@@ -1171,12 +1246,10 @@ bool nuiMainWindow::GetQuitOnClose() const
 
 void nuiMainWindow::EnterModalState()
 {
-  EmptyTrash();
   CancelGrab();
   mMouseInfo.Buttons = 0;
   
   mpNGLWindow->EnterModalState();
-  EmptyTrash();
   CancelGrab();
   mMouseInfo.Buttons = 0;
 }
@@ -1242,6 +1315,8 @@ double nuiMainWindow::GetLastInteractiveEventTime() const
 void nuiMainWindow::SetPaintEnabled(bool set)
 {
   mPaintEnabled = set;
+  if (set)
+    Invalidate();
 }
 
 bool nuiMainWindow::IsPaintEnabled() const

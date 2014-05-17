@@ -12,13 +12,7 @@
 #include "nuiColor.h"
 #include "nglVector.h"
 
-class nuiCacheManager
-{
-public:
-  nuiCacheManager() {}
-  virtual ~nuiCacheManager() {}
-  virtual void ReleaseCacheObject(void* pHandle) = 0;
-};
+class nuiTexture;
 
 class nuiRenderArray : public nuiRefCount
 {
@@ -138,7 +132,7 @@ public:
   
   bool Is3DMesh() const;
   void Set3DMesh(bool set);
-    bool IsShape() const;
+  bool IsShape() const;
   void SetShape(bool set);
   bool IsStatic() const;
   void SetStatic(bool set);
@@ -148,8 +142,6 @@ public:
   void Reserve(uint Count);
   void Resize(uint Count);
   void Reset();
-  void* GetCacheHandle(nuiCacheManager* pManager) const;
-  void SetCacheHandle(nuiCacheManager* pManager, void* pHandle) const;
   uint32 GetTotalSize() const;
   void FillBuffer(GLubyte* pBuffer) const;
 
@@ -200,14 +192,20 @@ public:
   int32 GetStreamCount() const;
 
   nglString Dump() const;
+
+  // Helper method:
+  void AddImageRect(nuiTexture* pTexture, const nuiRect& rDest, const nuiRect& rSource, const nuiColor& rColor = nuiColor(255, 255, 255));
+  void AddRect(const nuiRect& rDest, const nuiColor& rColor = nuiColor(255, 255, 255));
+
+  void SetDebug(bool set) { mDebug = set; }
+  bool GetDebug() const { return mDebug; }
 private:
   GLenum mMode;
   bool mEnabled[4];
   bool mStatic : 1;
   bool m3DMesh : 1;
   bool mShape : 1;
-  mutable void* mpCacheHandle;
-  mutable nuiCacheManager* mpCacheManager;
+  bool mDebug : 1;
 
   Vertex mCurrentVertex;
   std::vector<Vertex> mVertices;

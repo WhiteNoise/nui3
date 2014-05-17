@@ -204,24 +204,28 @@ nuiFontDesc::nuiFontDesc(const nglPath& rPath, int32 Face)
   
   error = FT_New_Face(gFTLibrary, rPath.GetChars(), Face, &pFace);
 
-  if (error)
-  {
-    nglIStream* pStream = rPath.OpenRead();
-    
-    if (!pStream)
-    {
-      NGL_LOG("font", NGL_LOG_ERROR, "Error Scanning font '%s' face %d\n", rPath.GetChars(), Face);
-      return;
-    }
-    
-    uint32 size = pStream->Available();
-    pBuffer = new FT_Byte[size];
-    pStream->ReadUInt8(pBuffer, size);
-    delete pStream;
-    
-    error = FT_New_Memory_Face(gFTLibrary, pBuffer, size, Face, &pFace);
-  }
-  
+//  if (error)
+//  {
+//    nglIStream* pStream = rPath.OpenRead();
+//    
+//    if (!pStream)
+//    {
+//      NGL_LOG("font", NGL_LOG_ERROR, "Error Scanning font '%s' face %d\n", rPath.GetChars(), Face);
+//      return;
+//    }
+//    
+//    uint32 size = pStream->Available();
+//    pBuffer = new FT_Byte[size];
+//    pStream->ReadUInt8(pBuffer, size);
+//    delete pStream;
+//    
+//    error = FT_New_Memory_Face(gFTLibrary, pBuffer, size, Face, &pFace);
+//    if (!error)
+//    {
+//      printf("HOLY SHIT IT WORKED!");
+//    }
+//  }
+
   if (error || pFace->num_faces <= Face)
   {
     if (!Face)
@@ -1602,7 +1606,7 @@ bool nuiFontBase::Load (const nglPath& rPath, uint Face, float Size)
 bool nuiFontBase::Load (const uint8* pBase, int32 BufferSize, uint Face, bool StaticBuffer, float Size)
 {
   // Load face from memory
-  NGL_DEBUG( NGL_LOG(_T("font"), NGL_LOG_INFO, _T("Loading logical font at %p (face %d, %d bytes)"), pBase, Face, Size); )
+  NGL_DEBUG( NGL_LOG(_T("font"), NGL_LOG_INFO, _T("Loading logical font at %p (face %d, size %f, %d bytes)"), pBase, Face, Size, BufferSize); )
   mpFace->SetFontInstance(new nuiFontInstance(pBase, BufferSize, Face, StaticBuffer));
   mpFace->Desc.face_id = nuiFontInstance::Install(mpFace->GetFontInstance());
   
@@ -1792,6 +1796,8 @@ nuiTexture *nuiFontBase::AllocateTexture(int size)
   pTexture->SetWrapT(GL_CLAMP);
 #endif
 
+  NGL_DEBUG( NGL_LOG(_T("font"), NGL_LOG_INFO, _T("Allocated new font texture (%d x %d) %s"), size, size, GetObjectName().GetChars()); )
+
   return pTexture;
 }
 
@@ -1906,7 +1912,7 @@ uint32 POT(uint32 i)
   return t;
 }
 
-const int nuiFontBase::TEXTURE_SIZE = 128;
+const int nuiFontBase::TEXTURE_SIZE = 256;
 
 void nuiFontBase::AddCacheGlyph(int Index, nuiFontBase::GlyphLocation &rGlyphLocation)
 {
@@ -1918,28 +1924,30 @@ void nuiFontBase::AddCacheGlyph(int Index, nuiFontBase::GlyphLocation &rGlyphLoc
   int OffsetX = mCurrentX;
   int OffsetY = mCurrentY;
 
-  if (!FindNextGlyphLocation(bmp.Width + 1, bmp.Height + 1, OffsetX, OffsetY))
+  if (!FindNextGlyphLocation(bmp.Width + 4, bmp.Height + 4, OffsetX, OffsetY))
   {
     mCurrentTexture++;
-    nuiTexture *texture = AllocateTexture(MAX(TEXTURE_SIZE, POT(MAX(bmp.Width, bmp.Height))));
+    nuiTexture *texture = AllocateTexture(MAX(TEXTURE_SIZE, 2 * POT(MAX(bmp.Width, bmp.Height))));
     mTextures.push_back(texture);
 
     mCurrentX = 0;
     mCurrentY = 0;
     mRowMaxWidth = 0;
+    OffsetX = 0;
+    OffsetY = 0;
   }
 
   nuiTexture *pCurrentTexture = mTextures[mCurrentTexture];
 
-  rGlyphLocation = GlyphLocation (OffsetX + 1, OffsetY + 1, bmp.Width, bmp.Height, mCurrentTexture);
+  rGlyphLocation = GlyphLocation (OffsetX + 2, OffsetY + 2, bmp.Width, bmp.Height, mCurrentTexture);
   mGlyphLocationLookupTable.insert(std::make_pair(Index, rGlyphLocation));
 
-  //printf("Glyph: %d %d (%d,%d) [%d * %d]\n", Index, (int)mGlyphLocationLookupTable.size(), OffsetX + 1, OffsetY + 1, bmp.Width, bmp.Height);
+  //NGL_DEBUG( NGL_LOG("font", NGL_LOG_INFO, "Glyph: %d %d (%d,%d) [%d * %d]\n", Index, (int)mGlyphLocationLookupTable.size(), OffsetX + 1, OffsetY + 1, bmp.Width, bmp.Height); )
 
   CopyBitmapToTexture(bmp, pCurrentTexture, OffsetX + 1, OffsetY + 1);
 
   mCurrentX = OffsetX;
-  mCurrentY = OffsetY + bmp.Height + 2;
+  mCurrentY = OffsetY + bmp.Height + 4;
 }
 
 void nuiFontBase::GetCacheGlyph(int Index, nuiFontBase::GlyphLocation &rGlyphLocation)
@@ -2001,8 +2009,9 @@ bool nuiFontBase::PrepareGlyph(float X, float Y, nuiTextGlyph& rGlyph)
   float hh = h * nuiGetInvScaleFactor();
   
   rGlyph.mDestRect.Set(X + x - 1, Y + y - 1, ww + 2, hh + 2);
-  rGlyph.mSourceRect.Set(GlyphLocation.mOffsetX - nuiGetScaleFactor(), GlyphLocation.mOffsetY - nuiGetScaleFactor(), w + 2 * nuiGetScaleFactor(), h + 2 * nuiGetScaleFactor());
-  
+  float f = nuiGetScaleFactor();
+  rGlyph.mSourceRect.Set(GlyphLocation.mOffsetX - f, GlyphLocation.mOffsetY - f, w + 2 * f, h + 2 * f);
+
   return true;
 }
 

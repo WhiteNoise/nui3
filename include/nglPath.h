@@ -190,7 +190,9 @@ public:
 	//@}
 	bool      ResolveLink(); ///< If this object is a link (Win32) or an alias (MacOS) it is transformed into the path it points too. Otherwise it isn't changed.
   bool      MakeRelativeTo(const nglPath& rOriginal); ///< Change this path so that it is relative to rOriginal. Return false if the operation fails.
-  
+  void SetBackupPermited(bool set);
+
+
   nglIStream* OpenRead() const;
   nglIOStream* OpenWrite(bool OverWrite = true) const;
   
@@ -298,7 +300,9 @@ public:
 	//@}
   
   nglString GetVolumeName() const;
-  nglString GetVolumeLessPath() const;  
+  nglString GetVolumeLessPath() const;
+
+  static nglPath EmptyPath;
 protected:
 	nglString   mPathName;
 

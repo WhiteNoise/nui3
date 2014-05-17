@@ -641,6 +641,8 @@ void nuiFontManager::GetSystemFolders(std::map<nglString, nglPath>& rFolders)
   {
     rFolders[_T("System0")] = _T("/c:/windows/fonts/");
   }
+#elif (defined _ANDROID_)
+  rFolders["System"] = "/system/fonts/";
 #elif (defined _LINUX_)
   int count = 0;
   Display* pDisplay = XOpenDisplay(NULL);
@@ -688,6 +690,8 @@ static nuiLabel* gpFontPathLabel = NULL;
 
 void nuiFontManager::ScanFolders(bool rescanAllFolders /* = false */)
 {
+  NGL_LOG("font", NGL_LOG_INFO, "Scan font folders (rescanAllFolders: %s)", YESNO(rescanAllFolders));
+
   nuiContextInfo ContextInfo(nuiContextInfo::StandardContext3D);
   nglWindowInfo Info;
   
@@ -752,7 +756,10 @@ void nuiFontManager::ScanFolders(bool rescanAllFolders /* = false */)
   
   nglOStream* pStream = mSavePath.OpenWrite();
   if (pStream)
+  {
     Save(*pStream);
+    mSavePath.SetBackupPermited(false);
+  }
   delete pStream;
 }
 
@@ -1057,6 +1064,7 @@ nuiFontManager nuiFontManager::gManager;
 
 nuiFontManager& nuiFontManager::GetManager(bool InitIfNeeded)
 {
+  NGL_LOG("font", NGL_LOG_INFO, "nuiFontManager::GetManager (init if needed = %s)", YESNO(InitIfNeeded));
   nuiFontBase::Init();
 
   const bool FORCE_FONT_ENUM = false;
@@ -1072,11 +1080,12 @@ nuiFontManager& nuiFontManager::GetManager(bool InitIfNeeded)
       fontdb += nglString(NUI_FONTDB_PATH);
       nglOFile db(fontdb, eOFileCreate);
       if (db.IsOpen())
+      {
         gManager.Save(db);
+        // Prevent file from being backed-up on iCloud...
+        fontdb.SetBackupPermited(false);
+      }
       
-      // Prevent file from being backed-up on iCloud...
-      uint8 attrValue = 1;
-      int result = setxattr(fontdb.GetPathName().GetStdString().c_str(), "com.apple.MobileBackup", &attrValue, sizeof (attrValue), 0, 0);
       //NGL_ASSERT(result == 0);
     }
 #endif
@@ -1113,6 +1122,7 @@ nuiFontManager& nuiFontManager::LoadManager(nglIStream& rStream, double lastscan
 
 
 #define NUI_FONTDB_MARKER "nuiFontDatabase5"
+
 
 bool nuiFontManager::Save(nglOStream& rStream)
 {
@@ -1214,7 +1224,7 @@ bool nuiFontManager::Load(nglIStream& rStream, double lastscantime)
       
       // register the font 
       mpFonts.push_back(pFontDesc);
-      
+      NGL_OUT("Font %s (%s) available\n", pFontDesc->GetName().GetChars(), pFontDesc->GetPath().GetChars());
       // remove it from the compiled list
       itf = fontFiles.find(pFontDesc->GetPath());
       if (itf != fontFiles.end())

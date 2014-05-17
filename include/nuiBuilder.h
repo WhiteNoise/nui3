@@ -12,6 +12,7 @@
 #include "nuiContainer.h"
 
 class nuiBuilder;
+class nuiEventActionHolder;
 
 typedef nuiWidgetPtr (*nuiCreateWidgetFn)();
 
@@ -71,7 +72,17 @@ public:
 
   nuiWidget* CreateWidget(const nglString& rClassName) const;
   nuiWidget* CreateWidget(const nglString& rClassName, const std::map<nglString, nglString>& rParamDictionary) const;
-  
+
+  static nuiWidget* Build(const nglString& rClassName)
+  {
+    return nuiBuilder::Get().CreateWidget(rClassName);
+  }
+
+  static nuiWidget* Build(const nglString& rClassName, const std::map<nglString, nglString>& rParamDictionary)
+  {
+    return nuiBuilder::Get().CreateWidget(rClassName, rParamDictionary);
+  }
+
   static nuiBuilder& Get()
   {
     return mBuilder;
@@ -122,19 +133,23 @@ public:
   
   void SetProperty(const nglString& rName, const nglString& rValue);
   void SetAttribute(const nglString& rName, const nglString& rValue, int32 index0 = -1, int32 index1 = -1);
-  
+  void SetActions(const std::vector<std::pair<nglString, nuiEventActionHolder*> >& rEventActions);
+
   const nglString& GetObjectClass() const;
   const nglString& GetObjectName() const;
   
   void SetDefaultDictionary(const std::map<nglString, nglString>& rParamDictionary);
   const std::map<nglString, nglString>& GetDefaultDictionary() const;
   std::map<nglString, nglString>& GetDefaultDictionary();
+  void SetObjectNameIsClass();
 protected:
   std::vector<nuiWidgetCreatorOperation> mOperations;
   nglString mClassName;
   nglString mObjectName;
+  bool mObjectNameIsClass = false;
   std::map<nglString, nglString> mDefaultDictionary;
   const nglString& LookUp(const std::map<nglString, nglString>& rParamDictionary, const nglString& rString) const;
+  std::vector<std::pair<nglString, nuiEventActionHolder*> > mEventActions;
 };
 
 

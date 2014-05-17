@@ -9,14 +9,17 @@
 
 nuiAudioDecoder::nuiAudioDecoder(nglIStream& rStream) :
   nuiSampleReader(rStream),
-  mpPrivate(NULL)
+  mpPrivate(NULL),
+  mCurrentPosition(0),
+  mForcedSampleRate(0)
 {
   CreateAudioDecoderPrivate();
 }
 
 nuiAudioDecoder::nuiAudioDecoder(const nuiAudioDecoder& rDecoder, nglIStream& rStream) :
-nuiSampleReader(rDecoder, rStream),
-mpPrivate(NULL)
+  nuiSampleReader(rDecoder, rStream),
+  mpPrivate(NULL),
+  mForcedSampleRate(0)
 {
   CreateAudioDecoderPrivate();
 }
@@ -35,19 +38,18 @@ nuiSampleReader* nuiAudioDecoder::Clone(nglIStream& rStream) const
 }
 
 
-void nuiAudioDecoder::SetPosition(int64 pos)
+void nuiAudioDecoder::SetForcedSampleRate(double forcedSR)
 {
-  if (!mInitialized)
-    return;
-  
-  if (mPosition == pos)
-    return;
- 
-  if (Seek(pos))
-  {
-    mPosition = pos;
-  }
+  mForcedSampleRate = forcedSR;
 }
 
+double nuiAudioDecoder::GetForcedSampleRate() const
+{
+  return mForcedSampleRate;
+}
 
+bool nuiAudioDecoder::IsSampleRateForced() const
+{
+  return mForcedSampleRate != 0;
+}
 

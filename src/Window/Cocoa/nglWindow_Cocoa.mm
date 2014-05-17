@@ -6,10 +6,13 @@
 #include <string.h>
 
 #include "nglWindow_Cocoa.h"
+#include "nglDragAndDrop_Cocoa.h"
 
-#include <Cocoa/Cocoa.h>
-#include <OpenGL/OpenGL.h>
-#include <AppKit/AppKit.h>
+#import <Cocoa/Cocoa.h>
+#import <OpenGL/OpenGL.h>
+#import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
+#import <CoreServices/CoreServices.h>
 
 #define NGL_WINDOW_FPS 60.0f
 
@@ -187,7 +190,8 @@ nglKeyCode CocoaToNGLKeyCode(unichar c, uint16 scanCode)
 -(void)windowWillClose:(NSNotification *)note
 {
   //[[NSApplication sharedApplication] terminate:self];
-  [super close];//mpNGLWindow->CallOnDestruction();
+  [super windowWillClose:note];
+  //mpNGLWindow->CallOnDestruction();
 }
 
 static float gScaleFactor = 0.0f;
@@ -199,7 +203,7 @@ float nuiGetScaleFactor()
   {
     gScaleFactor = [[NSScreen mainScreen] backingScaleFactor];
   }
-
+  //gScaleFactor = 1;
   return gScaleFactor;
 }
 
@@ -234,17 +238,24 @@ float nuiGetInvScaleFactor()
     NSOpenGLPFADepthSize, (NSOpenGLPixelFormatAttribute)16,
     NSOpenGLPFAAccelerated,
     NSOpenGLPFABackingStore,
+
+    NSOpenGLPFAMultisample,
+    NSOpenGLPFASampleBuffers, (NSOpenGLPixelFormatAttribute)1,
+    NSOpenGLPFASamples, (NSOpenGLPixelFormatAttribute)4,
     //NSOpenGLPFAWindow,
     (NSOpenGLPixelFormatAttribute)0
   };
   NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
   
   oglContext = [[NSOpenGLContext alloc] initWithFormat: format shareContext: contextToShare];
+  [format release];
   GLint v = 1;
   [oglContext setValues:&v forParameter:NSOpenGLCPSwapInterval];
   [oglContext setView:self];
   [oglContext makeCurrentContext];
-  
+
+  [self registerForDraggedTypes: [NSArray arrayWithObjects: @"public.file-url", NSFilenamesPboardType,(NSString*)kUTTypePlainText,(NSString*)kUTTypeUTF8PlainText, NSURLPboardType, NSFilesPromisePboardType, nil]];
+
   return self;
 }
 
@@ -272,7 +283,7 @@ float nuiGetInvScaleFactor()
 - (void)drawRect:(NSRect)frameRect
 {
   [oglContext update];
-  [[self window] doPaint];
+  [(nglNSWindow*)[self window] doPaint];
 }
 
 // this tells the window manager that nothing behind our view is visible
@@ -311,6 +322,38 @@ float nuiGetInvScaleFactor()
   [wnd getNGLWindow]->CallOnRescale([wnd backingScaleFactor]);
 }
 
+NSString *kPrivateDragUTI = @"com.libnui.privatepasteboardtype";
+
+
+// Drag and drop:
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+{
+  return [(nglNSWindow*)[self window] draggingEntered:sender];
+}
+
+- (NSDragOperation)draggingUpdated:(id < NSDraggingInfo >)sender
+{
+  return [(nglNSWindow*)[self window] draggingUpdated:sender];
+}
+
+
+- (void)draggingExited:(id <NSDraggingInfo>)sender
+{
+  return [(nglNSWindow*)[self window] draggingExited:sender];
+}
+
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
+{
+  return [(nglNSWindow*)[self window] prepareForDragOperation:sender];
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
+{
+  return [(nglNSWindow*)[self window] performDragOperation:sender];
+}
+
+
+
 
 @end
 
@@ -331,13 +374,16 @@ float nuiGetInvScaleFactor()
 - (id) initWithFrame: (NSRect) rect andNGLWindow: (nglWindow*) pNGLWindow andSharedContext:(NSOpenGLContext*)sharedContext
 {
   mModifiers = 0;
+  mpDropObject = NULL;
 
 	mInited = false;
 	mInvalidated = true;
-	
+
 	mInvalidationTimer = nil;
 	mDisplayLink = nil;
-	
+
+  mLastPaintTime = 0;
+
   BOOL deffering = NO;
   uint32 styleMask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
   NSBackingStoreType buffering = NSBackingStoreBuffered;
@@ -528,31 +574,36 @@ float nuiGetInvScaleFactor()
   NSPoint p = [self mouseLocationOutsideOfEventStream];
   info.X = p.x;
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
+  info.DeltaX = x;
+  info.DeltaY = -y;
 
-  if (x > 0)
+  if (!mpNGLWindow->CallOnMouseWheel(info))
   {
-    info.Buttons = nglMouseInfo::ButtonWheelLeft;
-    mpNGLWindow->CallOnMouseClick(info);
-    mpNGLWindow->CallOnMouseUnclick(info);
-  }
-  else if (x < 0)
-  {
-    info.Buttons = nglMouseInfo::ButtonWheelRight;
-    mpNGLWindow->CallOnMouseClick(info);
-    mpNGLWindow->CallOnMouseUnclick(info);
-  }
+    if (x > 0)
+    {
+      info.Buttons = nglMouseInfo::ButtonWheelLeft;
+      mpNGLWindow->CallOnMouseClick(info);
+      mpNGLWindow->CallOnMouseUnclick(info);
+    }
+    else if (x < 0)
+    {
+      info.Buttons = nglMouseInfo::ButtonWheelRight;
+      mpNGLWindow->CallOnMouseClick(info);
+      mpNGLWindow->CallOnMouseUnclick(info);
+    }
 
-  if (y > 0)
-  {
-    info.Buttons = nglMouseInfo::ButtonWheelUp;
-    mpNGLWindow->CallOnMouseClick(info);
-    mpNGLWindow->CallOnMouseUnclick(info);
-  }
-  else if (y < 0)
-  {
-    info.Buttons = nglMouseInfo::ButtonWheelDown;
-    mpNGLWindow->CallOnMouseClick(info);
-    mpNGLWindow->CallOnMouseUnclick(info);
+    if (y > 0)
+    {
+      info.Buttons = nglMouseInfo::ButtonWheelUp;
+      mpNGLWindow->CallOnMouseClick(info);
+      mpNGLWindow->CallOnMouseUnclick(info);
+    }
+    else if (y < 0)
+    {
+      info.Buttons = nglMouseInfo::ButtonWheelDown;
+      mpNGLWindow->CallOnMouseClick(info);
+      mpNGLWindow->CallOnMouseUnclick(info);
+    }
   }
   mpNGLWindow->CallOnMultiEventsFinished(info);
 }
@@ -712,8 +763,13 @@ float nuiGetInvScaleFactor()
 - (void)Paint
 {
   [self InitNGLWindow];
+  nglTime now;
+  double lap = now - mLastPaintTime;
+  if (mLastPaintTime == 0)
+    lap = 0;
+  mLastPaintTime = now;
+  mpTimer->OnTick(lap);
 
-  mpTimer->Tick();
   if (mInvalidated)
   {
     mInvalidated = false;
@@ -755,6 +811,193 @@ float nuiGetInvScaleFactor()
   //[[[self contentView] getContext] flushBuffer];
 }
 
+// Drag and drop:
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+{
+  NSLog(@"Dragging entered at %f,%f\n", [sender draggingLocation].x, [sender draggingLocation].y);
+  /*------------------------------------------------------
+   method called whenever a drag enters our drop zone
+   --------------------------------------------------------*/
+  customGLView* pView = [self contentView];
+
+  mpDropObject = new nglDragAndDrop(eDropEffectCopy, NULL, 0, 0);
+
+  /* When an image from one window is dragged over another, we want to resize the dragging item to
+   * preview the size of the image as it would appear if the user dropped it in. */
+  [sender enumerateDraggingItemsWithOptions:NSDraggingItemEnumerationConcurrent
+                                    forView:pView
+                                    classes:[NSArray arrayWithObject:[NSPasteboardItem class]]
+                              searchOptions:nil
+                                 usingBlock:^(NSDraggingItem *draggingItem, NSInteger idx, BOOL *stop)
+   {
+     NSArray* array = [[draggingItem item] types];
+     for (int i = 0; i < [array count]; i++)
+     {
+       NSString* str = (NSString*)[array objectAtIndex:i];
+       NSLog(@"  Dragging item %d - type %d %@\n", (int)idx, i, str);
+     }
+   }];
+
+  NSPasteboard* pboard = [sender draggingPasteboard];
+  NSArray* types = [pboard types];
+  if ( [types containsObject:NSFilenamesPboardType] )
+  {
+    nglDataFilesObject* pObj = new nglDataFilesObject("ngl/Files");
+    NSArray* filenames = [pboard propertyListForType:NSFilenamesPboardType];
+    for (int i = 0; i < [filenames count]; i++)
+    {
+      NSString* fname = [filenames objectAtIndex:i];
+      nglString str((CFStringRef)fname);
+      pObj->AddFile(str);
+      NSLog(@"File %d: %@\n", i, fname);
+    }
+
+    mpDropObject->AddType(pObj);
+  }
+  else if ( [types containsObject:NSURLPboardType] )
+  {
+    nglDataFilesObject* pObj = new nglDataFilesObject("ngl/Files");
+    NSArray* filenames = [pboard propertyListForType:NSURLPboardType];
+    for (int i = 0; i < [filenames count]; i++)
+    {
+      NSString* fname = [filenames objectAtIndex:i];
+      nglString str((CFStringRef)fname);
+      pObj->AddFile(str);
+      NSLog(@"URL %d: %@\n", i, fname);
+    }
+
+    mpDropObject->AddType(pObj);
+  }
+
+  if ( [types containsObject:(NSString*)kUTTypeUTF8PlainText] )
+  {
+    NSData* data = [pboard dataForType:(NSString*)kUTTypeUTF8PlainText];
+    NSString* string = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    nglDataTextObject* pObj = new nglDataTextObject("ngl/Text");
+    pObj->SetData(nglString((CFStringRef)string));
+    mpDropObject->AddType(pObj);
+    NSLog(@"UTF8 text String: %@\n", string);
+  }
+  else if ( [types containsObject:(NSString*)kUTTypePlainText] )
+  {
+    NSData* data = [pboard dataForType:(NSString*)kUTTypePlainText];
+    NSString* string = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    nglDataTextObject* pObj = new nglDataTextObject("ngl/Text");
+    pObj->SetData(nglString((CFStringRef)string));
+                  mpDropObject->AddType(pObj);
+    NSLog(@"Plain text String: %@\n", string);
+  }
+
+  if ( [types containsObject:(NSString*)kUTTypeText] )
+  {
+    NSData* data = [pboard dataForType:(NSString*)kUTTypeText];
+    NSString* string = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+    nglDataTextObject* pObj = new nglDataTextObject("ngl/Text");
+    pObj->SetData(nglString((CFStringRef)string));
+                  mpDropObject->AddType(pObj);
+    NSLog(@"Text String: %@\n", string);
+  }
+
+  if ( [types containsObject:NSFilesPromisePboardType] )
+  {
+    NSArray* filenames = [pboard propertyListForType:NSFilesPromisePboardType];
+    for (int i = 0; i < [filenames count]; i++)
+    {
+      NSString* fname = [filenames objectAtIndex:i];
+      NSLog(@"File %d: %@\n", i, fname);
+    }
+  }
+
+  mpNGLWindow->OnDragEnter();
+  nglDropEffect effect = mpNGLWindow->OnCanDrop(mpDropObject, [sender draggingLocation].x, [sender draggingLocation].y, [NSEvent pressedMouseButtons]);
+  switch (effect)
+  {
+    case eDropEffectNone:
+    default:
+      return NSDragOperationNone;
+
+    case eDropEffectCopy:
+      return NSDragOperationCopy;
+
+    case eDropEffectMove:
+      return NSDragOperationMove;
+
+    case eDropEffectLink:
+      return NSDragOperationLink;
+
+    case eDropEffectScroll:
+      return NSDragOperationGeneric;
+  }
+}
+
+- (NSDragOperation)draggingUpdated:(id < NSDraggingInfo >)sender
+{
+  //NSLog(@"Dragging updated at %f,%f\n", [sender draggingLocation].x, [sender draggingLocation].y);
+  nglDropEffect effect = mpNGLWindow->OnCanDrop(mpDropObject, [sender draggingLocation].x, [sender draggingLocation].y, [NSEvent pressedMouseButtons]);
+  switch (effect)
+  {
+    case eDropEffectNone:
+    default:
+      return NSDragOperationNone;
+
+    case eDropEffectCopy:
+      return NSDragOperationCopy;
+
+    case eDropEffectMove:
+      return NSDragOperationMove;
+
+    case eDropEffectLink:
+      return NSDragOperationLink;
+
+    case eDropEffectScroll:
+      return NSDragOperationGeneric;
+  }
+}
+
+
+- (void)draggingExited:(id <NSDraggingInfo>)sender
+{
+  /*------------------------------------------------------
+   method called whenever a drag exits our drop zone
+   --------------------------------------------------------*/
+  //remove highlight of the drop zone
+  NSLog(@"Dragging exited at %f,%f\n", [sender draggingLocation].x, [sender draggingLocation].y);
+  delete mpDropObject;
+  mpDropObject = NULL;
+  mpNGLWindow->OnDragLeave();
+}
+
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
+{
+  NSLog(@"Prepare for drag operation at %f,%f\n", [sender draggingLocation].x, [sender draggingLocation].y);
+  /*------------------------------------------------------
+   method to determine if we can accept the drop
+   --------------------------------------------------------*/
+  nglDropEffect effect = mpNGLWindow->OnCanDrop(mpDropObject, [sender draggingLocation].x, [sender draggingLocation].y, [NSEvent pressedMouseButtons]);
+  switch (effect)
+  {
+    case eDropEffectNone:
+    default:
+      return NO;
+
+    case eDropEffectCopy:
+    case eDropEffectMove:
+    case eDropEffectLink:
+    case eDropEffectScroll:
+      return YES;
+  }
+  return YES;
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
+{
+  //finished with the drag so remove any highlighting
+  mpNGLWindow->OnDropped(mpDropObject, [sender draggingLocation].x, [sender draggingLocation].y, [NSEvent pressedMouseButtons]);
+  delete mpDropObject;
+  mpDropObject = NULL;
+  return YES;
+}
+
 
 @end///< nglNSWindow
 
@@ -763,6 +1006,20 @@ float nuiGetInvScaleFactor()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////// NGL WINDOW:
 
+nglCocoaDragAndDrop::nglCocoaDragAndDrop(nglWindow* pWin)
+{
+  mpWin = pWin;
+}
+
+nglCocoaDragAndDrop::~nglCocoaDragAndDrop()
+{
+  mpWin = NULL;
+}
+
+bool nglCocoaDragAndDrop::Drag(nglDragAndDrop* pDragObject)
+{
+  return false;
+}
 
 
 /*
@@ -794,8 +1051,17 @@ nglWindow::nglWindow (const nglContextInfo& rContext, const nglWindowInfo& rInfo
   InternalInit (rContext, rInfo, pShared);
 }
 
+
+
 void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInfo& rInfo, const nglContext* pShared)
 {
+  //[self registerForDraggedTypes: [NSArray arrayWithObjects: @"public.file-url", NSFilenamesPboardType,(NSString*)kUTTypePlainText,(NSString*)kUTTypeUTF8PlainText, NSURLPboardType, NSFilesPromisePboardType, nil]];
+  App->GetDataTypesRegistry().RegisterDataType(_T("ngl/Text"), kUTTypeText, nglDataTextObject::Create);
+  App->GetDataTypesRegistry().RegisterDataType(_T("ngl/Text"), kUTTypePlainText, nglDataTextObject::Create);
+  App->GetDataTypesRegistry().RegisterDataType(_T("ngl/Text"), kUTTypeUTF8PlainText, nglDataTextObject::Create);
+  App->GetDataTypesRegistry().RegisterDataType(_T("ngl/Files"), "public.file-url", nglDataFilesObject::Create);
+  //App->GetDataTypesRegistry().RegisterDataType(_T("ngl/PromiseFiles"), kDragFlavorTypePromiseHFS, nglDataFilesObject::Create);
+
   mState = eHide;
   mAngle = 0;
 
@@ -880,7 +1146,7 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
 
 nglWindow::~nglWindow()
 {
-  [mpNSWindow Unregister];
+  [(id)mpNSWindow Unregister];
   Unregister();
 }
 
@@ -897,16 +1163,16 @@ void nglWindow::SetState (StateChange State)
 	switch (State)
 	{
 		case eHide:
-      [mpNSWindow hide:nil];
+      [(id)mpNSWindow hide:nil];
 			break;
 		case eShow:
-      [mpNSWindow makeKeyAndOrderFront:nil];
+      [(id)mpNSWindow makeKeyAndOrderFront:nil];
 			break;
 		case eMinimize:
-      [mpNSWindow makeKeyAndOrderFront:nil];
+      [(id)mpNSWindow makeKeyAndOrderFront:nil];
 			break;
 		case eMaximize:
-      [mpNSWindow makeKeyAndOrderFront:nil];
+      [(id)mpNSWindow makeKeyAndOrderFront:nil];
 			break;
 	};
 }
@@ -954,7 +1220,7 @@ bool nglWindow::SetPosition (int XPos, int YPos)
 
 nglString nglWindow::GetTitle() const
 {
-  NSString* pR = [mpNSWindow title];
+  NSString* pR = [(id)mpNSWindow title];
   nglString r((CFStringRef)pR);
   [pR release];
   return r;
@@ -962,7 +1228,7 @@ nglString nglWindow::GetTitle() const
 
 void nglWindow::SetTitle (const nglString& rTitle)
 {
-  [mpNSWindow setTitle: (NSString*)rTitle.ToCFString()];
+  [(id)mpNSWindow setTitle: (NSString*)rTitle.ToCFString()];
 }
 
 bool IsThisKeyDown(const short theKey)
@@ -1027,7 +1293,7 @@ void nglWindow::BeginSession()
 #endif
   //  MakeCurrent();
   NGL_ASSERT(mpNSWindow);
-  [mpNSWindow BeginSession];
+  [(id)mpNSWindow BeginSession];
 }
 
 void nglWindow::EndSession()
@@ -1039,14 +1305,14 @@ void nglWindow::EndSession()
 #endif
 	
   NGL_ASSERT(mpNSWindow);
-  [mpNSWindow EndSession];
+  [(id)mpNSWindow EndSession];
 #endif
 }
 
 bool nglWindow::MakeCurrent() const
 {
   NGL_ASSERT(mpNSWindow);
-  [mpNSWindow MakeCurrent];
+  [(id)mpNSWindow MakeCurrent];
 
   return true;
 }
@@ -1111,6 +1377,8 @@ bool nglWindow::SetCursor(nuiMouseCursor Cursor)
       [[NSCursor pointingHandCursor] set]; break;
     case eCursorResizeSE:
       [[NSCursor pointingHandCursor] set]; break;
+    default:
+      break;
   }
   return true;
 }
@@ -1196,5 +1464,10 @@ void nglWindow::OnDragStop(bool canceled)
 
 void nglWindow::OnDropped(nglDragAndDrop* pDragObject, int X,int Y, nglMouseInfo::Flags Button)
 {
+}
+
+int nglWindow::GetStatusBarSize() const
+{
+  return 0;
 }
 

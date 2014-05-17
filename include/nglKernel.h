@@ -22,6 +22,7 @@ class nglKernel;
 class nglPath;
 class nuiNotificationManager;
 class nuiNotificationObserver;
+class nglWindow;
 
 extern nglKernel* App;
 /*!<
@@ -103,10 +104,6 @@ void nglDumpStackTrace();
 #endif
 
 class nglDeviceInfo;
-
-#ifdef _ANDROID_
-struct android_app;
-#endif
 
 //! Kernel, application abstraction base class
 /*!
@@ -319,7 +316,7 @@ public:
   //@}
 
   bool IsActive() const; ///< Returns true is the application is in the active state (mainly for iOS multitasking).
-
+  nglThread::ID GetMainThreadID() const;
   void NonBlockingHeartBeat(); ///< Keep the application event loop alive without waiting for new events. (i.e. only process the events that are already in the queue).
 
   static void SetCrashReportEmail(const nglString& rEmail);
@@ -336,6 +333,9 @@ public:
 #if (defined _UNIX_) || (defined _MINUI3_) || (defined _COCOA_) || (defined _CARBON_)
   void             CatchSignal (int Signal, void (*pHandler)(int));
 #endif
+
+  void TimedPrint(const char* Format, ...) const;
+  void TimedPrintv(const char* Format, va_list Args) const;
 protected:
   // Life cycle
   nglKernel();
@@ -364,6 +364,7 @@ protected:
 
   bool mActive;
 
+  static nglTime mStartTime;
   // From nglError
   virtual const nglChar* OnError (uint& rError) const;
 
@@ -388,6 +389,7 @@ private:
   nglPath       mPath;
   nglString     mName;
   ArgList       mArgs;
+  nglThread::ID mMainThreadID;
 
 #ifndef _MINUI3_
   nglDataTypesRegistry mDataTypesRegistry;
@@ -442,7 +444,7 @@ private:
   friend class nglPluginKernel;
   friend class nglPlugin;
 
-#ifdef _UNIX_
+#if (defined _UNIX_) && (!defined _ANDROID_)
 public:
   virtual void  AddEvent (nglEvent* pEvent);
   virtual void  DelEvent (nglEvent* pEvent);
@@ -454,8 +456,8 @@ public:
    * as part of the core kernel API.
    */
   virtual void* GetDisplay();
-  virtual void  AddWindow (class nglWindow* pWin);
-  virtual void  DelWindow (class nglWindow* pWin);
+  virtual void  AddWindow (nglWindow* pWin);
+  virtual void  DelWindow (nglWindow* pWin);
 #endif
 
 protected:
@@ -527,15 +529,22 @@ protected:
 public:
 	void * GetNSApplication() { return mpNSApplication; }
 
-#endif//_UIKIT_
+#endif//_COCOA_
 
 #ifdef _ANDROID_
 public:
   android_app* GetAndroidApp();
+  void  AddWindow (nglWindow* pWin);
+  void  DelWindow (nglWindow* pWin);
+  virtual void  AddTimer (nglTimer* pTimer);
+  virtual void  DelTimer (nglTimer* pTimer);
+  void WaitForWindowInit();
+
 protected:
   bool SysInit(android_app* app);
-private:
   android_app* mpAndroidApp;
+  nglWindow* mpWindow; /// Only one window at a time is possible with the Android NDK
+  bool mWindowInited;
 #endif
 
 };

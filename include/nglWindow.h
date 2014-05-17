@@ -30,7 +30,7 @@ This class is not available if the _NOGFX_ symbol is defined.
 
 #include "nglDragAndDropObjects.h"
 
-typedef int32 nglTouchId;
+typedef int64 nglTouchId;
 
 class nuiMainMenu;
 
@@ -42,6 +42,9 @@ public:
   {
     X = 0;
     Y = 0;
+    DeltaX = 0;
+    DeltaY = 0;
+
     Buttons = 0;
     
     TouchId = 0;
@@ -54,6 +57,8 @@ public:
   {
     X = rInfo.X;
     Y = rInfo.Y;
+    DeltaX = rInfo.DeltaX;
+    DeltaY = rInfo.DeltaY;
     Buttons = rInfo.Buttons;
     
     TouchId = rInfo.TouchId;
@@ -83,8 +88,10 @@ public:
 
   int32   X;        ///< Horizontal coordinate
   int32   Y;        ///< Vertical coordinate
-  Flags Buttons;  ///< Buttons state
+  int32 DeltaX;     ///< Mouse Wheel displacement in X
+  int32 DeltaY;     ///< Mouse Wheel displacement in Y
 
+  Flags Buttons;  ///< Buttons state
   nglTouchId    TouchId; ///< used to retrieve which finger acting
   
   nglTime EventTime; ///< Timestamp of the mouse info object (= time of the event if the mouse info comes from an event).
@@ -357,6 +364,7 @@ window = new nglWindow (context, info, NULL);
   virtual void SetRotation(uint Angle); ///< Set the current (user area) rotation angle
   void EnableAutoRotation(bool set); ///< Change the rotation and size of the screen to follow the device's screen orientation (this is the default behaviour).
   bool GetAutoRotation() const; ///< Change the rotation and size of the screen to follow the device's screen orientation (this is the default behaviour).
+  int GetStatusBarSize() const;
   //@}
 
 
@@ -662,6 +670,19 @@ window = new nglWindow (context, info, NULL);
     \a ButtonDoubleClick and \a ButtonTripleClick bits might be set in \a aButton,
     together with the hit button flag.
   */
+
+  virtual bool OnMouseWheel (nglMouseInfo& rInfo);
+  /*!<
+   This method is called as soon as the mouse wheel is moved
+   \param rInfo mouse status. The DeltaX and DeltaY members contain the displacement of the wheel.
+   \return true is the mouse event was handled and false otherwise. If the key wasn't handled it is potentially sent back to the system or hosting application.
+
+   See GetMouse() for X and Y values exact interpretation.
+
+   \a ButtonDoubleClick and \a ButtonTripleClick bits might be set in \a aButton,
+   together with the hit button flag.
+   */
+
   virtual bool OnMouseUnclick (nglMouseInfo& rInfo);
   /*!<
     This method is called when a mouse button is released.
@@ -672,6 +693,17 @@ window = new nglWindow (context, info, NULL);
 
     \a ButtonDoubleClick and \a ButtonTripleClick bits cannot be set in \a Buttons.
   */
+  virtual bool OnMouseCanceled (nglMouseInfo& rInfo);
+  /*!<
+   This method is called when a mouse button is canceled (if the system preempts mouse input).
+   \param rInfo mouse status
+   \return true is the mouse event was handled and false otherwise. If the key wasn't handled it is potentially sent back to the system or hosting application.
+
+   See GetMouse() for X and Y values exact interpretation.
+
+   \a ButtonDoubleClick and \a ButtonTripleClick bits cannot be set in \a Buttons.
+   */
+
   virtual bool OnMouseMove (nglMouseInfo& rInfo);
     
     
@@ -783,8 +815,11 @@ public:
   bool CallOnKeyUp      (const nglKeyEvent& rEvent);
   bool CallOnMouseClick (nglMouseInfo& rInfo);
   bool CallOnMouseUnclick(nglMouseInfo& rInfo);
+  bool CallOnMouseWheel (nglMouseInfo& rInfo);
   bool CallOnMouseMove  (nglMouseInfo& rInfo);
-  bool CallOnMultiEventsFinished (nglMouseInfo& rInfo);
+bool CallOnMouseCanceled  (nglMouseInfo& rInfo);
+bool CallOnMultiEventsFinished (nglMouseInfo& rInfo);
+
   bool CallOnRotation(uint Angle);
   void CallOnRescale(float NewScale);
 
@@ -866,10 +901,8 @@ private:
   friend pascal OSStatus nglWindowEventHandler (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, void* userData);
   friend pascal OSStatus nglWindowKeyboardEventHandler (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, void* userData);
   friend class nglApplication;
-#endif //_CARBON_
 
-#ifdef _CARBON_
-class nglCarbonDragAndDrop* mpCarbonDragAndDrop;
+  class nglCarbonDragAndDrop* mpCarbonDragAndDrop;
 #endif //_CARBON_
 
 #ifdef _UIKIT_
@@ -950,6 +983,21 @@ protected:
   class nglPBuffer* mpPBuffer;
   bool mPBufferDisabled;
 #endif//_WIN32_
+
+#ifdef _ANDROID_
+  friend class nglKernel;
+  friend class nglApplication;
+  int32 mWidth, mHeight;
+  int32 mStatusBarSize;
+  bool InternalInit(const nglContextInfo& rContext, const nglWindowInfo& rInfo, const nglContext* pShared);
+  bool OnSysInit(struct android_app* app);
+  void OnTermDisplay();
+  float RemapCoords(struct android_app* app, int& x, int& y);
+  void OnHandleMouse(int device, int button, int state, int x, int y);
+  int32_t OnHandleInput(struct android_app* app, AInputEvent* event);
+  void OnUpdateConfig(struct android_app* app);
+  void OnContentRectChanged(ANativeActivity* activity, const ARect* rect);
+#endif
 
   GLuint mFBO_BackBuffer;
   GLuint mFBO_BackBufferTexture;

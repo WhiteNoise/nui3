@@ -856,6 +856,12 @@ public:
       nuiWidgetCreator* pCreator = ReadWidgetCreator();
       if (!pCreator)
         return false;
+      if (pCreator->GetObjectName().IsEmpty())
+      {
+        SetError("Expected new widget type definitions to have a name");
+        return false;
+      }
+      pCreator->SetObjectNameIsClass();
       nuiBuilder::Get().SetHandler(pCreator->GetObjectName(), pCreator);
       return true;
     }
@@ -1209,7 +1215,8 @@ public:
     nglString type;
     nglString name;
     std::map<nglString, nglString> dict;
-    
+    std::vector<std::pair<nglString, nuiEventActionHolder*> > eventactions;
+
     if (!SkipBlank())
     {
       SetError(_T("unexpected end of file"));
@@ -1426,22 +1433,97 @@ public:
           return NULL;
         }
         
-        if (Operator == _T(':')) // attribute assignment
+        if (Operator == ':') // attribute assignment
         {
           pCreator->SetAttribute(LValue, RValue, i0, i1);
         }
-        else if (Operator == _T('=')) // property assignment
+        else if (Operator == '=') // property assignment
         {
           pCreator->SetProperty(LValue, RValue);
+        }
+        else if (Operator == '{')
+        {
+          if (!GetChar()) // Eat the equal sign
+          {
+            SetError(_T("Missing event actions"));
+            return NULL;
+          }
+
+          if (!SkipBlank())
+          {
+            SetError(_T("unexpected end of file"));
+            delete pCreator;
+            return NULL;
+          }
+
+          nuiEventActionHolder* pActionHolder = new nuiEventActionHolder();
+          while (mChar != _T('}'))
+          {
+            if (!SkipBlank())
+            {
+              SetError(_T("unexpected end of file"));
+              delete pCreator;
+              return NULL;
+            }
+
+            nglString LValue;
+            nglString RValue;
+            nglChar Operator;
+            int32 i0;
+            int32 i1;
+            res = ReadAction(LValue, RValue, Operator, i0, i1);
+            if (!res)
+            {
+              SetError(_T("error while reading an assignment"));
+              delete pCreator;
+              return NULL;
+            }
+
+            if (Operator == ':' || Operator == '=') // attribute assignment
+            {
+              nuiCSSAction* pAction = new nuiCSSAction_SetAttribute(LValue, RValue, i0, i1);
+              pActionHolder->AddAction(pAction);
+            }
+            else
+            {
+              SetError(_T("recursive event action prohibited"));
+              delete pCreator;
+              return NULL;
+            }
+
+            if (!SkipBlank())
+            {
+              SetError(_T("unexpected end of file"));
+              delete pCreator;
+              return NULL;
+            }
+            
+          }
+
+          if (!GetChar()) // Eat }
+          {
+            SetError(_T("unexpected end of file"));
+            return NULL;
+          }
+
+          if (!SkipBlank())
+          {
+            SetError(_T("unexpected end of file"));
+            delete pCreator;
+            return NULL;
+          }
+          
+
+          eventactions.push_back(std::make_pair(LValue, pActionHolder));
         }
 
         if (!SkipBlank())
         {
           SetError(_T("unexpected end of file"));
           delete pCreator;
-          return NULL;        
+          return NULL;
         }
-        
+
       }
 
     }
@@ -1452,7 +1534,8 @@ public:
       delete pCreator;
       return NULL;
     }
-    
+
+    pCreator->SetActions(eventactions);
     return pCreator;
   }
   
@@ -1926,14 +2009,20 @@ public:
     }
     
     nglChar op = 0;
-    if (mChar == _T('='))
+    if (mChar == '=')
       op = mChar;
-    if (mChar == _T(':'))
+    if (mChar == ':')
       op = mChar;
-    
+    if (mChar == '{')
+    {
+      rLValue = symbol;
+      rOperator = mChar;
+      return true;
+    }
+
     if (!op)
     {
-      SetError(_T("Missing action operator ('=' or ':')"));
+      SetError(_T("Missing action operator ('=', ':') ok '{'"));
       return false;
     }
     
@@ -2010,6 +2099,46 @@ nuiCSSAction::~nuiCSSAction()
 }
 
 
+//class nuiCSSActionHolder
+
+nuiCSSActionHolder::nuiCSSActionHolder()
+{
+}
+
+nuiCSSActionHolder::~nuiCSSActionHolder()
+{
+  {
+    std::vector<nuiCSSAction*>::iterator it = mActions.begin();
+    std::vector<nuiCSSAction*>::iterator end = mActions.end();
+    while (it != end)
+    {
+      delete *it;
+      ++it;
+    }
+  }
+}
+
+void nuiCSSActionHolder::AddAction(nuiCSSAction* pAction)
+{
+  mActions.push_back(pAction);
+}
+
+void nuiCSSActionHolder::ApplyAction(nuiObject* pObject)
+{
+  if (pObject)
+  {
+    std::vector<nuiCSSAction*>::iterator it = mActions.begin();
+    std::vector<nuiCSSAction*>::iterator end = mActions.end();
+    while (it != end)
+    {
+      nuiCSSAction* pAction = *it;
+      pAction->ApplyAction(pObject);
+      ++it;
+    }
+  }
+}
+
+
 //class nuiCSSRule
 
 nuiCSSRule::nuiCSSRule()
@@ -2028,27 +2157,12 @@ nuiCSSRule::~nuiCSSRule()
       ++it;
     }
   }
-
-  {
-    std::vector<nuiCSSAction*>::iterator it = mActions.begin();
-    std::vector<nuiCSSAction*>::iterator end = mActions.end();
-    while (it != end)
-    {
-      delete *it;
-      ++it;
-    }
-  }
 }
 
 void nuiCSSRule::AddMatcher(nuiWidgetMatcher* pMatcher)
 {
   mMatchers.push_back(pMatcher);
   mMatchersTag |= pMatcher->GetTag();
-}
-
-void nuiCSSRule::AddAction(nuiCSSAction* pAction)
-{
-  mActions.push_back(pAction);
 }
 
 bool nuiCSSRule::Match(nuiWidget* pWidget, uint32 MatchersMask)
@@ -2074,14 +2188,7 @@ void nuiCSSRule::ApplyRule(nuiWidget* pWidget, uint32 MatchersTag)
     return;
   if (pWidget)
   {
-    std::vector<nuiCSSAction*>::iterator it = mActions.begin();
-    std::vector<nuiCSSAction*>::iterator end = mActions.end();
-    while (it != end)
-    {
-      nuiCSSAction* pAction = *it;
-      pAction->ApplyAction(pWidget);
-      ++it;
-    }
+    nuiCSSActionHolder::ApplyAction(pWidget);
   }
 }
 
@@ -2096,6 +2203,43 @@ void nuiCSSRule::ApplyAction(nuiObject* pObject)
   ApplyRule(pWidget, -1);
 }
 
+
+//class nuiEventActionHolder : public nuiCSSActionHolder
+nuiEventActionHolder::nuiEventActionHolder()
+: mEventSink(this)
+{
+}
+
+nuiEventActionHolder::~nuiEventActionHolder()
+{
+}
+
+bool nuiEventActionHolder::Connect(nuiEventSource* pEventSource, nuiObject* pTargetObject)
+{
+  NGL_ASSERT(pEventSource != nullptr);
+  NGL_ASSERT(pTargetObject != nullptr);
+  mBindings[pTargetObject].push_back(pEventSource);
+  mEventSink.Connect(*pEventSource, &nuiEventActionHolder::OnEventFired, pTargetObject);
+  return true;
+}
+
+void nuiEventActionHolder::Disconnect(nuiObject* pTargetObject)
+{
+  NGL_ASSERT(pTargetObject != nullptr);
+  auto it = mBindings.find(pTargetObject);
+  if (it == mBindings.end())
+    return;
+  for (auto source : it->second)
+    mEventSink.DisconnectSource(*source);
+  mBindings.erase(it);
+}
+
+void nuiEventActionHolder::OnEventFired(const nuiEvent& rEvent)
+{
+  nuiObject* pTargetObject = (nuiObject*)rEvent.mpUser;
+  NGL_ASSERT(pTargetObject != nullptr);
+  ApplyAction(pTargetObject);
+}
 
 
 // class nuiCSS

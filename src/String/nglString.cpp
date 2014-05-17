@@ -1550,43 +1550,43 @@ inline static nglChar Hex2Dec(nglUChar c)
 
 void nglString::DecodeUrl()
 {
-    // Note from RFC1630: "Sequences which start with a percent
-    // sign but are not followed by two hexadecimal characters
-    // (0-9, A-F) are reserved for future extension"
-    
-    const nglChar* pSrc = GetChars();
-    const int32 SRC_LEN = GetLength();
-    const nglChar* const SRC_END = pSrc + SRC_LEN;
-    // last decodable '%'
-    const nglChar * const SRC_LAST_DEC = SRC_END - 2;
-    
-    const nglChar* pStart = new nglChar[SRC_LEN + 1];
-    nglChar* pEnd = const_cast<nglChar*>(pStart);
-    
-    while (pSrc < SRC_LAST_DEC)
+  // Note from RFC1630: "Sequences which start with a percent
+  // sign but are not followed by two hexadecimal characters
+  // (0-9, A-F) are reserved for future extension"
+
+  const nglChar* pSrc = GetChars();
+  const int32 SRC_LEN = GetLength();
+  const nglChar* const SRC_END = pSrc + SRC_LEN;
+  // last decodable '%'
+  const nglChar * const SRC_LAST_DEC = SRC_END - 2;
+
+  const nglChar* pStart = new nglChar[SRC_LEN + 1];
+  nglChar* pEnd = const_cast<nglChar*>(pStart);
+
+  while (pSrc < SRC_LAST_DEC)
+  {
+    if (*pSrc == '%')
     {
-        if (*pSrc == '%')
-        {
-            char dec1, dec2;
-            if (-1 != (dec1 = Hex2Dec(*(pSrc + 1)))
-                && -1 != (dec2 = Hex2Dec(*(pSrc + 2))))
-            {
-                *pEnd++ = (dec1 << 4) + dec2;
-                pSrc += 3;
-                continue;
-            }
-        }
-        
-        *pEnd++ = *pSrc++;
+      char dec1, dec2;
+      if (-1 != (int)(dec1 = Hex2Dec(*(pSrc + 1)))
+          && -1 != (int)(dec2 = Hex2Dec(*(pSrc + 2))))
+      {
+        *pEnd++ = (dec1 << 4) + dec2;
+        pSrc += 3;
+        continue;
+      }
     }
-    
-    // the last 2- chars
-    while (pSrc < SRC_END)
-        *pEnd++ = *pSrc++;
-    
-    *pEnd = 0;
-    Copy(pStart);
-    delete [] pStart;
+
+    *pEnd++ = *pSrc++;
+  }
+
+  // the last 2- chars
+  while (pSrc < SRC_END)
+    *pEnd++ = *pSrc++;
+
+  *pEnd = 0;
+  Copy(pStart);
+  delete [] pStart;
 }
 
 
@@ -1689,7 +1689,7 @@ nglString& nglString::Format(const nglChar* pFormat, ...)
     return *this;
 }
 
-#define FORMAT_BUFSIZE (128)
+#define FORMAT_BUFSIZE (8192)
 
 nglString& nglString::Formatv(const nglChar* pFormat, va_list args)
 {

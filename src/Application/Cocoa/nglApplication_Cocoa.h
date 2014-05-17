@@ -19,6 +19,8 @@
 @interface nglNSApplicationDelegate : NSObject<NSApplicationDelegate>
 {
 }
+/*
+	Mine..  NSNotification is better?
 
 - (void) applicationDidFinishLaunching:       (NSNotification *) aNotification;
 - (void) applicationDidBecomeActive:          (NSNotification *) aNotification;
@@ -26,6 +28,15 @@
 //- (void) applicationDidReceiveMemoryWarning:  (NSApplication*) pUIApp;
 //- (void) applicationSignificantTimeChange:    (NSApplication*) pUIApp;
 - (void) applicationWillTerminate:            (NSNotification *) aNotification;
+*/
+
+- (void) applicationDidFinishLaunching:       (NSApplication*) pUIApp;
+- (BOOL) application:(NSApplication *)pNSApplication didFinishLaunchingWithOptions:(NSDictionary *)launchOptions;
+- (void) applicationDidBecomeActive:          (NSApplication*) pUIApp;
+- (void) applicationDidEnterBackground:         (NSApplication*) pUIApp;
+- (void) applicationDidReceiveMemoryWarning:  (NSApplication*) pUIApp;
+- (void) applicationSignificantTimeChange:    (NSApplication*) pUIApp;
+- (void) applicationWillTerminate:            (NSApplication*) pUIApp;
 
 @end//nglNSApplicationDelegate
 

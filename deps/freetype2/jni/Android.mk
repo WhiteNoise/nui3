@@ -5,11 +5,11 @@ LOCAL_PATH := $(call my-dir)/..
 
 include $(CLEAR_VARS)
 
-MY_INCLUDE_FILES := $(LOCAL_PATH)/../freetype-overlay/include $(LOCAL_PATH)/include
+MY_INCLUDE_FILES := 	$(LOCAL_PATH)/../freetype-overlay/include 	\
+			$(LOCAL_PATH)/include
 LOCAL_MODULE := freetype
 LOCAL_C_INCLUDES := $(MY_INCLUDE_FILES)
-LOCAL_LDLIBS := -lz
-LOCAL_CFLAGS := -DFT2_BUILD_LIBRARY
+LOCAL_CFLAGS := -DFT2_BUILD_LIBRARY -DFT_CONFIG_OPTION_SYSTEM_ZLIB
 LOCAL_ARM_MODE := arm
 
 LOCAL_SRC_FILES := \
@@ -55,6 +55,8 @@ src/lzw/ftlzw.c \
 src/bdf/bdf.c
 
 LOCAL_EXPORT_C_INCLUDES := $(MY_INCLUDE_FILES)
+
+LOCAL_STATIC_LIBRARIES += zlib
 
 include $(BUILD_STATIC_LIBRARY)
 

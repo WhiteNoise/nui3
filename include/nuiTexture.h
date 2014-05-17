@@ -128,11 +128,12 @@ protected:
   void Init();
   void InitAttributes();
 
+  void DetachSurface();
+
   nglImage* mpImage;
   bool mOwnImage;
 
   nuiSurface* mpSurface;
-  void ResizeSurface(int32 w, int32 h);
 
   nuiSize mRealWidth;
   nuiSize mRealHeight;

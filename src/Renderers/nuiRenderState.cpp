@@ -21,7 +21,8 @@ nuiRenderState::nuiRenderState()
   mClearDepth = 1.0f;
 
   mLineCap = nuiLineCapBut;
-  mLineJoin = nuiLineJoinBevel;
+  mLineJoin = nuiLineJoinMiter;
+  mMitterLimit = 0.5;
 
   mBlendFunc = nuiBlendTransp;
 
@@ -56,6 +57,34 @@ nuiRenderState& nuiRenderState::operator =(const nuiRenderState& rState)
 
 void nuiRenderState::Copy(const nuiRenderState& rState)
 {
+  for (int i = 0; i < NUI_MAX_TEXTURE_UNITS; i++)
+  {
+    nuiTexture* pTexture1 = rState.mpTexture[i];
+    nuiTexture* pTexture2 = mpTexture[i];
+    if (pTexture1)
+      pTexture1->Acquire();
+    if (pTexture2)
+      pTexture2->Release();
+  }
+
+  if (rState.mpShader)
+    rState.mpShader->Acquire();
+  if (mpShader)
+    mpShader->Release();
+
+  if (rState.mpShaderState)
+    rState.mpShaderState->Acquire();
+  if (mpShaderState)
+    mpShaderState->Release();
+
+  if (rState.mpFont)
+    rState.mpFont->Acquire();
+  if (mpFont)
+    mpFont->Release();
+
+  memcpy(&mpShader, &rState.mpShader, offsetof(nuiRenderState, mMitterLimit) - offsetof(nuiRenderState, mpShader) + sizeof(mMitterLimit) );
+  
+#if 0
   mBlending       = rState.mBlending;
   mTexturing      = rState.mTexturing;
   mColorBuffer    = rState.mColorBuffer;
@@ -71,6 +100,7 @@ void nuiRenderState::Copy(const nuiRenderState& rState)
   mFillColor      = rState.mFillColor;
   mLineCap        = rState.mLineCap;
   mLineJoin       = rState.mLineJoin;
+  mMitterLimit    = rState.mMitterLimit;
   mCulling        = rState.mCulling;
   mCullingMode    = rState.mCullingMode;
   mClearDepth     = rState.mClearDepth;
@@ -105,6 +135,7 @@ void nuiRenderState::Copy(const nuiRenderState& rState)
     mpFont->Acquire();
   if (pOldFont)
     pOldFont->Release();
+#endif
 
 }
 
@@ -144,6 +175,7 @@ bool nuiRenderState::operator==(const nuiRenderState& rState) const
     (mFillColor      == rState.mFillColor)        &&
     (mLineCap        == rState.mLineCap)          &&
     (mLineJoin       == rState.mLineJoin)         &&
+    (mMitterLimit    == rState.mMitterLimit)      &&
     (mpShader        == rState.mpShader)          &&
     (mpShaderState   == rState.mpShaderState)     &&
     (mCulling        == rState.mCulling)          &&

@@ -80,6 +80,16 @@ nuiSlider::~nuiSlider()
 
 #define SHADESIZE 4 
 
+void nuiSlider::DrawBackground(nuiDrawContext* pContext)
+{
+  GetTheme()->DrawSliderBackground(pContext,this);
+}
+
+void nuiSlider::DrawForeground(nuiDrawContext* pContext)
+{
+  GetTheme()->DrawSliderForeground(pContext,this);
+}
+
 bool nuiSlider::Draw(nuiDrawContext* pContext)
 {
   //pContext->PushState();
@@ -90,7 +100,7 @@ bool nuiSlider::Draw(nuiDrawContext* pContext)
   if (mDrawBackground)
   {
     if (!mpBackground)
-      pTheme->DrawSliderBackground(pContext,this);
+      DrawBackground(pContext);
     else
       DrawChild(pContext, mpBackground);
   }
@@ -205,7 +215,6 @@ bool nuiSlider::MouseClicked  (nuiSize X, nuiSize Y, nglMouseInfo::Flags Button)
     mClicked = true;
     mThumbClicked = true;
     mInteractiveValueChanged = true;
-    Grab();
     Invalidate();
     mClickValue = mRange.GetValue();
     
@@ -254,7 +263,6 @@ bool nuiSlider::MouseUnclicked  (nuiSize X, nuiSize Y, nglMouseInfo::Flags Butto
     mClicked = false;
     
     mThumbClicked = false;
-    Ungrab();
     
     Invalidate();
     return true;
@@ -334,6 +342,40 @@ nuiOrientation nuiSlider::GetOrientation()
   return mOrientation;
 }
 
+bool nuiSlider::AddChild(nuiWidgetPtr pChild)
+{
+  if (pChild->GetObjectName().Compare("Handle", false) == 0)
+  {
+    if (mpHandle)
+      mpHandle->Trash();
+    mpHandle = pChild;
+  }
+  else if (pChild->GetObjectName().Compare("Background", false) == 0)
+  {
+    if (mpBackground)
+      mpBackground->Trash();
+    mpHandle = pChild;
+  }
+
+
+  return nuiSimpleContainer::AddChild(pChild);
+}
+
+bool nuiSlider::DelChild(nuiWidgetPtr pChild)
+{
+  if (pChild == mpHandle)
+  {
+    mpHandle = nullptr;
+  }
+  else if (pChild == mpBackground)
+  {
+    mpHandle = nullptr;
+  }
+
+  return nuiSimpleContainer::DelChild(pChild);
+}
+
+
 bool nuiSlider::SetHandle(nuiWidget* pWidget)
 {
   if (mpHandle)
@@ -361,7 +403,7 @@ bool nuiSlider::SetBackground(nuiWidget* pWidget)
   return true;
 }
 
-void nuiSlider::DrawBackground(bool DrawBackground)
+void nuiSlider::SetDrawBackground(bool DrawBackground)
 {
   mDrawBackground = DrawBackground;
 }

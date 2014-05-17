@@ -298,11 +298,11 @@ bool nuiTexture::CreateAtlasFromPath(const nglPath& rPath, int32 MaxTextureSize,
     offset = 1;
 
   //App->GetLog().SetLevel(_T("StopWatch"), 100);
-  nuiStopWatch watch(_T("Create atlas"));
+  //nuiStopWatch watch(_T("Create atlas"));
   std::vector<AtlasElem> images;
   
   GetAllImages(images, rPath, MaxTextureSize, ForceAtlasSize, AutoTrim);
-  watch.AddIntermediate(_T("Got all images"));
+  //watch.AddIntermediate(_T("Got all images"));
   
   TEXTURE_PACKER::TexturePacker* packer = TEXTURE_PACKER::createTexturePacker();
   packer->setTextureCount(images.size() + offset);
@@ -318,7 +318,7 @@ bool nuiTexture::CreateAtlasFromPath(const nglPath& rPath, int32 MaxTextureSize,
   
   int32 width = 0, height = 0;
   int unused_area = packer->packTextures(width, height, true, true);
-  watch.AddIntermediate(_T("Packed textures"));
+  //watch.AddIntermediate(_T("Packed textures"));
 
   // Create image buffer:
   nglImageInfo info(width, height, 32);
@@ -350,7 +350,7 @@ bool nuiTexture::CreateAtlasFromPath(const nglPath& rPath, int32 MaxTextureSize,
 
   TEXTURE_PACKER::releaseTexturePacker(packer);
 
-  watch.AddIntermediate(_T("Done"));
+  //watch.AddIntermediate(_T("Done"));
   return true;
 }
 
@@ -748,7 +748,7 @@ void nuiTexture::Init()
   mRealWidthPOT = mRealWidth;
   mRealHeightPOT = mRealHeight;
 
-  //NGL_OUT(_T("nuiTexture::Init() (0x%x - [%f %f] source='%s') COUNT: %d\n"), this, mRealWidth, mRealHeight, GetProperty(_T("Source")).GetChars(), mpTextures.size());
+  NGL_DEBUG(NGL_LOG("nuiTexture", NGL_LOG_INFO, "nuiTexture::Init() (0x%x - [%f %f] source='%s') COUNT: %d\n", this, mRealWidth, mRealHeight, GetProperty(_T("Source")).GetChars(), mpTextures.size());)
 
   if (mRealWidth > 0 && mRealHeight > 0)
   // Find the nearest bounding power of two size:
@@ -807,8 +807,7 @@ bool nuiTexture::IsValid() const
 
 nuiTexture::~nuiTexture()
 {
-//  NGL_OUT(_T("nuiTexture::~nuiTexture(0x%x - [%f %f] source='%s')\n"), this, mRealWidth, mRealHeight, GetProperty(_T("Source")).GetChars());
-
+  nuiPainter::BroadcastDestroyTexture(this);
   if (mOwnImage)
     delete mpImage;
 
@@ -816,12 +815,14 @@ nuiTexture::~nuiTexture()
   {
     //mpSurface->Release();
   }
-  mpTextures.erase(GetProperty(_T("Source")));
+  mpTextures.erase(GetProperty("Source"));
   
   if (mpProxyTexture)
     mpProxyTexture->Release();
   
   TexturesChanged();
+
+  NGL_DEBUG(NGL_LOG("nuiTexture", NGL_LOG_INFO, "nuiTexture::~nuiTexture(0x%x - [%f %f] source='%s') COUNT : %d\n", this, mRealWidth, mRealHeight, GetProperty(_T("Source")).GetChars(), mpTextures.size());)
 }
 
 void nuiTexture::ForceReload(bool Rebind)
@@ -1244,46 +1245,10 @@ const nuiRect& nuiTexture::GetProxyRect() const
   return mProxyRect;
 }
 
-void nuiTexture::ResizeSurface(int32 w, int32 h)
+void nuiTexture::DetachSurface()
 {
-  mRealWidth = (nuiSize)mpSurface->GetWidth();
-  mRealHeight = (nuiSize)mpSurface->GetHeight();
-
-  mScale = nuiGetScaleFactor();
-  mRealWidth *= mScale;
-  mRealHeight *= mScale;
-
-  mRealWidthPOT = mRealWidth;
-  mRealHeightPOT = mRealHeight;
-
-  //NGL_OUT(_T("nuiTexture::Init() (0x%x - [%f %f] source='%s') COUNT: %d\n"), this, mRealWidth, mRealHeight, GetProperty(_T("Source")).GetChars(), mpTextures.size());
-
-  if (mRealWidth > 0 && mRealHeight > 0)
-    // Find the nearest bounding power of two size:
-  {
-    uint i;
-    nuiSize val = 1;
-    for (i=0; i<32; i++)
-    {
-      if (mRealWidthPOT <= val)
-      {
-        mRealWidthPOT = val;
-        break;
-      }
-      val*=2;
-    }
-
-    val = 1;
-    for (i=0; i<32; i++)
-    {
-      if (mRealHeightPOT <= val)
-      {
-        mRealHeightPOT = val;
-        break;
-      }
-      val*=2;
-    }
-  }
+  NGL_ASSERT(mpSurface != nullptr);
+  mpSurface = nullptr;
 }
 
 

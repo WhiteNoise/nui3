@@ -233,7 +233,18 @@ bool nglWindow::OnMouseClick (nglMouseInfo& rInfo)
 	return false;
 }
 
+bool nglWindow::OnMouseWheel (nglMouseInfo& rInfo)
+{
+	return false;
+}
+
+
 bool nglWindow::OnMouseUnclick (nglMouseInfo& rInfo)
+{
+	return false;
+}
+
+bool nglWindow::OnMouseCanceled (nglMouseInfo& rInfo)
 {
 	return false;
 }
@@ -336,7 +347,7 @@ void nglWindow::CallOnState (StateInfo State)
 
 void nglWindow::CallOnResize (uint Width, uint Height)
 {
-  NGL_DEBUG( NGL_LOG(_T("window"), NGL_LOG_DEBUG, _T("Resize: %dx%d"), Width, Height); )
+  NGL_LOG(_T("window"), NGL_LOG_DEBUG, _T("Resize: %dx%d"), Width, Height);
   mpPainter->SetSize(Width, Height);
   OnResize (Width, Height);
 #ifdef _COCOA_
@@ -382,6 +393,14 @@ void nglWindow::CallOnTextInputCancelled ()
   OnTextInputCancelled();
 }
 
+bool nglWindow::CallOnMouseWheel(nglMouseInfo& rInfo)
+{
+  //nuiStopWatch watch(_T("nglWindow::CallOnMouseWheel"));
+  NGL_DEBUG( NGL_LOG(_T("window"), NGL_LOG_DEBUG, _T("Wheel: %d,%d (%d,%d) button=%x"), rInfo.X, rInfo.Y, rInfo.DeltaX, rInfo.DeltaY, rInfo.Buttons); )
+  return OnMouseWheel (rInfo);
+}
+
+
 bool nglWindow::CallOnMouseClick (nglMouseInfo& rInfo)
 {
   //nuiStopWatch watch(_T("nglWindow::CallOnMouseClick"));
@@ -394,6 +413,13 @@ bool nglWindow::CallOnMouseUnclick (nglMouseInfo& rInfo)
   //nuiStopWatch watch(_T("nglWindow::CallOnMouseUnclick"));
   NGL_DEBUG( NGL_LOG(_T("window"), NGL_LOG_DEBUG, _T("Unclic: %d,%d  button=%x"), rInfo.X, rInfo.Y, rInfo.Buttons); )
   return OnMouseUnclick (rInfo);
+}
+
+bool nglWindow::CallOnMouseCanceled (nglMouseInfo& rInfo)
+{
+  //nuiStopWatch watch(_T("nglWindow::CallOnMouseCanceled"));
+  NGL_DEBUG( NGL_LOG(_T("window"), NGL_LOG_DEBUG, _T("Canceled: %d,%d  button=%x"), rInfo.X, rInfo.Y, rInfo.Buttons); )
+  return OnMouseCanceled (rInfo);
 }
 
 bool nglWindow::CallOnMouseMove (nglMouseInfo& rInfo)

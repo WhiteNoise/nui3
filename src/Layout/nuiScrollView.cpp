@@ -8,10 +8,14 @@
 #include "nui.h"
 
 #define SCROLL_SIZE 12.0f
-#define NUI_SMOOTH_SCROLL_RATIO (0.2f/1.f)
+#define NUI_SMOOTH_SCROLL_RATIO (0.2f/2.f)
 #define HIDE_SCROLLBARS_DELAY 0.6
-#define INERTIA_SPEED 1200
+//#define INERTIA_SPEED 2400
+#define INERTIA_SPEED 4800
+#define INERTIA_BRAKES 0.9
 #define EXTRA_OUT_SIZE_RATIO 0.5
+
+#define _DEBUG_LAYOUT 1
 
 
 nuiScrollView::nuiScrollView(bool Horizontal, bool Vertical)
@@ -47,7 +51,7 @@ void nuiScrollView::InitAttributes()
   AddAttribute(new nuiAttribute<float>(_T("VPos"), nuiUnitPixels, nuiMakeDelegate(this, &nuiScrollView::GetYPos), nuiMakeDelegate(this, &nuiScrollView::SetYPos)));  
 
   AddAttribute(new nuiAttribute<float>(_T("HOffset"), nuiUnitPixels, nuiMakeDelegate(this, &nuiScrollView::GetXOffset), nuiMakeDelegate(this, &nuiScrollView::SetXOffset)));
-  AddAttribute(new nuiAttribute<float>(_T("VOffset"), nuiUnitPixels, nuiMakeDelegate(this, &nuiScrollView::GetYOffset), nuiMakeDelegate(this, &nuiScrollView::SetYOffset)));  
+  AddAttribute(new nuiAttribute<float>(_T("VOffset"), nuiUnitPixels, nuiMakeDelegate(this, &nuiScrollView::GetYOffset), nuiMakeDelegate(this, &nuiScrollView::SetYOffset)));
 }
 
 void nuiScrollView::Init(nuiScrollBar* pHorizontalScrollBar, nuiScrollBar* pVerticalScrollBar, bool Horizontal, bool Vertical)
@@ -159,7 +163,7 @@ void nuiScrollView::Init(nuiScrollBar* pHorizontalScrollBar, nuiScrollBar* pVert
 
 bool nuiScrollView::GetEnableHorizontalScroll() const
 {
-  return (mpHorizontal || !mForceNoHorizontal);
+  return (mpHorizontal && !mForceNoHorizontal);
 }
 
 void nuiScrollView::SetEnableHorizontalScroll(bool set)
@@ -171,7 +175,7 @@ void nuiScrollView::SetEnableHorizontalScroll(bool set)
 
 bool nuiScrollView::GetEnableVerticalScroll() const
 {
-  return (mpVertical || !mForceNoVertical);
+  return (mpVertical && !mForceNoVertical);
 }
 
 void nuiScrollView::SetEnableVerticalScroll(bool set)
@@ -193,6 +197,16 @@ nuiScrollView::~nuiScrollView()
   {
 //    mSVSink.Disconnect(mpVertical->GetRange().ValueChanged);
   }
+
+  delete mpShowAnimH;
+  delete mpShowAnimV;
+  delete mpHideAnimH;
+  delete mpHideAnimV;
+  mpShowAnimH = NULL;
+  mpShowAnimV = NULL;
+  mpHideAnimH = NULL;
+  mpHideAnimV = NULL;
+
 }
 
 
@@ -208,7 +222,13 @@ nuiRect nuiScrollView::CalcIdealSize()
     if (pItem != mpHorizontal && pItem != mpVertical)
     {
       pItem->SetLayoutConstraint(mConstraint);
-      rect.Union(rect, pItem->GetIdealRect()); 
+      rect.Union(rect, pItem->GetIdealRect());
+#ifdef _DEBUG_LAYOUT
+      if (GetDebug())
+      {
+        NGL_OUT(_T("\tnuiScrollView::CalcIdealSize: [%s %s] size %s\n"), pItem->GetObjectClass().GetChars(), pItem->GetObjectName().GetChars(), mIdealRect.GetValue().GetChars());
+      }
+#endif
     }
     else if (pItem)
     {
@@ -626,7 +646,6 @@ void nuiScrollView::OnHotRectChanged(const nuiEvent& rEvent)
 {
   if (mHorizontalHotRectActive || mVerticalHotRectActive)
   {
-    UpdateLayout();
     nuiWidgetPtr pChild = (nuiWidgetPtr)rEvent.mpUser;
 
     if (!pChild)
@@ -637,12 +656,20 @@ void nuiScrollView::OnHotRectChanged(const nuiEvent& rEvent)
 
     if (!mForceNoVertical && mVerticalHotRectActive)
     {
-      mpVertical->GetRange().MakeInRangeVisual(rect.Top(), rect.GetHeight());
+      bool moved = mpVertical->GetRange().MakeInRangeVisual(rect.Top(), rect.GetHeight());
+      if (moved)
+      {
+//        printf("moved vertical\n");
+      }
     }
 
     if (!mForceNoHorizontal && mHorizontalHotRectActive)
     {
-      mpHorizontal->GetRange().MakeInRangeVisual(rect.Left(), rect.GetWidth());
+      bool moved = mpHorizontal->GetRange().MakeInRangeVisual(rect.Left(), rect.GetWidth());
+      if (moved)
+      {
+//        printf("moved horizontal\n");
+      }
     }
   }
 }
@@ -656,6 +683,27 @@ void nuiScrollView::SetFillChildren(bool Set) ///< If filling is enabled the scr
 bool nuiScrollView::GetFillChildren()
 {
   return mFillChildren;
+}
+
+bool nuiScrollView::MouseWheelMoved(const nglMouseInfo& rInfo)
+{
+  if (mpHorizontal && !mForceNoHorizontal)
+  {
+    mpHorizontal->GetRange().SetValue(mpHorizontal->GetRange().GetValue() + rInfo.DeltaX * 5);
+  }
+
+  if (mpVertical && !mForceNoVertical)
+  {
+    mpVertical->GetRange().SetValue(mpVertical->GetRange().GetValue() + rInfo.DeltaY * 5);
+  }
+
+  if (mHideScrollBars)
+  {
+    ShowScrollBars(true);
+  }
+
+
+  return true;
 }
 
 bool nuiScrollView::MouseClicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags Button)
@@ -741,8 +789,10 @@ bool nuiScrollView::MouseClicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags Butto
   }
   else if (Button & nglMouseInfo::ButtonLeft && mDragEnabled)
   {
-    Grab();
     mLeftClick = true;
+    mTimerOn = false;
+    mSpeedX = 0;
+    mSpeedY = 0;
     mClickX = X;
     mClickY = Y;
     mLastX = X;
@@ -776,8 +826,6 @@ bool nuiScrollView::MouseUnclicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags But
   Dragged(X, Y);
   mLeftClick = false;
 
-  Ungrab();
-  
   nglTime now;
   double elapsed = now.GetValue() - mLastTime.GetValue();
   if (elapsed > 0.05)
@@ -785,7 +833,12 @@ bool nuiScrollView::MouseUnclicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags But
     mSpeedX = 0;
     mSpeedY = 0;
   }
-  
+  else
+  {
+    if (mSpeedX != 0 || mSpeedY != 0)
+      mTimerOn = true;
+  }
+
   if (mHideScrollBars)
   {
     HideScrollBars();
@@ -799,13 +852,13 @@ bool nuiScrollView::MouseMoved(nuiSize X, nuiSize Y)
     return false;
   
   nglTime now;
-  double elapsed = now.GetValue() - mLastTime.GetValue();
+  float elapsed = now.GetValue() - mLastTime.GetValue();
   
   nuiSize vectX = mLastX - X;
   nuiSize vectY = mLastY - Y;
   nuiSize module = sqrt(vectX * vectX + vectY * vectY);
-  mSpeedX = (vectX / module) * INERTIA_SPEED * elapsed;
-  mSpeedY = (vectY / module) * INERTIA_SPEED * elapsed;  
+  mSpeedX += (vectX / module) * INERTIA_SPEED * elapsed;
+  mSpeedY += (vectY / module) * INERTIA_SPEED * elapsed;
   
   mLastX = X;
   mLastY = Y;
@@ -924,6 +977,9 @@ nuiSize nuiScrollView::GetVIncrement() const
 
 void nuiScrollView::OnSmoothScrolling(const nuiEvent& rEvent)
 {
+  mSpeedX *= INERTIA_BRAKES;
+  mSpeedY *= INERTIA_BRAKES;
+
   if (!mTimerOn)
     return;
 
@@ -954,14 +1010,12 @@ void nuiScrollView::OnSmoothScrolling(const nuiEvent& rEvent)
     {
       SetXPos(GetXPos() + mSpeedX);
       //mXOffset = GetXPos();
-      mSpeedX *= 0.7;
     }
     
     if (mSpeedY != 0)
     {
       SetYPos(GetYPos() + mSpeedY);
       //mYOffset = GetYPos();
-      mSpeedY *= 0.7;
     }
   }
 
@@ -1175,8 +1229,7 @@ void nuiScrollView::ActivateMobileMode()
   
   mpHorizontal->SetForegroundDecoName(_T("nuiDefaultDecorationMobileScrollbarHandle"));
   mpVertical->SetForegroundDecoName(_T("nuiDefaultDecorationMobileScrollbarHandle"));
-  SetBarSize(13);
-  
+  SetBarSize(6);
 }
 
 void nuiScrollView::ActivateHotRect(bool hset, bool vset)
@@ -1200,3 +1253,51 @@ bool nuiScrollView::IsVerticalHotRectActive() const
   return mVerticalHotRectActive;
 }
 
+bool nuiScrollView::PreMouseClicked(const nglMouseInfo& rInfo)
+{
+  if (!mDragEnabled)
+    return false;
+  if (rInfo.Buttons & nglMouseInfo::ButtonLeft)
+  {
+    mTouch = rInfo;
+    mTouched = true;
+  }
+  return false;
+}
+
+bool nuiScrollView::PreMouseUnclicked(const nglMouseInfo& rInfo)
+{
+  if (!mDragEnabled)
+    return false;
+  if (rInfo.Buttons & nglMouseInfo::ButtonLeft)
+  {
+    mTouched = false;
+  }
+  return false;
+}
+
+bool nuiScrollView::PreMouseMoved(const nglMouseInfo& rInfo)
+{
+  if (!mDragEnabled)
+    return false;
+
+  if (mTouched)
+  {
+    float x = 0;
+    if (GetEnableHorizontalScroll())
+      x = mTouch.X - rInfo.X;
+    float y = 0;
+    if (GetEnableVerticalScroll())
+      y = mTouch.Y - rInfo.Y;
+
+    float dist = sqrt(x * x + y * y);
+
+    if (dist > 10 && StealMouseEvent(rInfo))
+    {
+      //NGL_OUT("nuiScrollView Preempting mouse from existing grabber!\n");
+      mTouched = false;
+      return true;
+    }
+  }
+  return false;
+}

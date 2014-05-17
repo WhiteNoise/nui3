@@ -62,10 +62,6 @@ inline float log2f(float x)
 #pragma warning(disable: 4307)
 #endif
 
-#ifdef _UIKIT_ /// TMP FIX: not sure needed ...
-#define finite(x) __inline_isfinited((double)(x))
-#endif
-
 
 uint Log2Ceil(uint Value);
 /*!< Retrieve the binary logarithm of \a Value (by excess)

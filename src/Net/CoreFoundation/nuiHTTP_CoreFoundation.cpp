@@ -23,9 +23,11 @@ nuiHTTPResponse* nuiHTTPRequest::SendRequest(const nuiHTTPResponseReceivedDelega
 	
   CFStringRef preprocessedString =
   CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, originalURLString, CFSTR(""), kCFStringEncodingUTF8);
+  CFRelease(originalURLString);
   CFStringRef urlString =
   CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, preprocessedString, NULL, NULL, kCFStringEncodingUTF8);
-	
+	CFRelease(preprocessedString);
+
   free(pUrl);
   CFURLRef url = CFURLCreateWithString(kCFAllocatorDefault, urlString, NULL);
   CFRelease(urlString);
@@ -140,7 +142,6 @@ nuiHTTPResponse* nuiHTTPRequest::SendRequest(const nuiHTTPResponseReceivedDelega
         CFRelease(readStream);
         if (body)
             CFRelease(body);
-        
       return NULL;
     }
     else

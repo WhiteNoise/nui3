@@ -7,6 +7,8 @@
 
 #include "nui.h"
 
+#define __NUI_NO_AA__
+
 #ifndef __NUI_NO_AA__
   #include "AAPrimitives.h"
 #endif
@@ -58,7 +60,7 @@ void nuiOutliner::AddJoin(const nuiPoint& Point0, const nuiPoint& Point1, const 
     const double ua = (x43 * y13 - y43 * x13) * denom_inv;
     const double ub = (x21 * y13 - y21 * x13) * denom_inv;
 
-    if (mLineJoin == nuiLineJoinMiter || (ua >= 0.0f && ua <= 1.0f) && (ub >= 0.0f && ub <= 1.0f))
+    if ((mLineJoin == nuiLineJoinMiter) || ((ua >= 0.0f && ua <= 1.0f) && (ub >= 0.0f && ub <= 1.0f)))
     {
       nuiPoint mitter((float)(x1 + ua*(x2-x1)), (float)(y1 + ua*(y2-y1)));
       rPoints.AddVertexOptim(mitter);
@@ -109,6 +111,7 @@ void nuiOutliner::AddCap(const nuiPoint& rFirstPoint, const nuiPoint& rLastPoint
 
 void nuiOutliner::Tessellate(nuiPath& rPoints, const nuiPath& rVertices, uint offset, int count, float Quality) const
 {
+  //printf("nuiOutliner::Tessellate offset = %d count = %d\n", offset, count);
   nuiPath Left;
   nuiPath Right;
 
@@ -128,9 +131,13 @@ void nuiOutliner::Tessellate(nuiPath& rPoints, const nuiPath& rVertices, uint of
   {
     int p1 = i;
     int p2 = (p1+1);
+    if (closed)
+      p2 %= segments;
+    else
+      p2 %= segments + 1;
+
     p1 += offset;
     p2 += offset;
-
     const nuiPoint& rPoint = rVertices[p1];
     const nuiPoint& rNextPoint = rVertices[p2];
 
@@ -150,7 +157,19 @@ void nuiOutliner::Tessellate(nuiPath& rPoints, const nuiPath& rVertices, uint of
     }
   }
 
+  for (int i = 0; i < Left.GetCount(); i++)
+  {
+    //printf("Left %d:\n", i);
+    //Left[i].Dump();
+  }
+
   Right.Reverse();
+
+  for (int i = 0; i < Right.GetCount(); i++)
+  {
+    //printf("Right %d:\n", i);
+    //Right[i].Dump();
+  }
 
   if (!Left.GetCount() || !Right.GetCount()) // Case of a path where all points have the same coordinates
   {
@@ -195,21 +214,18 @@ void nuiOutliner::Tessellate(nuiPath& rPoints, const nuiPath& rVertices, uint of
   {
     // Left:
     int ndx1 = 0;
-    int ndx2 = 0;
+    int ndx2 = segments -1;
+    AddJoin(Left[ndx2], Left[ndx2+1], Left[ndx1], Left[ndx1+1], rPoints);
     for (i = 0; i < segments-1; i++)
     {
       ndx1 = i * 2;
       ndx2 = ndx1 + 2;
       AddJoin(Left[ndx1], Left[ndx1+1], Left[ndx2], Left[ndx2+1], rPoints);
     }
-    if (mLineJoin == nuiLineJoinBevel)
-      rPoints.AddVertexOptim(rPoints.Front());
-    else
-      rPoints.Back() = rPoints.Front();
     rPoints.StopPath();
 
     // Right:
-    for (i = 0; i < segments; i++)
+    for (i = 0; i < segments-1; i++)
     {
       ndx1 = i * 2;
       ndx2 = ndx1 + 2;
@@ -242,7 +258,8 @@ void nuiOutliner::Tessellate(nuiPath& rPoints, const nuiPath& rVertices, uint of
       AddJoin(Right[ndx1], Right[ndx1+1], Right[ndx2], Right[ndx2+1], rPoints);
     }
     AddCap(Right.Back(), Left.Front(), rPoints);
-    rPoints.Front() = rPoints.Back();
+    if (rPoints.GetCount() > 2)
+      rPoints[offset] = rPoints[rPoints.GetCount() - 1];
 
     rPoints.StopPath();
   }
@@ -404,7 +421,7 @@ void nuiOutliner::TessellateObj(nuiRenderObject& rObject, const nuiPath& rVertic
 
 #else
 
-void nuiOutliner::TessellateObj(nuiRenderObject& rObject, const nuiPath& rVertices, uint offset, int count, float Quality)
+void nuiOutliner::TessellateObj(nuiRenderObject& rObject, const nuiPath& rVertices, uint offset, int count, float Quality) const
 {
   NGL_ASSERT(count);
 

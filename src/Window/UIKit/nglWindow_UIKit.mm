@@ -11,6 +11,7 @@
 
 #define NGL_WINDOW_FPS 60.0f
 
+#define USE_MULTISAMPLE 0
 
 //#include "nglImage.h"
 
@@ -33,88 +34,101 @@ const nglChar* gpWindowErrorTable[] =
 #define NGL_OUT {}
 #endif
 
-#if defined(_MULTI_TOUCHES_) && 0//defined(_DEBUG_)
+#if defined(_MULTI_TOUCHES_) && defined(_DEBUG_)
 # define NGL_TOUCHES_OUT NGL_OUT
 #else//!_MULTI_TOUCHES_
-# define NGL_TOUCHES_OUT {}
+# define NGL_TOUCHES_OUT
 #endif//!_MULTI_TOUCHES_
 
 //#define _DEBUG_WINDOW_
 
-static std::list<nglTouchId> gAvailableTouches;
-static nglTouchId gPressedTouches[_NUI_MAX_TOUCHES_];
+@interface RetainedEAGLLayer : CAEAGLLayer
+@end
 
-void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
+@implementation RetainedEAGLLayer
+- (void)setDrawableProperties:(NSDictionary *)drawableProperties
 {
-  switch (Angle)
+  // Copy the dictionary and add/modify the retained property
+  NSMutableDictionary *mutableDictionary = [[NSMutableDictionary alloc] initWithCapacity:drawableProperties.count + 1];
+  [drawableProperties enumerateKeysAndObjectsUsingBlock:^(id key, id object, BOOL *stop)
   {
-    case 90:
-      {
-        int tmpX= rInfo.X;
-        rInfo.X = ((int)rRect.GetWidth()) - rInfo.Y;
-        rInfo.Y = tmpX;
-      }
-      break;
-    case 270:
-      {
-        int tmpY = rInfo.Y;
-        rInfo.Y = ((int)rRect.GetHeight()) - rInfo.X;
-        rInfo.X = tmpY;
-      }
-      break;
-    case 180:
-      {
-        rInfo.X = ((int)rRect.GetWidth()) - rInfo.X;
-        rInfo.Y = ((int)rRect.GetHeight()) - rInfo.Y;
-      }
-      break;
-    case 0:
-      {
-      }
-      break;
-    default:
-      {
-        NGL_ASSERT(!"Unsupported rendering angle");
-      }
-  }
-  NGL_TOUCHES_OUT(_T("AdjustFromAngle %d, X:%d Y:%d\n"), Angle, rInfo.X, rInfo.Y);
+    // Copy all keys except the retained backing
+    if (![key isKindOfClass:[NSString class]] || ![(NSString *)key isEqualToString:kEAGLDrawablePropertyRetainedBacking])
+    {
+      [mutableDictionary setObject:object forKey:key];
+    }
+  }];
+  // Add the retained backing setting
+  [mutableDictionary setObject:@(YES) forKey:kEAGLDrawablePropertyRetainedBacking];
+  // Continue
+  [super setDrawableProperties:mutableDictionary];
+  [mutableDictionary release];
 }
+@end
+
+@interface RetainedGLKView : GLKView
+@end
+
+@implementation RetainedGLKView
++ (Class)layerClass
+{
+  return [RetainedEAGLLayer class];
+}
+@end
+
+
+@implementation NGLViewController
+
+- (id) initWithNGLWindow: (nglWindow*) pNGLWindow
+{
+  if (self =  [self initWithNibName:nil bundle:nil])
+  {
+    mpNGLWindow = pNGLWindow;
+    return self;
+  }
+
+  return nil;
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+  return YES; //(interfaceOrientation == UIInterfaceOrientationLandscapeRight) || (interfaceOrientation == UIInterfaceOrientationLandscapeLeft);
+}
+
+-(BOOL)shouldAutorotate
+{
+  return YES;
+}
+
+-(NSUInteger)supportedInterfaceOrientations
+{
+  NSInteger mask = UIInterfaceOrientationMaskAll;
+  return mask;
+
+}
+@end
 
 @implementation nglUIWindow
 
 - (nglWindow *) getNGLWindow
 {
-	return self->mpNGLWindow;
+  return self->mpNGLWindow;
 }
 
 + (Class) layerClass
 {
-	return [CAEAGLLayer class];
+  return [CAEAGLLayer class];
 }
 
 
-- (id) initWithFrame: (CGRect) rect andNGLWindow: (nglWindow*) pNGLWindow andContextInfo: (nglContextInfo*)pContextInfo
+- (id) initWithNGLWindow: (nglWindow*) pNGLWindow andContextInfo: (nglContextInfo*)pContextInfo
 {
   mpContextInfo = pContextInfo;
-	mInited = false;
-	mInvalidated = true;
-	
-	mInvalidationTimer = nil;
-	mDisplayLink = nil;
-	
-	glView = nil;
-	glViewOld = nil;
-	OrientationTimer = nil;
-	
-	
-	mAngle = -1;
- 
-	//oldorientation = UIDeviceOrientationUnknown;
-  UIDevice* pUIDev = [UIDevice currentDevice];	
-  oldorientation = pUIDev.orientation;
+  mInited = false;
 
-  
-  if ( (self = [super initWithFrame: rect]) )
+  mInvalidationTimer = nil;
+  mDisplayLink = nil;
+  if ( (self = [super initWithFrame:[[UIScreen mainScreen] bounds]]) )
   {
     mpNGLWindow = pNGLWindow;
   }
@@ -122,46 +136,50 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   {
     NGL_ASSERT(!"initWithFrame: Could not initialize UIWindow");
   }
-  glView = [[EAGLView alloc] initWithFrame:rect replacing: nil contextInfo: pContextInfo];
-  [self addSubview:glView];
-	[self sendSubviewToBack:glView];
-  
-//NGL_OUT(_T("[nglUIWindow initWithFrame]\n"));
+
+  EAGLContext * context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+  mpGLKView = [[RetainedGLKView alloc] initWithFrame:[[UIScreen mainScreen] bounds] context:context];
+//  mpGLKView = [[GLKView alloc] initWithFrame:[[UIScreen mainScreen] bounds] context:context];
+  mpGLKView.delegate = self;
+  mpGLKView.multipleTouchEnabled = YES;
+  mpGLKView.enableSetNeedsDisplay = NO;
+
+  NGLViewController* ctrl = [[NGLViewController alloc] initWithNGLWindow:mpNGLWindow];
+  ctrl.view = mpGLKView;
+  ctrl.preferredFramesPerSecond = 60;
+
+  [self setRootViewController:ctrl];
+
+  [mpGLKView bindDrawable];
+  //NGL_OUT(_T("[nglUIWindow initWithFrame]\n"));
 
 
   int frameInterval = 1;
-  NSString* sysVersion = [[UIDevice currentDevice] systemVersion];
-  if ([sysVersion compare:@"3.1" options:NSNumericSearch] != NSOrderedAscending) ///< CADisplayLink requires version 3.1 or greater
-  {
-    mDisplayLink = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(Paint)];
-    [mDisplayLink setFrameInterval:frameInterval];
-    [mDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-  }
-  else ///< NSTimer is used as fallback
-  {
-    mInvalidationTimer = [NSTimer scheduledTimerWithTimeInterval:(1.0f / NGL_WINDOW_FPS) target:self selector:@selector(Paint) userInfo:nil repeats:YES];
-  }
+  //  NSString* sysVersion = [[UIDevice currentDevice] systemVersion];
+  //  if ([sysVersion compare:@"3.1" options:NSNumericSearch] != NSOrderedAscending) ///< CADisplayLink requires version 3.1 or greater
+  //  {
+  //    mDisplayLink = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(Paint)];
+  //    [mDisplayLink setFrameInterval:frameInterval];
+  //    [mDisplayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+  //  }
+  //  else ///< NSTimer is used as fallback
+  //  {
+  //    mInvalidationTimer = [NSTimer scheduledTimerWithTimeInterval:(1.0f / NGL_WINDOW_FPS) target:self selector:@selector(Paint) userInfo:nil repeats:YES];
+  //  }
 
   mpNGLWindow->CallOnRescale(nuiGetScaleFactor());
   mpTimer = nuiAnimation::AcquireTimer();
   mpTimer->Stop();
 
-	[self initializeKeyboard];
+  [self initializeKeyboard];
 
   [self makeKeyAndVisible];
-  
+
   return self;
 }
 
 - (void) dealloc
 {
-  if (glView)
-  {
-    [glView removeFromSuperview];
-    glView = nil;
-  }
-  //[self disconnect];
-
   delete mpContextInfo;
   [super dealloc];
 }
@@ -169,7 +187,6 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
 - (void) disconnect
 {
   
-  [[UIDevice currentDevice] endGeneratingDeviceOrientationNotifications];
   //NGL_OUT(_T("[nglUIWindow dealloc]\n"));
   if (mpNGLWindow)
   {
@@ -181,21 +198,12 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   if (mInvalidationTimer != nil)
   {
     [mInvalidationTimer invalidate];
-    //    [mInvalidationTimer release]; ///< should be auto released
     mInvalidationTimer = nil;
   }
   if (mDisplayLink != nil)
   {
     [mDisplayLink invalidate];
-    //    [mDisplayLink release]; ///< should be auto released
     mDisplayLink = nil;
-  }
-  
-  if (OrientationTimer)
-  {
-    [OrientationTimer invalidate];
-    //[OrientationTimer release];
-    OrientationTimer = nil;
   }
   
   UIWindow* next = [[[UIApplication sharedApplication] windows] objectAtIndex:0];
@@ -212,146 +220,12 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   [self showKeyboard];
 }
 
-- (void) UpdateOrientation
-{
-  int32 angle = -1;
-  int32 w, h;
-  w = mpNGLWindow->GetWidth();
-  h = mpNGLWindow->GetHeight();
-  
-  bool forceresize = false;
-  UIApplication* pApp = [UIApplication sharedApplication];
-  UIDevice* pUIDev = [UIDevice currentDevice];
-  UIDeviceOrientation orientation = pUIDev.orientation;
-  UIInterfaceOrientation apporientation = pApp.statusBarOrientation;
-	
-  angle = mpNGLWindow->GetRotation();
-  if (apporientation != orientation)
-  {
-    switch (orientation)
-    {
-      case UIDeviceOrientationUnknown:
-      case UIDeviceOrientationFaceUp:
-      case UIDeviceOrientationFaceDown:
-        break;
-      case UIDeviceOrientationPortrait:
-        angle = 0;
-        break;
-      case UIDeviceOrientationPortraitUpsideDown:
-        angle = 180;
-        break;
-      case UIDeviceOrientationLandscapeLeft:
-        angle = 270;
-        break;
-      case UIDeviceOrientationLandscapeRight:
-        angle = 90;
-        break;
-    }
-  }
-  
-  mpNGLWindow->CallOnRotation(angle);
-
-  angle = mpNGLWindow->GetRotation();
-  if (mAngle != angle)
-  {
-    NSLog(@"new window angle: %f (old %f)\n", (float)angle, (float)mAngle);
-    switch (angle)
-    {
-      case 0:
-        //UIDeviceOrientationPortrait
-        if (pApp.statusBarOrientation != UIInterfaceOrientationPortrait)
-        {
-          pApp.statusBarOrientation = UIInterfaceOrientationPortrait;
-          [self UpdateKeyboard];
-        }
-        w = [UIScreen mainScreen].applicationFrame.size.width;
-        h = [UIScreen mainScreen].applicationFrame.size.height;
-        break;
-      case 90:
-        //UIDeviceOrientationLandscapeRight
-        if (pApp.statusBarOrientation != UIInterfaceOrientationLandscapeLeft)
-        {
-          pApp.statusBarOrientation = UIInterfaceOrientationLandscapeLeft;
-          [self UpdateKeyboard];
-        }
-        h = [UIScreen mainScreen].applicationFrame.size.width;
-        w = [UIScreen mainScreen].applicationFrame.size.height;
-        break;
-      case 180:
-        //UIDeviceOrientationPortraitUpsideDown
-        if (pApp.statusBarOrientation != UIInterfaceOrientationPortraitUpsideDown)
-        {
-          pApp.statusBarOrientation = UIInterfaceOrientationPortraitUpsideDown;
-          [self UpdateKeyboard];
-        }
-        w = [UIScreen mainScreen].applicationFrame.size.width;
-        h = [UIScreen mainScreen].applicationFrame.size.height;
-        break;
-      case 270:
-        //UIDeviceOrientationLandscapeLeft
-        if (pApp.statusBarOrientation != UIInterfaceOrientationLandscapeRight)
-        {
-          pApp.statusBarOrientation = UIInterfaceOrientationLandscapeRight;
-          [self UpdateKeyboard];
-        }
-        h = [UIScreen mainScreen].applicationFrame.size.width;
-        w = [UIScreen mainScreen].applicationFrame.size.height;
-        break;
-    }
-    
-    forceresize = YES;
-  }
-    
-  if (forceresize)
-  {				
-    CGRect rect = [[UIScreen mainScreen] applicationFrame];
-    NSLog(@"new window size: %d, %d\n", w, h);
-
-    glViewOld = glView;
-    self.frame = rect;
-		
-    glView = [[EAGLView alloc] initWithFrame:rect replacing: glViewOld contextInfo:mpContextInfo];
-    [self addSubview:glView];
-		[self sendSubviewToBack:glView];
-
-		// Invalidate all subviews
-		[self.subviews makeObjectsPerformSelector:@selector(setNeedsDisplay)];
-    mpNGLWindow->SetSize(w, h);
-  }   
-  oldorientation = orientation;
-  mAngle = angle;
-}
-
-- (void) recreateWindow
-{
-  int w = mpNGLWindow->GetWidth();
-  int h = mpNGLWindow->GetHeight();
-  CGRect rect = [[UIScreen mainScreen] applicationFrame];
-  //    rect.size.width = w;
-  //    rect.size.height = h;
-  NSLog(@"new window size: %d, %d\n", w, h);
-  
-  glViewOld = glView;
-  self.frame = rect;
-  
-  glView = [[EAGLView alloc] initWithFrame:rect replacing: glViewOld contextInfo:mpContextInfo];
-  [self addSubview:glView];
-	[self sendSubviewToBack:glView];
-  //[glView startAnimation];
-  
-  mpNGLWindow->SetSize(w, h);
-}
-
 - (void) InitNGLWindow
 {  
   if (!mInited)
   {
     mInited = true;
     mpNGLWindow->CallOnCreation();
-//    mpNGLWindow->Invalidate();
-//    mpNGLWindow->CallOnPaint();
-    OrientationTimer = [NSTimer scheduledTimerWithTimeInterval:(NSTimeInterval)((1.0 / 10.0)) target:self selector:@selector(UpdateOrientation) userInfo:nil repeats:TRUE];
-    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
   }
 
   static int32 counter = 0;
@@ -362,36 +236,7 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   }
   
   counter = 60;
-
-  [self UpdateOrientation];
 }
-
-- (void) sendEvent: (UIEvent*) pEvent
-{
-
-  double t = nglTime();
-  //[self InitNGLWindow];
-  
-//  [self dumpTouches: pEvent];
-//nuiStopWatch watch(_T("nglWindowUIKIT::sendEvent"));
-  nglWindow::EventMask mask = mpNGLWindow->GetEventMask();
-  if (mask & nglWindow::MouseEvents)
-  {
-    [self handleEvent: pEvent];
-  }
-
-  mLastEventTime = t;
-	
-  [super sendEvent: pEvent];
-}
-
-/*
-- (void) touchesChangedWithEvent: (UIEvent*) pEvent
-{
-//NGL_OUT(_T("[nglUIWindow touchesChangedWithEvent]\n"));
-  [super touchesChangedWithEvent: pEvent];
-}
-*/
 
 - (void) dumpTouch: (UITouch*) pTouch
 {
@@ -435,260 +280,218 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
   }
 }
 
+- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
+{
+  if (!CGRectEqualToRect(oldrect, rect))
+  {
+    mpNGLWindow->SetSize(CGRectGetWidth(rect), CGRectGetHeight(rect));
+    oldrect = rect;
+  }
+
+  [self Paint];
+}
+
 - (void)Paint
 {
   [self InitNGLWindow];
 
-  if (glViewOld)
   {
-    [glViewOld removeFromSuperview];
-    glViewOld = nil;
-  }
-  //if (mInvalidated)
-  {
-    mInvalidated = false;
-    //mpNGLWindow->CallOnPaint();
-    mpTimer->Tick();
+    GLKViewController* ctrl = (GLKViewController*)self.rootViewController;
+    double lap = ctrl.timeSinceLastDraw;
+    mpTimer->OnTick(lap);
   }
 }
 
-
-- (void) handleEvent: (UIEvent*) pEvent
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  //nuiStopWatch watch(_T("nglWindowUIKIT::handleEvent"));
-  if (pEvent.type != UIEventTypeTouches)
-    return;
-  
-	static double sOldTimestamp = 0.0;
-  NSSet* pSet = [pEvent allTouches];
-  if (!pSet)
+  for (id item in touches)
   {
-    NGL_ASSERT(pSet);
-    return;
-  }
-    
-  NSArray* pArray = [pSet allObjects];
-  NGL_ASSERT(pArray);
-  NSUInteger count = [pArray count];
+    UITouch* pTouch = item;
+    UITouchPhase touchPhase = [pTouch phase];
+    uint32 touchTapCount = (uint)[pTouch tapCount];
 
-  std::vector<UITouch*> touches;
-  touches.resize((uint)count);
-  [pArray getObjects: &touches[0]];
-    
+
     std::vector<nglMouseInfo> touchFrame;
 
-  const nuiRect rect(0,0, mpNGLWindow->GetWidth(), mpNGLWindow->GetHeight());
-
-  for (uint n = 0; n < count; n++)
-  {
-    UITouch* pTouch = touches[n];
-
-//    UITouchInfo touchInfo = [pTouch info];
-    UITouchPhase touchPhase = [pTouch phase];
-    uint touchTapCount = [pTouch tapCount];
-
-    CGPoint newp = [pTouch locationInView: (UIView*)self];
-    CGPoint oldp = [pTouch previousLocationInView: (UIView*)self];
+    CGPoint newp = [pTouch locationInView: self.rootViewController.view];
 
     int x = (int)newp.x;
     int y = (int)newp.y;
-    
-    TouchesInfo::iterator it = mTouches.find(pTouch);
 
-    if (it != mTouches.end())
-    {
-///< this touch exists
-      nglTouchInfo& rTouch(it->second);
-      NGL_ASSERT(touchPhase != UITouchPhaseBegan);
-      if (touchPhase == UITouchPhaseEnded || touchPhase == UITouchPhaseCancelled)
-      {
-///< this touch has been released
-        NGL_TOUCHES_OUT(_T("[%p][%d] [available: %d] Release X:%d Y:%d, phase: %s\n"), pTouch, rTouch.mTouchId, gAvailableTouches.size(), x, y, touchPhase == UITouchPhaseEnded ? "UITouchPhaseEnded" : touchPhase == UITouchPhaseCancelled ? "UITouchPhaseEnded" : "SHALL NOT");
-        
-        nglMouseInfo info;
-        info.Buttons = nglMouseInfo::ButtonLeft;
-        info.X = x;
-        info.Y = y;
+    nglMouseInfo info;
+    info.Buttons = nglMouseInfo::ButtonLeft;
+    info.X = x;
+    info.Y = y;
 
-        AdjustFromAngle(mpNGLWindow->GetRotation(), rect, info);
+    info.SwipeInfo = nglMouseInfo::eNoSwipe;
+    info.TouchId = (int64)pTouch;
 
-        info.SwipeInfo = nglMouseInfo::eNoSwipe;
-        info.TouchId = rTouch.mTouchId;
+    if (touchTapCount > 1)// && ([pTouch timestamp] - sOldTimestamp < DOUBLE_TAP_DELAY))
+      info.Buttons |= nglMouseInfo::ButtonDoubleClick;
 
-///< if tapcount > 1, unclicked from a double click
-//        if (touchTapCount > 1)// && ([pTouch timestamp] - sOldTimestamp < DOUBLE_TAP_DELAY))
-//          info.Buttons |= nglMouseInfo::ButtonDoubleClick;
+    //NGL_TOUCHES_OUT("[%p][%d] Begin X:%d Y:%d\n", pTouch, info.TouchId, x, y);
 
-          touchFrame.push_back(info);
-        mpNGLWindow->CallOnMouseUnclick(info);
+    ///< if tapcount > 1, unclicked from a double click
+    //        if (touchTapCount > 1)// && ([pTouch timestamp] - sOldTimestamp < DOUBLE_TAP_DELAY))
+    //          info.Buttons |= nglMouseInfo::ButtonDoubleClick;
 
-        gAvailableTouches.push_back(info.TouchId);
-        gPressedTouches[info.TouchId] = false;
-        
-        it = mTouches.find(pTouch);
-        if(it != mTouches.end())
-           mTouches.erase(it);
-        
-      }
-      else if (rTouch.X != x || rTouch.Y != y)
-      {
-///< this touch has moved
-        NGL_TOUCHES_OUT(_T("[%p][%d] Move X:%d Y:%d\n"), pTouch, rTouch.mTouchId, x, y);
-        NGL_ASSERT(touchPhase == UITouchPhaseMoved);
-        rTouch.X = x;
-        rTouch.Y = y;
-
-        nglMouseInfo info;
-        info.Buttons = nglMouseInfo::ButtonLeft;
-        info.X = x;
-        info.Y = y;
-
-        AdjustFromAngle(mpNGLWindow->GetRotation(), rect, info);
-
-        info.SwipeInfo = nglMouseInfo::eNoSwipe;
-        info.TouchId = rTouch.mTouchId;
-///< if tapcount > 1, moved from a double click
-//        if (touchTapCount > 1)// && ([pTouch timestamp] - sOldTimestamp < DOUBLE_TAP_DELAY))
-//          info.Buttons |= nglMouseInfo::ButtonDoubleClick;
-          touchFrame.push_back(info);
-        mpNGLWindow->CallOnMouseMove(info);
-      }
-      else
-      {
-        //NGL_ASSERT(touchPhase == UITouchPhaseStationary);
-      }
-    }
-    else if (touchPhase == UITouchPhaseBegan && (gAvailableTouches.size() > 0))
-    {
-///< this is a new touch
-      NGL_TOUCHES_OUT(_T("[%p][available: %d] UITouchPhaseBegan X:%d Y:%d\n"), pTouch, gAvailableTouches.size(), x, y);
-
-      NGL_ASSERT(touchPhase == UITouchPhaseBegan);
-
-      nglTouchInfo newTouch;
-      newTouch.X = x;
-      newTouch.Y = y;
-      NGL_ASSERT(gAvailableTouches.size() > 0);
-      newTouch.mTouchId = gAvailableTouches.front();
-
-      gAvailableTouches.pop_front();
-      gPressedTouches[newTouch.mTouchId] = true;
-
-      NGL_TOUCHES_OUT(_T("[%p][%d] New X:%d Y:%d\n"), pTouch, newTouch.mTouchId, x, y);
-      mTouches[pTouch] = newTouch;
-
-      nglMouseInfo info;
-      info.Buttons = nglMouseInfo::ButtonLeft;
-
-			// Double tapping events are way too slow on the iPhone
-			// compare timestamps to see if we should declare the event a double click
-#define DOUBLE_TAP_DELAY	0.25
-
-///< if tapcount > 1, it is a double click
-      if (touchTapCount > 1)// && ([pTouch timestamp] - sOldTimestamp < DOUBLE_TAP_DELAY))
-        info.Buttons |= nglMouseInfo::ButtonDoubleClick;
-
-			sOldTimestamp = [pTouch timestamp];
-
-      info.X = x;
-      info.Y = y;
-
-      AdjustFromAngle(mpNGLWindow->GetRotation(), rect, info);
-
-      info.SwipeInfo = nglMouseInfo::eNoSwipe;
-      info.TouchId = newTouch.mTouchId;
-          touchFrame.push_back(info);
-      mpNGLWindow->CallOnMouseClick(info);
-    }
-    else
-    {
-      NGL_TOUCHES_OUT(_T("[%p][available: %d] Discarding event: [UITouchPhaseBegan X:%d Y:%d]\n"), pTouch, gAvailableTouches.size(), x, y);
-    }
+    mpNGLWindow->CallOnMouseClick(info);
   }
-    
-    for (uint n = 0; n < touchFrame.size(); n++)
-    {
-        mpNGLWindow->CallOnMultiEventsFinished(touchFrame[n]);
-    }
-
-
-/*
-** Debug prints:
-*/
-/*
-  NGL_OUT(_T("Available Touches count: %d\nIds: "), gAvailableTouches.size());
-  for (std::list<nglTouchId>::const_iterator it = gAvailableTouches.begin(); it != gAvailableTouches.end(); ++it) {
-    NGL_OUT(_T("[%d]"), *it);
-  }
-  NGL_OUT(_T("\n"));
-*/
-  //[self Paint];
 }
 
-- (void) invalidate
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  mInvalidated = true;
+  for (id item in touches)
+  {
+    UITouch* pTouch = item;
+    UITouchPhase touchPhase = [pTouch phase];
+    uint32 touchTapCount = (uint)[pTouch tapCount];
+
+    CGPoint newp = [pTouch locationInView: self.rootViewController.view];
+
+    int x = (int)newp.x;
+    int y = (int)newp.y;
+
+
+    nglMouseInfo info;
+    info.Buttons = nglMouseInfo::ButtonLeft;
+    info.X = x;
+    info.Y = y;
+
+    info.SwipeInfo = nglMouseInfo::eNoSwipe;
+    info.TouchId = (int64)pTouch;
+
+    //NGL_TOUCHES_OUT("[%p][%d] Release X:%d Y:%d\n", pTouch, info.TouchId, x, y);
+
+    ///< if tapcount > 1, unclicked from a double click
+    //        if (touchTapCount > 1)// && ([pTouch timestamp] - sOldTimestamp < DOUBLE_TAP_DELAY))
+    //          info.Buttons |= nglMouseInfo::ButtonDoubleClick;
+
+    mpNGLWindow->CallOnMouseUnclick(info);
+    mpNGLWindow->CallOnMultiEventsFinished(info);
+  }
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  for (id item in touches)
+  {
+    UITouch* pTouch = item;
+    UITouchPhase touchPhase = [pTouch phase];
+    uint32 touchTapCount = (uint)[pTouch tapCount];
+
+    CGPoint newp = [pTouch locationInView: self.rootViewController.view];
+
+    int x = (int)newp.x;
+    int y = (int)newp.y;
+
+    nglMouseInfo info;
+    info.Buttons = nglMouseInfo::ButtonLeft;
+    info.X = x;
+    info.Y = y;
+
+    info.SwipeInfo = nglMouseInfo::eNoSwipe;
+    info.TouchId = (int64)pTouch;
+
+    //NGL_TOUCHES_OUT("[%p][%d] Cancel X:%d Y:%d\n", pTouch, info.TouchId, x, y);
+
+
+    mpNGLWindow->CallOnMultiEventsFinished(info);
+    mpNGLWindow->CallOnMouseCanceled(info);
+  }
+
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  for (id item in touches)
+  {
+    UITouch* pTouch = item;
+    UITouchPhase touchPhase = [pTouch phase];
+    uint32 touchTapCount = (uint)[pTouch tapCount];
+
+    CGPoint newp = [pTouch locationInView: self.rootViewController.view];
+
+    int x = (int)newp.x;
+    int y = (int)newp.y;
+
+    nglMouseInfo info;
+    info.Buttons = nglMouseInfo::ButtonLeft;
+    info.X = x;
+    info.Y = y;
+
+    info.SwipeInfo = nglMouseInfo::eNoSwipe;
+    info.TouchId = (int64)pTouch;
+
+    //NGL_TOUCHES_OUT("[%p][%d] Moved X:%d Y:%d\n", pTouch, info.TouchId, x, y);
+
+    ///< if tapcount > 1, unclicked from a double click
+    //        if (touchTapCount > 1)// && ([pTouch timestamp] - sOldTimestamp < DOUBLE_TAP_DELAY))
+    //          info.Buttons |= nglMouseInfo::ButtonDoubleClick;
+
+    mpNGLWindow->CallOnMouseMove(info);
+  }
 }
 
 /////// Keyboard support:
 - (void)initializeKeyboard
 {
-	mpTextField = NULL;
+  mpTextField = NULL;
 
-	// Apparently CGRectZero breaks backspace in OS3.2 .. weird.
-	mpTextField = [[UITextField alloc] initWithFrame: CGRectMake(0,0,160,50)];
-	
-	mpTextField.delegate = self;
-	/* placeholder so there is something to delete! */
-	mpTextField.text = @"x";	
-	
-	/* set UITextInputTrait properties, mostly to defaults */
-	mpTextField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-	mpTextField.autocorrectionType = UITextAutocorrectionTypeNo;
-	mpTextField.enablesReturnKeyAutomatically = NO;
-	mpTextField.keyboardAppearance = UIKeyboardAppearanceAlert;
-	mpTextField.keyboardType = UIKeyboardTypeDefault;
-	mpTextField.clearsOnBeginEditing = NO;
-	mpTextField.returnKeyType = UIReturnKeyDefault;
-	mpTextField.secureTextEntry = NO;	
-	
-	mpTextField.hidden = YES;
-	mKeyboardVisible = NO;
-	/* add the UITextField (hidden) to our view */
-	[self addSubview: mpTextField];
-	
+  // Apparently CGRectZero breaks backspace in OS3.2 .. weird.
+  mpTextField = [[UITextField alloc] initWithFrame: CGRectMake(0,0,160,50)];
+  
+  mpTextField.delegate = self;
+  /* placeholder so there is something to delete! */
+  mpTextField.text = @"x";  
+  
+  /* set UITextInputTrait properties, mostly to defaults */
+  mpTextField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+  mpTextField.autocorrectionType = UITextAutocorrectionTypeNo;
+  mpTextField.enablesReturnKeyAutomatically = NO;
+  mpTextField.keyboardAppearance = UIKeyboardAppearanceAlert;
+  mpTextField.keyboardType = UIKeyboardTypeDefault;
+  mpTextField.clearsOnBeginEditing = NO;
+  mpTextField.returnKeyType = UIReturnKeyDefault;
+  mpTextField.secureTextEntry = NO; 
+  
+  mpTextField.hidden = YES;
+  mKeyboardVisible = NO;
+  /* add the UITextField (hidden) to our view */
+  [self addSubview: mpTextField];
+  
 }
 
 // Show Keyboard
 - (void)showKeyboard
 {
-	mKeyboardVisible = YES;
-	[mpTextField becomeFirstResponder];
+  mKeyboardVisible = YES;
+  [mpTextField becomeFirstResponder];
 }
 
 // hide onscreen virtual keyboard
 - (void)hideKeyboard
 {
-	mKeyboardVisible = NO;
-	[mpTextField resignFirstResponder];
+  mKeyboardVisible = NO;
+  [mpTextField resignFirstResponder];
 }
 
 // UITextFieldDelegate method.  Invoked when user types something.
 - (BOOL)textField:(UITextField *)_textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
 {
-  NGL_OUT(_T("change chars in range %d - %d\n"), range.location, range.length);
-	if ([string length] == 0)
+  NGL_OUT("change chars in range %d - %d\n", range.location, range.length);
+  if ([string length] == 0)
   {
     mpNGLWindow->CallOnKeyDown(nglKeyEvent(NK_BACKSPACE, 8, 8)); // 8 = BS = BackSpace
     mpNGLWindow->CallOnKeyUp(nglKeyEvent(NK_BACKSPACE, 8, 8));
-	}
-	else
+  }
+  else
   {
     nglString str((CFStringRef)string);
     mpNGLWindow->CallOnTextInput(str);
-	}
+  }
 
-	return NO; /* don't allow the edit! (keep placeholder text there) */
+  return NO; /* don't allow the edit! (keep placeholder text there) */
 }
 
 /* Terminates the editing session */
@@ -708,291 +511,31 @@ void AdjustFromAngle(uint Angle, const nuiRect& rRect, nglMouseInfo& rInfo)
       return YES;
     }
   }
-	return NO;
+  return NO;
 }
 
 - (BOOL)textFieldShouldClear:(UITextField*)_textField
 {
-	return NO;
+  return NO;
 }
 
 - (void) MakeCurrent
 {
-  [glView MakeCurrent];
+  BOOL res = [EAGLContext setCurrentContext:(EAGLContext*) mpGLKView.context];
 }
 
 - (void) BeginSession
 {
-  [glView BeginSession];
+  [mpGLKView bindDrawable];
 }
 
 - (void) EndSession
 {
-  [glView EndSession];
+  //[glView EndSession];
 }
 
 
 @end///< nglUIWindow
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////// EAGLVIEW:
-@implementation EAGLView
-
-// You must implement this method
-+ (Class)layerClass
-{
-  return [CAEAGLLayer class];
-}
-
-//The EAGL view is stored in the nib file. When it's unarchived it's sent -initWithCoder:
-- (id)initWithFrame:(CGRect)rect replacing:(EAGLView*) original  contextInfo: (nglContextInfo*)pContextInfo
-{
-  mpContextInfo = pContextInfo;
-  NSLog(@"new EAGLView (%f,%f %fx%f)\n", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-  context = nil;
-  backingWidth = 0;
-  backingHeight = 0;
-  defaultFrameBuffer = 0;
-  colorRenderBuffer = 0;
-  depthRenderBuffer = 0;
-
-  rect.origin.x = 0;
-  rect.origin.y = 0;
-  if ((self = [super initWithFrame:rect]))
-  {
-    if ([self respondsToSelector:@selector(contentScaleFactor)])
-    {
-      /* on iOS 4.0, use contentsScaleFactor */
-      NSLog(@"Scale: %f\n", self.contentScaleFactor);
-      self.contentScaleFactor = nuiGetScaleFactor();
-    }
-    else
-    {
-      NSLog(@"no scaling\n");
-    }
-    
-    
-    // Get the layer
-    CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
-    
-    eaglLayer.opaque = TRUE;
-    if (pContextInfo->CopyOnSwap)
-      eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                      [NSNumber numberWithBool:TRUE], kEAGLDrawablePropertyRetainedBacking,
-                                      kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-                                      nil];
-    else
-      eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                      kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
-                                      nil];
-
-
-    EAGLSharegroup* group = nil;
-    if (original != nil) 
-		{
-      group = [original getSharegroup];
-			[original removeFromSuperview];
-		}
-    
-		//self.clearsContextBeforeDrawing = TRUE;
-
-    EAGLRenderingAPI glAPI;
-    if (nuiMainWindow::GetRenderer() == eOpenGL)
-      glAPI = kEAGLRenderingAPIOpenGLES1;
-    else if (nuiMainWindow::GetRenderer() == eOpenGL2)
-      glAPI = kEAGLRenderingAPIOpenGLES2;
-
-    NGL_ASSERT(glAPI != NULL);
-
-    if (group)
-      context = [[EAGLContext alloc] initWithAPI:glAPI sharegroup: group];
-    else
-      context = [[EAGLContext alloc] initWithAPI:glAPI];
-    
-    if (!context || ![EAGLContext setCurrentContext:context])
-    {
-      [self release];
-      return nil;
-    }
-        
-    if (![self resizeFromLayer:eaglLayer])
-    {
-      NSLog(@"Unable to resizeFromLayer\n");
-    }
-  }
-  else
-  {
-    NSLog(@"EAGLView init failed :-/\n");
-  }
-  
-  return self;
-}
-
-- (EAGLSharegroup*)getSharegroup
-{
-  return [[self context] sharegroup];
-}
-
-- (void)layoutSubviews
-{
-  //[self resizeFromLayer:(CAEAGLLayer*)self.layer];
-}
-
-
-- (void)dealloc
-{
-  // Tear down GL
-  if (defaultFrameBuffer)
-  {
-    glDeleteFramebuffersOES(1, &defaultFrameBuffer);
-    defaultFrameBuffer = 0;
-  }
-  
-  if (colorRenderBuffer)
-  {
-    glDeleteRenderbuffersOES(1, &colorRenderBuffer);
-    colorRenderBuffer = 0;
-  }
-
-  if (depthRenderBuffer)
-  {
-    glDeleteRenderbuffersOES(1, &depthRenderBuffer);
-    depthRenderBuffer = 0;
-  }
-
-  // Tear down context
-  if ([EAGLContext currentContext] == context)
-    [EAGLContext setCurrentContext:nil];
-  
-  [context release];
-  context = nil;
-  
-  
-  [super dealloc];
-}
-
-- (EAGLContext*)context
-{
-  return context;
-}
-
-- (BOOL)resizeFromLayer:(CAEAGLLayer *)layer
-{
-  if (!defaultFrameBuffer)
-  {
-    // Create default framebuffer object. The backing will be allocated for the current layer in -resizeFromLayer
-    glGenFramebuffersOES(1, &defaultFrameBuffer);
-    glGenRenderbuffersOES(1, &colorRenderBuffer);
-
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFrameBuffer);
-    printf("glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFrameBuffer); (fb = %d)\n", defaultFrameBuffer);
-    glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderBuffer);
-    printf("glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderBuffer); (fb = %d)\n", colorRenderBuffer);
-
-    if ([context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:layer] == NO)
-    {
-      NSLog(@"Failed to call context:renderbuferStorage:");
-      return NO;
-    }
-    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderBuffer);
-
-    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
-    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
-
-    if (mpContextInfo->DepthBits)
-    {
-      glGenRenderbuffersOES(1, &depthRenderBuffer);
-      glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderBuffer);
-      glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT16_OES, backingWidth, backingHeight);
-      glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthRenderBuffer);
-      
-    }
-  }
-  else
-  {
-
-    // Allocate color buffer backing based on the current layer size
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFrameBuffer);
-    glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderBuffer);
-    if (depthRenderBuffer)
-      glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderBuffer);
-
-    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
-    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
-
-    if ([context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:layer] == NO)
-    {
-      NSLog(@"Failed to call context:renderbuferStorage:");
-      return NO;
-    }
-
-    // this line seemed to fix some render buffer creation errors, but I'm not sure if it's necessary.
-    //glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorRenderBuffer);
-  }
-
-  if (glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES)
-  {
-    NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));
-    return NO;
-  }
-  
-  NSLog(@"Resize frame buffer: %d x %d\n", backingWidth, backingHeight);
-  
-
-  // Angle:
-  UIDevice* pUIDev = [UIDevice currentDevice];
-  unsigned int orientation = pUIDev.orientation;
-  
-  switch (orientation)
-  {
-    case UIDeviceOrientationUnknown:
-    case UIDeviceOrientationFaceUp:
-    case UIDeviceOrientationFaceDown:
-      angle = 0;
-      break;
-    case UIDeviceOrientationPortrait:
-      angle = 0;
-      break;
-    case UIDeviceOrientationPortraitUpsideDown:
-      angle = 180;
-      break;
-    case UIDeviceOrientationLandscapeLeft:
-      angle = 270;
-      break;
-    case UIDeviceOrientationLandscapeRight:
-      angle = 90;
-      break;
-    default:
-      break;
-  }
-  
-  return YES;
-}
-
-- (void) MakeCurrent
-{
-  [EAGLContext setCurrentContext:context];
-}
-
-- (void) BeginSession
-{
-  [EAGLContext setCurrentContext:context];
-  glBindFramebufferOES(GL_FRAMEBUFFER_OES, defaultFrameBuffer);
-}
-
-- (void) EndSession
-{
-  glBindRenderbufferOES(GL_RENDERBUFFER_OES, colorRenderBuffer);
-  //glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderbuffer);
-  [context presentRenderbuffer:GL_RENDERBUFFER_OES];
-}
-
-
-
-
-@end
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////// NGL WINDOW:
@@ -1038,32 +581,10 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
 
   mAutoRotate = true;
   
-  for (nglTouchId t = 0; t < _NUI_MAX_TOUCHES_; t++)
-  {
-    gPressedTouches[t] = false;
-    gAvailableTouches.push_back(t);
-  }
-
   mAngle = rInfo.Rotate;
-  CGRect rect = [[UIScreen mainScreen] applicationFrame];
-  float w, h;
-  mWidth = 0;
-  mHeight = 0;
-  if (mAngle == 270 || mAngle == 90)
-  {
-    w = rect.size.height;
-    h = rect.size.width;
-  }
-  else
-  {
-    w = rect.size.width;
-    h = rect.size.height;
-  }
-  
 
   // Create the actual window
-  nglUIWindow* pUIWindow = [[nglUIWindow alloc] initWithFrame: rect andNGLWindow: this andContextInfo: new nglContextInfo(rContext)];
-
+  nglUIWindow* pUIWindow = [[nglUIWindow alloc] initWithNGLWindow: this andContextInfo: new nglContextInfo(rContext)];
   mOSInfo.mpUIWindow = pUIWindow;
   mpUIWindow = pUIWindow;
 
@@ -1073,7 +594,8 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
   [pUIWindow setMultipleTouchEnabled: YES];
   
   [pUIWindow makeKeyAndVisible];
-  
+
+
   NGL_LOG(_T("window"), NGL_LOG_INFO, _T("trying to create GLES context"));
   rContext.Dump(NGL_LOG_INFO);
   
@@ -1084,19 +606,51 @@ void nglWindow::InternalInit (const nglContextInfo& rContext, const nglWindowInf
     NGL_ASSERT(0);
     return;
   }
-	
-	CGRect r = [(nglUIWindow*)mpUIWindow frame];
-	NSLog(@"currentFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
-	r = [UIScreen mainScreen].applicationFrame;
-	NSLog(@"applicationFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
+  
+  Build(rContext);
+  CGRect rect = pUIWindow.frame;
+  CGRect r = [(nglUIWindow*)mpUIWindow frame];
+  NSLog(@"currentFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
+  r = [UIScreen mainScreen].applicationFrame;
+  NSLog(@"applicationFrame: %f, %f - %f, %f\n", r.origin.x, r.origin.y, r.size.width, r.size.height);
 
-	Build(rContext);
-	SetSize(w, h);
-	
+  float w, h;
+  mWidth = 0;
+  mHeight = 0;
+
+  UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+  switch (orientation)
+  {
+    case UIInterfaceOrientationPortrait:
+      mAngle = 0;
+      break;
+    case UIInterfaceOrientationPortraitUpsideDown:
+      mAngle = 180;
+      break;
+    case UIInterfaceOrientationLandscapeLeft:
+      mAngle = 90;
+      break;
+    case UIInterfaceOrientationLandscapeRight:
+      mAngle = 270;
+      break;
+  }
+  if (mAngle == 270 || mAngle == 90)
+  {
+    w = rect.size.height;
+    h = rect.size.width;
+  }
+  else
+  {
+    w = rect.size.width;
+    h = rect.size.height;
+  }
+
+  SetSize(w, h);
+  
 /* Ultra basic UIKit view integration on top of nuiWidgets
   UIWebView* pWebView = [[UIWebView alloc] initWithFrame: CGRectMake(50, 50, 200, 200)];
-	[pUIWindow addSubview: pWebView];
-	pWebView.hidden = NO;
+  [pUIWindow addSubview: pWebView];
+  pWebView.hidden = NO;
   NSURL* pURL = [[NSURL alloc] initWithString: @"http://libnui.net"];
   NSURLRequest* pReq = [[NSURLRequest alloc] initWithURL: pURL];
   [pWebView loadRequest: pReq];
@@ -1136,25 +690,25 @@ void nglWindow::SetState (StateChange State)
   //  static int last_x, last_y;
   UIApplication* pApp = [UIApplication sharedApplication];
 
-	switch (State)
-	{
-		case eHide:
-			[pApp setStatusBarHidden:TRUE animated:TRUE];
-			break;
-		case eShow:
-			[pApp setStatusBarHidden:TRUE animated:TRUE];
-			break;
-		case eMinimize:
-			[pApp setStatusBarHidden:TRUE animated:TRUE];
-			break;
-		case eMaximize:
-		{
-			[pApp setStatusBarHidden:TRUE animated:TRUE];
-		}
-			break;
-	};
+  switch (State)
+  {
+    case eHide:
+      [pApp setStatusBarHidden:TRUE animated:TRUE];
+      break;
+    case eShow:
+      [pApp setStatusBarHidden:TRUE animated:TRUE];
+      break;
+    case eMinimize:
+      [pApp setStatusBarHidden:TRUE animated:TRUE];
+      break;
+    case eMaximize:
+    {
+      [pApp setStatusBarHidden:TRUE animated:TRUE];
+    }
+      break;
+  };
 
-  [(nglUIWindow*)mpUIWindow recreateWindow];
+//  [(nglUIWindow*)mpUIWindow recreateWindow];
 }
 
 nglWindow::StateInfo nglWindow::GetState() const
@@ -1170,7 +724,7 @@ void nglWindow::GetSize (uint& rWidth, uint& rHeight) const
 
 uint nglWindow::GetWidth () const
 {
-	return mWidth;
+  return mWidth;
 }
 
 uint nglWindow::GetHeight () const
@@ -1180,7 +734,7 @@ uint nglWindow::GetHeight () const
 
 bool nglWindow::SetSize (uint Width, uint Height)
 {
-  NGL_OUT(_T("nglWindow::SetSize(%d, %d)\n"), Width, Height);
+  //NGL_OUT(_T("nglWindow::SetSize(%d, %d)\n"), Width, Height);
   mWidth  = Width;
   mHeight = Height;
   CallOnResize(Width, Height);
@@ -1238,7 +792,7 @@ void nglWindow::EndSession()
 #ifdef _DEBUG_WINDOW_
   NGL_LOG(_T("window"), NGL_LOG_INFO, _T("EndSession\n"));
 #endif
-	
+  
   NGL_ASSERT(mpUIWindow);
   [mpUIWindow EndSession];
 #endif
@@ -1254,7 +808,6 @@ bool nglWindow::MakeCurrent() const
 
 void nglWindow::Invalidate()
 {
-  [(nglUIWindow*)mpUIWindow invalidate];
 }
 
 bool nglWindow::SetCursor(nuiMouseCursor Cursor)
@@ -1344,5 +897,15 @@ void nglWindow::OnDragStop(bool canceled)
 
 void nglWindow::OnDropped(nglDragAndDrop* pDragObject, int X,int Y, nglMouseInfo::Flags Button)
 {
+}
+
+
+int nglWindow::GetStatusBarSize() const
+{
+  if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1)
+  {
+    return MIN([UIApplication sharedApplication].statusBarFrame.size.height, [UIApplication sharedApplication].statusBarFrame.size.width);
+  }
+  return 0;
 }
 

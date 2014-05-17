@@ -9,13 +9,6 @@
 
 #include "nui.h"
 
-#define CHECK_GL_ERRORS \
-{\
-GLenum err = glGetError();\
-if (err != GL_NO_ERROR)\
-  NGL_LOG("painter", NGL_LOG_ERROR,  "%s:%d openGL error %d", __FILE__, __LINE__, err);\
-}
-
 static const char* defaultVertexShader =
 "attribute vec4 Position;\n\
 attribute vec2 TexCoord;\n\
@@ -504,6 +497,7 @@ nuiShaderState& nuiShaderState::operator= (const nuiShaderState& rState)
   mTextureTranslate = rState.mTextureTranslate;
   mDifuseColor = rState.mDifuseColor;
   mUniforms = rState.mUniforms;
+  return *this;
 }
 
 void nuiShaderState::Set(const nuiShaderState& rState)
@@ -694,6 +688,12 @@ nuiShaderProgram::~nuiShaderProgram()
 
   if (mProgram)
     glDeleteProgram(mProgram);
+
+  {
+    auto it = gpPrograms.find(mName);
+    NGL_ASSERT(it != gpPrograms.end());
+    gpPrograms.erase(it);
+  }
 }
 
 void nuiShaderProgram::AddShaderFromPath(nuiShaderKind shaderType, const nglPath& rPath)
@@ -820,39 +820,39 @@ bool nuiShaderProgram::Link()
       nuiShader* pShader = it->second;
       if (!pShader->Load())
       {
-        CHECK_GL_ERRORS;
+        nuiCheckForGLErrors();
         NGL_LOG("painter", NGL_LOG_ERROR, "nuiShaderProgram::Link() Unable to load shader: %s", pShader->GetError().GetChars());
         return false;
       }
 
       glAttachShader(mProgram, pShader->GetShader());
-      CHECK_GL_ERRORS;
+      nuiCheckForGLErrors();
     }
   }
 
 
   glLinkProgram(mProgram);
-  CHECK_GL_ERRORS;
+  nuiCheckForGLErrors();
 
   // 3
   GLint linkSuccess;
   glGetProgramiv(mProgram, GL_LINK_STATUS, &linkSuccess);
-  CHECK_GL_ERRORS;
+  nuiCheckForGLErrors();
   if (linkSuccess == GL_FALSE)
   {
     GLchar messages[256];
     glGetProgramInfoLog(mProgram, sizeof(messages), 0, &messages[0]);
-    CHECK_GL_ERRORS;
+    nuiCheckForGLErrors();
     NGL_LOG("painter", NGL_LOG_ERROR, "nuiShaderProgram::Link() %s", messages);
     return false;
   }
 
   glValidateProgram(mProgram);
-  CHECK_GL_ERRORS;
+  nuiCheckForGLErrors();
 
 
   glUseProgram(mProgram);
-  CHECK_GL_ERRORS;
+  nuiCheckForGLErrors();
 
 
   // Enumerate Uniforms:
@@ -893,7 +893,7 @@ bool nuiShaderProgram::Validate() const
   {
     GLchar messages[256];
     glGetProgramInfoLog(mProgram, sizeof(messages), 0, &messages[0]);
-    CHECK_GL_ERRORS;
+    nuiCheckForGLErrors();
     //NGL_LOG("painter", NGL_LOG_ERROR, "nuiShaderProgram::Validate() failed: %s", messages);
     return false;
   }
