@@ -817,8 +817,8 @@ public:
   bool CallOnMouseUnclick(nglMouseInfo& rInfo);
   bool CallOnMouseWheel (nglMouseInfo& rInfo);
   bool CallOnMouseMove  (nglMouseInfo& rInfo);
-bool CallOnMouseCanceled  (nglMouseInfo& rInfo);
-bool CallOnMultiEventsFinished (nglMouseInfo& rInfo);
+  bool CallOnMouseCanceled  (nglMouseInfo& rInfo);
+  bool CallOnMultiEventsFinished (nglMouseInfo& rInfo);
 
   bool CallOnRotation(uint Angle);
   void CallOnRescale(float NewScale);

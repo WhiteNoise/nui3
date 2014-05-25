@@ -272,7 +272,7 @@ public:
   virtual bool MouseWheelMoved(const nglMouseInfo& rInfo);
   virtual bool MouseGrabbed(nglTouchId Id);
   virtual bool MouseUngrabbed(nglTouchId Id);
-  virtual const std::map<nglTouchId, nglMouseInfo>& GetMouseStates() const;  //@}
+  virtual const std::map<nglTouchId, nglMouseInfo>& GetMouseStates() const;
   virtual bool MultiEventsFinished(const nglMouseInfo& rInfo);
   //@}
   /** @name Other Incomming events */

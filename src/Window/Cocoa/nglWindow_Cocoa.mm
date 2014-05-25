@@ -486,7 +486,7 @@ NSString *kPrivateDragUTI = @"com.libnui.privatepasteboardtype";
   info.Y = [self contentRectForFrameRect:[self frame]].size.height - p.y;
   info.Buttons |= [theEvent clickCount] > 1 ? nglMouseInfo::ButtonDoubleClick : 0;
   mpNGLWindow->CallOnMouseClick(info);
-    mpNGLWindow->CallOnMultiEventsFinished(info);
+  mpNGLWindow->CallOnMultiEventsFinished(info);
 }
 
 - (void)mouseUp:(NSEvent *)theEvent

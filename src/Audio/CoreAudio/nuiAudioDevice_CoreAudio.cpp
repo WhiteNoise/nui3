@@ -332,6 +332,7 @@ bool nuiAudioDevice_CoreAudio::Open(std::vector<int32>& rInputChannels, std::vec
 
 bool nuiAudioDevice_CoreAudio::Close()
 {
+    NGL_OUT(_T("CoreAudio ending\n"));
   OSStatus error = AudioDeviceStop(mDeviceID, IOProc);
   if (!error)
     error = AudioDeviceRemoveIOProc (mDeviceID, IOProc);

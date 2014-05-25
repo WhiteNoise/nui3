@@ -368,7 +368,26 @@ const nglChar* gpWindowErrorTable[] =
     //          info.Buttons |= nglMouseInfo::ButtonDoubleClick;
 
     mpNGLWindow->CallOnMouseUnclick(info);
-    mpNGLWindow->CallOnMultiEventsFinished(info);
+  }
+    
+  for (id item in touches)
+  {
+      UITouch* pTouch = item;
+      
+      CGPoint newp = [pTouch locationInView: self.rootViewController.view];
+      
+      int x = (int)newp.x;
+      int y = (int)newp.y;
+
+      nglMouseInfo info;
+      info.Buttons = nglMouseInfo::ButtonLeft;
+      info.X = x;
+      info.Y = y;
+      
+      info.SwipeInfo = nglMouseInfo::eNoSwipe;
+      info.TouchId = (int64)pTouch;
+
+      mpNGLWindow->CallOnMultiEventsFinished(info);
   }
 }
 
