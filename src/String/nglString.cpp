@@ -2920,25 +2920,31 @@ CFStringRef nglString::ToCFString() const
 
 nglString::nglString(CFStringRef string)
 {
-    CFIndex length = CFStringGetLength(string);
+  if (!string)
+  {
+    Nullify();
+    return;
+  }
+
+  CFIndex length = CFStringGetLength(string);
+  {
+    const char* str = CFStringGetCStringPtr(string, kCFStringEncodingUTF8);
+    if (str)
     {
-        const char* str = CFStringGetCStringPtr(string, kCFStringEncodingUTF8);
-        if (str)
-        {
-            mString = str;
-            return;
-        }
+      mString = str;
+      return;
     }
-    
-    char* str = (char*)malloc(length * 3);
-    Boolean res = CFStringGetCString (
-                                      string,
-                                      str,
-                                      length * 3,
-                                      kCFStringEncodingUTF8
-                                      );
-    mString = str;
-    free(str);
+  }
+
+  char* str = (char*)malloc(length * 3);
+  Boolean res = CFStringGetCString (
+                              string,
+                              str,
+                              length * 3,
+                              kCFStringEncodingUTF8
+                              );
+  mString = str;
+  free(str);
 }
 #endif
 
