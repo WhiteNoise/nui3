@@ -2838,7 +2838,8 @@ public:
   }
     ~Stack()
     {
-        delete[] data;
+	if(data)
+	  delete[] data;
     }
 
   void push(void* const & t)

@@ -87,11 +87,6 @@ const nglPath& nuiKnob::GetSequencePath() const
   if (mpImageSequence)
     return mpImageSequence->GetTexturePath();
 
-    // else someone did something dumb..
-//    static const nglPath dummyPath;
-    
-//    return dummyPath;
-
   return nglPath::EmptyPath;
 }
 

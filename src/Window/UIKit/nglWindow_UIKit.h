@@ -9,16 +9,16 @@
 #import <GLKit/GLKit.h>
 
 /*
-** Touches tracking ..
-*/
+ ** Touches tracking ..
+ */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class nglTouchInfo ///< Touch info
 {
 public:
-  UITouch* mpUITouch;
-  nglTouchId mTouchId;
-  int X, Y;
+    UITouch* mpUITouch;
+    nglTouchId mTouchId;
+    int X, Y;
 };
 
 typedef std::map<UITouch*,nglTouchInfo> TouchesInfo;
@@ -26,7 +26,7 @@ typedef std::map<UITouch*,nglTouchInfo> TouchesInfo;
 @interface NGLViewController : GLKViewController
 {
 @private
-  nglWindow* mpNGLWindow;
+    nglWindow* mpNGLWindow;
 }
 
 - (id) initWithNGLWindow: (nglWindow*) pNGLWindow;
@@ -35,23 +35,23 @@ typedef std::map<UITouch*,nglTouchInfo> TouchesInfo;
 
 
 /*
-** nglUIWindow
-*/
+ ** nglUIWindow
+ */
 @interface nglUIWindow : UIWindow<UITextFieldDelegate, GLKViewDelegate>
 {
-  nglWindow*    mpNGLWindow;
-  nglContextInfo* mpContextInfo;
-  nglTime       mLastEventTime;
-  bool          mInited;
-  id            mDisplayLink;
-  NSTimer*      mInvalidationTimer;
+    nglWindow*    mpNGLWindow;
+    nglContextInfo* mpContextInfo;
+    nglTime       mLastEventTime;
+    bool          mInited;
+    id            mDisplayLink;
+    NSTimer*      mInvalidationTimer;
 	UITextField*  mpTextField;
 	BOOL          mKeyboardVisible;
-
-  GLKView* mpGLKView;
-  nuiTimer*     mpTimer;
-
-  CGRect oldrect;
+    
+    GLKView* mpGLKView;
+    nuiTimer*     mpTimer;
+    
+    CGRect oldrect;
 }
 
 - (id) initWithNGLWindow: (nglWindow*) pNGLWindow;

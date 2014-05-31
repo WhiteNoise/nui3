@@ -48,7 +48,7 @@ bool nuiContainer::Trash()
 void nuiContainer::CallOnTrash()
 {
   CheckValid();
-  //ChildrenCallOnTrash();
+  ChildrenCallOnTrash();
   nuiWidget::CallOnTrash();
 //  OnTrash();
 }

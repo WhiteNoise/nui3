@@ -78,13 +78,7 @@ void objCCallOnMemoryWarning();
   //App->TimedPrint("nglUIApplicationDelegate didFinishLaunchingWithOptions");
 	NGL_ASSERT(App);
 
-//    objCCallOnInit(pUIApplication);
-    
-	NSURL *launchURL = nil;
-    
-#ifdef NUI_IOS
-    launchURL = [launchOptions objectForKey:UIApplicationLaunchOptionsURLKey];
-#endif
+	NSURL *launchURL = [launchOptions objectForKey:UIApplicationLaunchOptionsURLKey];	
 
   	if(launchURL)
   	{

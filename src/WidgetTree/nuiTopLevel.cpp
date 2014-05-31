@@ -1130,7 +1130,7 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseClick [%d] BEGIN\n"), rInfo.TouchId) );
     }
     
     bool hook = false;
-    for (int32 i = containers.size() - 1; i >= 0 && !hook; i--)
+    for (size_t i = containers.size() - 1; i >= 0 && !hook; i--)
     {
       nglMouseInfo info(rInfo);
       containers[i]->GlobalToLocal(info.X, info.Y);
@@ -1180,7 +1180,7 @@ void nuiTopLevel::UpdateMouseCursor(const nuiWidgetList& rWidgets)
     }
   }
   
-  int32 i = 0;
+  size_t i = 0;
   while (i < rWidgets.size())
   {
     nuiWidget* pWidget = rWidgets[i];
@@ -1200,7 +1200,7 @@ void nuiTopLevel::DispatchKeyboardFocus(const nuiWidgetList& rWidgets)
 {
   CheckValid();
   nuiAutoRef;
-  int32 i = 0;
+  size_t i = 0;
   
   while (i < rWidgets.size())
   {
@@ -1280,7 +1280,7 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("CallMouseUnclick [%d] BEGIN\n"), rInfo.TouchId) )
     }
     
     bool hook = false;
-    for (int32 i = containers.size() - 1; i >= 0 && !hook; i--)
+    for (size_t i = containers.size() - 1; i >= 0 && !hook; i--)
     {
       nglMouseInfo info(rInfo);
       containers[i]->GlobalToLocal(info.X, info.Y);
@@ -1463,7 +1463,7 @@ NGL_TOUCHES_DEBUG( NGL_OUT(_T("nuiTopLevel::CallMouseMove X:%d Y:%d\n"), rInfo.X
     }
     
     bool hook = false;
-    for (int32 i = containers.size() - 1; i >= 0 && !hook; i--)
+    for (size_t i = containers.size() - 1; i >= 0 && !hook; i--)
     {
       nglMouseInfo info(rInfo);
       containers[i]->GlobalToLocal(info.X, info.Y);
@@ -1617,7 +1617,7 @@ bool nuiTopLevel::CallMouseWheel (nglMouseInfo& rInfo)
     }
 
     bool hook = false;
-    for (int32 i = containers.size() - 1; i >= 0 && !hook; i--)
+    for (size_t i = containers.size() - 1; i >= 0 && !hook; i--)
     {
       nglMouseInfo info(rInfo);
       containers[i]->GlobalToLocal(info.X, info.Y);
@@ -1975,7 +1975,7 @@ bool nuiTopLevel::DrawTree(class nuiDrawContext *pContext)
     // Prepare the layout changes:
     pContext->ResetState();
 
-    int count = mDirtyRects.size();
+    size_t count = mDirtyRects.size();
 
 //    NGL_OUT("drawing %d partial rects\n", count);
 

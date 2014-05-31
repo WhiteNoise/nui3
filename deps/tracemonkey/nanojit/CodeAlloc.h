@@ -54,7 +54,7 @@ namespace nanojit
      */
     class CodeList
     {
-    public:
+//    public:
         friend class CodeAlloc;
 
         /** for making singly linked lists of blocks in any order */

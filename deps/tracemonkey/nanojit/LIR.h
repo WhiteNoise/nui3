@@ -899,12 +899,11 @@ namespace nanojit
 
         inline void* constvalp() const
         {
-            // DW
-//        #ifdef NANOJIT_64BIT
+        #ifdef NANOJIT_64BIT
             return (void*)imm64();
-//        #else
-//            return (void*)imm32();
-//        #endif
+        #else
+            return (void*)imm32();
+        #endif
         }
     };
 

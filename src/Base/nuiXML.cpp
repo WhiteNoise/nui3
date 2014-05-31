@@ -471,14 +471,15 @@ const nglString& nuiXMLNode::GetValue() const
 void nuiXMLNode::SetValue(const nglString& rValue)
 {
   mValue = rValue;
-  mName = _T("##text");
+  if (mName.GetLeft(2) != _T("##"))
+    mName = _T("##") + mName;
 }
 
 void nuiXMLNode::SetValue(const char* pValue)
 {
   mValue = nglString(pValue);
   if (mName.GetLeft(2) != _T("##"))
-    mName = _T("##text");
+    mName = _T("##") + mName;
 }
 
 // Node attributes management:

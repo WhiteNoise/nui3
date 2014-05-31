@@ -614,6 +614,7 @@ void nuiFontManager::AddSystemFolders()
 
 void nuiFontManager::GetSystemFolders(std::map<nglString, nglPath>& rFolders)
 {
+// DW: Disabled
     return;
     
 #ifdef FONT_TEST_HACK
