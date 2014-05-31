@@ -254,6 +254,14 @@ bool nuiDrawerView::PreMouseUnclicked(const nglMouseInfo& rInfo)
   if (!mInteractive)
     return false;
 
+  if (mStealRefused)
+  {
+    mTouched = false;
+    mMoving = false;
+    mStealRefused = false;
+    return false;
+  }
+
   if (rInfo.Buttons & nglMouseInfo::ButtonLeft)
   {
     if (mTouched && !mMoving && mOffset != 0)
@@ -262,7 +270,7 @@ bool nuiDrawerView::PreMouseUnclicked(const nglMouseInfo& rInfo)
       {
         if (mpMain)
         {
-          mpMain->DispatchMouseCanceled(rInfo);
+          mpMain->DispatchMouseCanceled(this, rInfo);
         }
         mTouched = false;
 
@@ -297,7 +305,13 @@ bool nuiDrawerView::PreMouseMoved(const nglMouseInfo& rInfo)
       {
         mTouched = false;
         mMoving = true;
+        mStealRefused = false;
         return true;
+      }
+      else
+      {
+        NGL_LOG("nuiDrawer", NGL_LOG_DEBUG, "PreMouseMoved: StealMouseEvent refused\n");
+        mStealRefused = true;
       }
     }
   }

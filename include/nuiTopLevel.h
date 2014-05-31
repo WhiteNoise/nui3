@@ -111,7 +111,9 @@ public:
   bool CallMouseUnclick(nglMouseInfo& rInfo);
   bool CallMouseWheel (nglMouseInfo& rInfo);
   bool CallMouseMove (nglMouseInfo& rInfo);
-bool CallMouseCancel(nglMouseInfo& rInfo);
+  bool CallMouseCancel(nuiWidgetPtr pThief, nglMouseInfo& rInfo);
+
+
 bool CallMultiEventsFinished(nglMouseInfo& rInfo);
 
   void GetMouseInfo(nglMouseInfo& rMouseInfo) const;

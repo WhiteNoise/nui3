@@ -151,6 +151,8 @@ void nuiWidget::InitDefaultValues()
   mReverseRender = false;
   mOverrideVisibleRect = false;
   mAutoUpdateLayout = false;
+  mAutoAcceptMouseCancel = true;
+  mAutoAcceptMouseSteal = true;
 }
 
 
@@ -495,7 +497,16 @@ void nuiWidget::InitAttributes()
                 nuiMakeDelegate(this, &nuiWidget::GetAutoUpdateLayout),
                 nuiMakeDelegate(this, &nuiWidget::SetAutoUpdateLayout)));
 
-  
+  AddAttribute(new nuiAttribute<bool>
+               (nglString(_T("AutoAcceptMouseCancel")), nuiUnitOnOff,
+                nuiMakeDelegate(this, &nuiWidget::GetAutoAcceptMouseCancel),
+                nuiMakeDelegate(this, &nuiWidget::SetAutoAcceptMouseCancel)));
+
+  AddAttribute(new nuiAttribute<bool>
+               (nglString(_T("AutoAcceptMouseSteal")), nuiUnitOnOff,
+                nuiMakeDelegate(this, &nuiWidget::GetAutoAcceptMouseSteal),
+                nuiMakeDelegate(this, &nuiWidget::SetAutoAcceptMouseSteal)));
+
 }
 
  
@@ -1761,7 +1772,7 @@ bool nuiWidget::MouseUnclicked(nuiSize X, nuiSize Y, nglMouseInfo::Flags Button)
 bool nuiWidget::MouseCanceled (nuiSize X, nuiSize Y, nglMouseInfo::Flags Button)
 {
   CheckValid();
-  return false;
+  return mAutoAcceptMouseCancel;
 }
 
 
@@ -1901,12 +1912,15 @@ bool nuiWidget::DispatchMouseUnclick(const nglMouseInfo& rInfo)
   return false;
 }
 
-bool nuiWidget::DispatchMouseCanceled(const nglMouseInfo& rInfo)
+bool nuiWidget::DispatchMouseCanceled(nuiWidgetPtr pThief, const nglMouseInfo& rInfo)
 {
   CheckValid();
+  if (pThief == this)
+    return false;
+
   nuiAutoRef;
   if (mTrashed)
-    return NULL;
+    return false;
 
   bool inside = false;
   bool res = false;
@@ -2047,6 +2061,11 @@ bool nuiWidget::StealMouseEvent(const nglMouseInfo& rInfo)
   nuiTopLevel* pTop = GetTopLevel();
   NGL_ASSERT(pTop);
   return pTop->StealMouseEvent(this, rInfo);
+}
+
+bool nuiWidget::RequestStolenMouse(const nglMouseInfo& rInfo)
+{
+  return mAutoAcceptMouseSteal;
 }
 
 bool nuiWidget::Grab()

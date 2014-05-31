@@ -20,7 +20,7 @@ public:
     //NGL_ASSERT(mRefCount == 0); 
   }
 
-  uint32 Acquire() const   
+  inline uint32 Acquire() const
   { 
     mRefCount++;
     if (mTrace)
@@ -30,7 +30,7 @@ public:
     return mRefCount;
   }
 
-  uint32 Release() const
+  inline uint32 Release() const
   { 
     if (mRefCount < 1)
     {
