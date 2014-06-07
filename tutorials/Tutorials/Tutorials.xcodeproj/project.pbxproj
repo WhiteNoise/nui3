@@ -7,18 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E516F376185CBB2E00D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
-		E516F378185CBB3600D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
-		E516F37E185CBB5700D97CA6 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F379185CBB5700D97CA6 /* CoreAudio.framework */; };
-		E516F37F185CBB5700D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
-		E516F380185CBB5700D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
-		E516F381185CBB5700D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F382185CBB5700D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
+		A7EB451E193A517D00D31516 /* libnuiPhone.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36D185CBB1800D97CA6 /* libnuiPhone.a */; };
+		A7EB4528193A542300D31516 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7EB451F193A542300D31516 /* Accelerate.framework */; };
+		A7EB4529193A542300D31516 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7EB4520193A542300D31516 /* AudioToolbox.framework */; };
+		A7EB452B193A542300D31516 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7EB4522193A542300D31516 /* CoreAudio.framework */; };
+		A7EB452C193A542300D31516 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7EB4523193A542300D31516 /* CoreFoundation.framework */; };
+		A7EB452D193A542300D31516 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7EB4524193A542300D31516 /* Foundation.framework */; };
+		A7EB452E193A542300D31516 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7EB4525193A542300D31516 /* GLKit.framework */; };
+		A7EB452F193A542300D31516 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7EB4526193A542300D31516 /* OpenGLES.framework */; };
+		A7EB4530193A542300D31516 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7EB4527193A542300D31516 /* UIKit.framework */; };
+		A7EB4532193A547E00D31516 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7EB4531193A547E00D31516 /* MobileCoreServices.framework */; };
 		E516F38A185CBC1200D97CA6 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F379185CBB5700D97CA6 /* CoreAudio.framework */; };
 		E516F38B185CBC1200D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F38C185CBC1200D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F38D185CBC1200D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F38E185CBC1200D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F38F185CBC1200D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F390185CBC1200D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F391185CBC1200D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -54,7 +56,6 @@
 		E516F3CF185CBEDF00D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F3D0185CBEDF00D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F3D1185CBEDF00D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F3D2185CBEDF00D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F3D3185CBEDF00D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F3D4185CBEDF00D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F3D5185CBEDF00D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -88,7 +89,6 @@
 		E516F3FC185CBEF600D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F3FD185CBEF600D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F3FE185CBEF600D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F3FF185CBEF600D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F400185CBEF600D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F401185CBEF600D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F402185CBEF600D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -122,7 +122,6 @@
 		E516F429185CBF0200D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F42A185CBF0200D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F42B185CBF0200D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F42C185CBF0200D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F42D185CBF0200D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F42E185CBF0200D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F42F185CBF0200D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -156,7 +155,6 @@
 		E516F456185CBF0800D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F457185CBF0800D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F458185CBF0800D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F459185CBF0800D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F45A185CBF0800D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F45B185CBF0800D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F45C185CBF0800D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -166,7 +164,6 @@
 		E516F483185CBF1200D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F484185CBF1200D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F485185CBF1200D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F486185CBF1200D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F487185CBF1200D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F488185CBF1200D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F489185CBF1200D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -174,7 +171,6 @@
 		E516F4B0185CBF1D00D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F4B1185CBF1D00D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F4B2185CBF1D00D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F4B3185CBF1D00D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F4B4185CBF1D00D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F4B5185CBF1D00D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F4B6185CBF1D00D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -275,7 +271,6 @@
 		E516F5C5185D157300D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F5C6185D157300D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F5C7185D157300D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F5C8185D157300D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F5C9185D157300D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F5CA185D157300D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F5CB185D157300D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -285,7 +280,6 @@
 		E516F5DB185D158000D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F5DC185D158000D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F5DD185D158000D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F5DE185D158000D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F5DF185D158000D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F5E0185D158000D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F5E1185D158000D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -295,7 +289,6 @@
 		E516F5F1185D158900D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F5F2185D158900D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F5F3185D158900D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F5F4185D158900D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F5F5185D158900D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F5F6185D158900D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F5F7185D158900D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -305,7 +298,6 @@
 		E516F607185D159100D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F608185D159100D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F609185D159100D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F60A185D159100D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F60B185D159100D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F60C185D159100D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F60D185D159100D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -315,7 +307,6 @@
 		E516F61D185D159A00D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F61E185D159A00D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F61F185D159A00D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F620185D159A00D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F621185D159A00D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F622185D159A00D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F623185D159A00D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -325,7 +316,6 @@
 		E516F633185D15A500D97CA6 /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */; };
 		E516F634185D15A500D97CA6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */; };
 		E516F635185D15A500D97CA6 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */; };
-		E516F636185D15A500D97CA6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F37D185CBB5700D97CA6 /* CoreServices.framework */; };
 		E516F637185D15A500D97CA6 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F377185CBB3600D97CA6 /* OpenGL.framework */; };
 		E516F638185D15A500D97CA6 /* libnuiCocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E516F36B185CBB1800D97CA6 /* libnuiCocoa.a */; };
 		E516F639185D15A500D97CA6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
@@ -425,7 +415,6 @@
 		E516F73D185D30FC00D97CA6 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = E516F72B185D30FC00D97CA6 /* icon.png */; };
 		E516F73E185D30FC00D97CA6 /* Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E516F72D185D30FC00D97CA6 /* Application.cpp */; };
 		E516F73F185D30FC00D97CA6 /* MainWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E516F72F185D30FC00D97CA6 /* MainWindow.cpp */; };
-		E55E77A3185BBC62005F01B1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55E77A2185BBC62005F01B1 /* Cocoa.framework */; };
 		E55E77AD185BBC62005F01B1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E55E77AB185BBC62005F01B1 /* InfoPlist.strings */; };
 		E55E77BB185BBC62005F01B1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E55E77BA185BBC62005F01B1 /* Images.xcassets */; };
 		E55E77ED185CBAA8005F01B1 /* Buttons.2005.sln in Resources */ = {isa = PBXBuildFile; fileRef = E55E77D7185CBAA8005F01B1 /* Buttons.2005.sln */; };
@@ -447,6 +436,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		A7EB451C193A517400D31516 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E516F35F185CBB1800D97CA6 /* nui3.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 73F0841812E9BA0700656E84;
+			remoteInfo = nuiPhone;
+		};
 		E516F368185CBB1800D97CA6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E516F35F185CBB1800D97CA6 /* nui3.xcodeproj */;
@@ -488,13 +484,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = E5FB9CF3147D5CEE001A1829;
 			remoteInfo = minui;
-		};
-		E516F374185CBB2100D97CA6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E516F35F185CBB1800D97CA6 /* nui3.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = E5D63EBB1209AB9C009C26A9;
-			remoteInfo = nuiCocoa;
 		};
 		E516F385185CBC1200D97CA6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -590,13 +579,22 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A7EB451F193A542300D31516 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/Accelerate.framework; sourceTree = DEVELOPER_DIR; };
+		A7EB4520193A542300D31516 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
+		A7EB4521193A542300D31516 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/AudioUnit.framework; sourceTree = DEVELOPER_DIR; };
+		A7EB4522193A542300D31516 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/CoreAudio.framework; sourceTree = DEVELOPER_DIR; };
+		A7EB4523193A542300D31516 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = DEVELOPER_DIR; };
+		A7EB4524193A542300D31516 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		A7EB4525193A542300D31516 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/GLKit.framework; sourceTree = DEVELOPER_DIR; };
+		A7EB4526193A542300D31516 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
+		A7EB4527193A542300D31516 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		A7EB4531193A547E00D31516 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.1.sdk/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		E516F35F185CBB1800D97CA6 /* nui3.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = nui3.xcodeproj; path = ../../nui3.xcodeproj; sourceTree = "<group>"; };
 		E516F377185CBB3600D97CA6 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		E516F379185CBB5700D97CA6 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
-		E516F37D185CBB5700D97CA6 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		E516F3A6185CBC1200D97CA6 /* Additive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Additive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E516F3A7185CBC1200D97CA6 /* Buttons copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Buttons copy-Info.plist"; path = "/Users/meeloo/work/nui3/tutorials/Tutorials/Buttons copy-Info.plist"; sourceTree = "<absolute>"; };
 		E516F3A9185CBC8A00D97CA6 /* Additive.2008.sln */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Additive.2008.sln; sourceTree = "<group>"; };
@@ -896,7 +894,6 @@
 				E516F38B185CBC1200D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F38C185CBC1200D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F38D185CBC1200D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F38E185CBC1200D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F38F185CBC1200D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F390185CBC1200D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F391185CBC1200D97CA6 /* Cocoa.framework in Frameworks */,
@@ -911,7 +908,6 @@
 				E516F3CF185CBEDF00D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F3D0185CBEDF00D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F3D1185CBEDF00D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F3D2185CBEDF00D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F3D3185CBEDF00D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F3D4185CBEDF00D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F3D5185CBEDF00D97CA6 /* Cocoa.framework in Frameworks */,
@@ -927,7 +923,6 @@
 				E516F3FC185CBEF600D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F3FD185CBEF600D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F3FE185CBEF600D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F3FF185CBEF600D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F400185CBEF600D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F401185CBEF600D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F402185CBEF600D97CA6 /* Cocoa.framework in Frameworks */,
@@ -943,7 +938,6 @@
 				E516F429185CBF0200D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F42A185CBF0200D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F42B185CBF0200D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F42C185CBF0200D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F42D185CBF0200D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F42E185CBF0200D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F42F185CBF0200D97CA6 /* Cocoa.framework in Frameworks */,
@@ -959,7 +953,6 @@
 				E516F456185CBF0800D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F457185CBF0800D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F458185CBF0800D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F459185CBF0800D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F45A185CBF0800D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F45B185CBF0800D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F45C185CBF0800D97CA6 /* Cocoa.framework in Frameworks */,
@@ -975,7 +968,6 @@
 				E516F483185CBF1200D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F484185CBF1200D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F485185CBF1200D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F486185CBF1200D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F487185CBF1200D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F488185CBF1200D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F489185CBF1200D97CA6 /* Cocoa.framework in Frameworks */,
@@ -991,7 +983,6 @@
 				E516F4B0185CBF1D00D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F4B1185CBF1D00D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F4B2185CBF1D00D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F4B3185CBF1D00D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F4B4185CBF1D00D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F4B5185CBF1D00D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F4B6185CBF1D00D97CA6 /* Cocoa.framework in Frameworks */,
@@ -1007,7 +998,6 @@
 				E516F5C5185D157300D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F5C6185D157300D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F5C7185D157300D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F5C8185D157300D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F5C9185D157300D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F5CA185D157300D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F5CB185D157300D97CA6 /* Cocoa.framework in Frameworks */,
@@ -1023,7 +1013,6 @@
 				E516F5DB185D158000D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F5DC185D158000D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F5DD185D158000D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F5DE185D158000D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F5DF185D158000D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F5E0185D158000D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F5E1185D158000D97CA6 /* Cocoa.framework in Frameworks */,
@@ -1039,7 +1028,6 @@
 				E516F5F1185D158900D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F5F2185D158900D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F5F3185D158900D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F5F4185D158900D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F5F5185D158900D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F5F6185D158900D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F5F7185D158900D97CA6 /* Cocoa.framework in Frameworks */,
@@ -1055,7 +1043,6 @@
 				E516F607185D159100D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F608185D159100D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F609185D159100D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F60A185D159100D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F60B185D159100D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F60C185D159100D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F60D185D159100D97CA6 /* Cocoa.framework in Frameworks */,
@@ -1071,7 +1058,6 @@
 				E516F61D185D159A00D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F61E185D159A00D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F61F185D159A00D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F620185D159A00D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F621185D159A00D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F622185D159A00D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F623185D159A00D97CA6 /* Cocoa.framework in Frameworks */,
@@ -1087,7 +1073,6 @@
 				E516F633185D15A500D97CA6 /* CoreAudioKit.framework in Frameworks */,
 				E516F634185D15A500D97CA6 /* CoreFoundation.framework in Frameworks */,
 				E516F635185D15A500D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F636185D15A500D97CA6 /* CoreServices.framework in Frameworks */,
 				E516F637185D15A500D97CA6 /* OpenGL.framework in Frameworks */,
 				E516F638185D15A500D97CA6 /* libnuiCocoa.a in Frameworks */,
 				E516F639185D15A500D97CA6 /* Cocoa.framework in Frameworks */,
@@ -1098,14 +1083,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E516F37E185CBB5700D97CA6 /* CoreAudio.framework in Frameworks */,
-				E516F37F185CBB5700D97CA6 /* CoreAudioKit.framework in Frameworks */,
-				E516F380185CBB5700D97CA6 /* CoreFoundation.framework in Frameworks */,
-				E516F381185CBB5700D97CA6 /* CoreMIDI.framework in Frameworks */,
-				E516F382185CBB5700D97CA6 /* CoreServices.framework in Frameworks */,
-				E516F378185CBB3600D97CA6 /* OpenGL.framework in Frameworks */,
-				E516F376185CBB2E00D97CA6 /* libnuiCocoa.a in Frameworks */,
-				E55E77A3185BBC62005F01B1 /* Cocoa.framework in Frameworks */,
+				A7EB4532193A547E00D31516 /* MobileCoreServices.framework in Frameworks */,
+				A7EB4528193A542300D31516 /* Accelerate.framework in Frameworks */,
+				A7EB4529193A542300D31516 /* AudioToolbox.framework in Frameworks */,
+				A7EB452B193A542300D31516 /* CoreAudio.framework in Frameworks */,
+				A7EB452C193A542300D31516 /* CoreFoundation.framework in Frameworks */,
+				A7EB452D193A542300D31516 /* Foundation.framework in Frameworks */,
+				A7EB452E193A542300D31516 /* GLKit.framework in Frameworks */,
+				A7EB452F193A542300D31516 /* OpenGLES.framework in Frameworks */,
+				A7EB4530193A542300D31516 /* UIKit.framework in Frameworks */,
+				A7EB451E193A517D00D31516 /* libnuiPhone.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1885,12 +1872,21 @@
 		E55E77A1185BBC62005F01B1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A7EB4531193A547E00D31516 /* MobileCoreServices.framework */,
+				A7EB451F193A542300D31516 /* Accelerate.framework */,
+				A7EB4520193A542300D31516 /* AudioToolbox.framework */,
+				A7EB4521193A542300D31516 /* AudioUnit.framework */,
+				A7EB4522193A542300D31516 /* CoreAudio.framework */,
+				A7EB4523193A542300D31516 /* CoreFoundation.framework */,
+				A7EB4524193A542300D31516 /* Foundation.framework */,
+				A7EB4525193A542300D31516 /* GLKit.framework */,
+				A7EB4526193A542300D31516 /* OpenGLES.framework */,
+				A7EB4527193A542300D31516 /* UIKit.framework */,
 				E516F5B8185CDB2F00D97CA6 /* AudioToolbox.framework */,
 				E516F379185CBB5700D97CA6 /* CoreAudio.framework */,
 				E516F37A185CBB5700D97CA6 /* CoreAudioKit.framework */,
 				E516F37B185CBB5700D97CA6 /* CoreFoundation.framework */,
 				E516F37C185CBB5700D97CA6 /* CoreMIDI.framework */,
-				E516F37D185CBB5700D97CA6 /* CoreServices.framework */,
 				E516F377185CBB3600D97CA6 /* OpenGL.framework */,
 				E516F35F185CBB1800D97CA6 /* nui3.xcodeproj */,
 				E55E77A2185BBC62005F01B1 /* Cocoa.framework */,
@@ -2260,7 +2256,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				E516F375185CBB2100D97CA6 /* PBXTargetDependency */,
+				A7EB451D193A517400D31516 /* PBXTargetDependency */,
 			);
 			name = Buttons;
 			productName = Tutorials;
@@ -3047,10 +3043,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		E516F375185CBB2100D97CA6 /* PBXTargetDependency */ = {
+		A7EB451D193A517400D31516 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = nuiCocoa;
-			targetProxy = E516F374185CBB2100D97CA6 /* PBXContainerItemProxy */;
+			name = nuiPhone;
+			targetProxy = A7EB451C193A517400D31516 /* PBXContainerItemProxy */;
 		};
 		E516F384185CBC1200D97CA6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3497,7 +3493,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = iphoneos7.1;
 			};
 			name = Debug;
 		};
@@ -3537,7 +3533,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = iphoneos7.1;
 			};
 			name = Release;
 		};
@@ -3545,10 +3541,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Tutorials/Tutorials-Prefix.pch";
 				INFOPLIST_FILE = "Tutorials/Tutorials-Info.plist";
+				SDKROOT = iphoneos;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -3557,10 +3555,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Tutorials/Tutorials-Prefix.pch";
 				INFOPLIST_FILE = "Tutorials/Tutorials-Info.plist";
+				SDKROOT = iphoneos;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
