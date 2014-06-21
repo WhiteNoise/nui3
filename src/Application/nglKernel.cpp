@@ -13,6 +13,13 @@
 #include <signal.h>
 #endif
 
+#ifdef _UIKIT_
+#import <UIKit/UIkit.h>
+#endif
+
+#ifdef _COCOA_
+#import <Cocoa/Cocoa.h>
+#endif
 
 /* Defined in <platform>/nglKernel.cpp
  */
@@ -513,5 +520,28 @@ nglThread::ID nglKernel::GetMainThreadID() const
   return mMainThreadID;
 }
 
+void nglKernel::DidReceiveNotification(const std::map<nglString, nglString>& infos)
+{
+  NGL_OUT("Received notification:\n");
+  for (const auto& item : infos)
+  {
+    NGL_OUT("\t%s -> %s\n", item.first.GetChars(), item.second.GetChars());
+  }
+}
 
+void nglKernel::DidRegisterForRemoteNotifications(const std::vector<uint8>& deviceToken)
+{
+  NGL_OUT("DidRegisterForRemoteNotifications (token size: %d)\n", deviceToken.size());
+}
 
+void nglKernel::RegisterForRemoteNotifications(int32 types)
+{
+#ifdef _UIKIT_
+  [[UIApplication sharedApplication] registerForRemoteNotificationTypes: types];
+#endif
+
+#ifdef _COCOA_
+  [[NSApplication sharedApplication] registerForRemoteNotificationTypes: types];
+#endif
+
+}

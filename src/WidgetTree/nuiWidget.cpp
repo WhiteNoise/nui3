@@ -1864,6 +1864,7 @@ bool nuiWidget::DispatchMouseClick(const nglMouseInfo& rInfo)
     bool res = PreClicked(info);
     if (!res)
     {
+      NGL_DEBUG(if (GetDebug()) NGL_LOG("widget", NGL_LOG_INFO, "%p MouseClicked (%d,%d)\n", this, rInfo.X, rInfo.Y); );
       res = MouseClicked(info);
       res |= Clicked(info);
     }
@@ -1900,6 +1901,7 @@ bool nuiWidget::DispatchMouseUnclick(const nglMouseInfo& rInfo)
     bool res = PreUnclicked(info);
     if (!res)
     {
+      NGL_DEBUG(if (GetDebug()) NGL_LOG("widget", NGL_LOG_INFO, "%p MouseUnclicked (%d,%d)\n", this, rInfo.X, rInfo.Y); );
       res = MouseUnclicked(info);
       res |= Unclicked(info);
     }
@@ -1939,6 +1941,7 @@ bool nuiWidget::DispatchMouseCanceled(nuiWidgetPtr pThief, const nglMouseInfo& r
   info.Y = Y;
 
   PreClickCanceled(info);
+  NGL_DEBUG(if (GetDebug()) NGL_LOG("widget", NGL_LOG_INFO, "%p MouseCanceled (%d,%d)\n", this, rInfo.X, rInfo.Y); );
   res = MouseCanceled(info);
   res |= ClickCanceled(info) | (!mClickThru);
   return res;
@@ -1972,6 +1975,7 @@ nuiWidgetPtr nuiWidget::DispatchMouseMove(const nglMouseInfo& rInfo)
   
   if (PreMouseMoved(info))
     return this;
+  NGL_DEBUG(if (GetDebug()) NGL_LOG("widget", NGL_LOG_INFO, "%p MouseMoved (%d,%d)\n", this, rInfo.X, rInfo.Y); );
   res = MouseMoved(info);
   res |= MovedMouse(info) | (!mClickThru);
   return (res && inside) ? this : NULL;
@@ -2005,6 +2009,7 @@ nuiWidgetPtr nuiWidget::DispatchMouseWheelMove(const nglMouseInfo& rInfo)
 
   if (PreMouseWheelMoved(info))
     return this;
+  NGL_DEBUG(if (GetDebug()) NGL_LOG("widget", NGL_LOG_INFO, "%p MouseWheelMoved (%d,%d)\n", this, rInfo.X, rInfo.Y); );
   res = MouseWheelMoved(info);
   res |= WheelMovedMouse(info) | (!mClickThru);
   return (res && inside) ? this : NULL;
@@ -2065,6 +2070,7 @@ bool nuiWidget::StealMouseEvent(const nglMouseInfo& rInfo)
 
 bool nuiWidget::RequestStolenMouse(const nglMouseInfo& rInfo)
 {
+  NGL_DEBUG(if (GetDebug()) NGL_LOG("widget", NGL_LOG_INFO, "%p RequestStolenMouse (%d,%d)\n", this, rInfo.X, rInfo.Y); );
   return mAutoAcceptMouseSteal;
 }
 
