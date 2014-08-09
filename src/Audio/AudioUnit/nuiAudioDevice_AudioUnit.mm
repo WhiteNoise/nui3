@@ -114,6 +114,15 @@ nuiAudioDevice_AudioUnit::nuiAudioDevice_AudioUnit()
 
     interruptionWhilePlaying = false;
     
+    NSString *category = AVAudioSessionCategoryPlayAndRecord;
+    AVAudioSessionCategoryOptions options = AVAudioSessionCategoryOptionMixWithOthers;
+    NSError *error = nil;
+    if ( ![[AVAudioSession sharedInstance] setCategory:category withOptions:options error:&error] ) {
+        NSLog(@"Couldn't set audio session category: %@", error);
+    }
+    
+    
+    
 // do we need this?
   OSStatus err;
   UInt32 size = sizeof (UInt32);
