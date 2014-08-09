@@ -1519,9 +1519,10 @@ void nuiGLPainter::UploadTexture(nuiTexture* pTexture, int slot)
 #endif
         {
           glTexImage2D(target, 0, internalPixelformat, (int)Width, (int)Height, 0, pixelformat, type, pBuffer);
+          nuiCheckForGLErrors();
           pTexture->ResetForceReload();
+          nuiCheckForGLErrors();
         }
-        nuiCheckForGLErrors();
 
 #ifdef _UIKIT_
 #ifdef NGL_DEBUG
@@ -1657,14 +1658,17 @@ void nuiGLPainter::DestroyTexture(nuiTexture* pTexture)
     return;
   NGL_ASSERT(it != mTextures.end());
 
-  TextureInfo& info(it->second);
+  TextureInfo info(it->second);
+  mTextures.erase(it);
+
   if (info.mTexture <= 0)
+  {
     return;
+  }
   //NGL_OUT(_T("nuiGLPainter::DestroyTexture 0x%x : '%s' / %d\n"), pTexture, pTexture->GetSource().GetChars(), info.mTexture);
 
   mpContext->BeginSession();
   glDeleteTextures(1, (GLuint*)&info.mTexture);
-  mTextures.erase(it);
 }
 
 nuiGLPainter::FramebufferInfo::FramebufferInfo()
