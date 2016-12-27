@@ -57,7 +57,7 @@ int64 nglOStream::WriteDouble (const double* pData, int64 Count)
   return Write (pData, Count, sizeof(double));
 }
 
-#define BUFFER_SIZE 4096
+
 
 int64 nglOStream::WriteText (const nglChar* pData, int64 Count)
 {
@@ -84,7 +84,8 @@ int64 nglOStream::WriteText (const nglString& rData)
   if(mpConv == 0)
       return 0;
 
-  char buffer[BUFFER_SIZE];
+    int bufferSize = rData.GetLength();
+  char *buffer = new char[bufferSize];
   int64 written = 0;
   int32 out_offset = 0;
     
@@ -97,7 +98,7 @@ int64 nglOStream::WriteText (const nglString& rData)
     int64 bytes=0;
     const char* data;
     int64 todo=0;
-    int32 buffer_free = BUFFER_SIZE;
+      int32 buffer_free = bufferSize;
 
     // FIXME!!!!!!!!!!!
     int32 err = backup.Export(out_offset, buffer, buffer_free, *mpConv);
@@ -112,11 +113,12 @@ int64 nglOStream::WriteText (const nglString& rData)
 
     default:
       //SetError() FIXME
+            delete buffer;
       return written;
     }
 
     data = buffer;
-    todo = BUFFER_SIZE - buffer_free;
+    todo = bufferSize - buffer_free;
 
     // Now write data[0 .. todo-1] with line-ending conversion if necessary
     if (mTextFormat == eTextNone)

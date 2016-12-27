@@ -94,7 +94,11 @@ float nuiGetScaleFactor()
 {
   if (gScaleFactor == 0)
   {
-    gScaleFactor = [UIScreen mainScreen].scale;
+      if ([[UIScreen mainScreen] respondsToSelector:@selector(nativeScale)]) {
+          gScaleFactor = (float)[UIScreen mainScreen].nativeScale;
+      } else {
+          gScaleFactor = (float)[UIScreen mainScreen].scale;
+      }
   }
 
   return gScaleFactor;

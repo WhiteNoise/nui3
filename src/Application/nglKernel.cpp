@@ -536,12 +536,16 @@ void nglKernel::DidRegisterForRemoteNotifications(const std::vector<uint8>& devi
 
 void nglKernel::RegisterForRemoteNotifications(int32 types)
 {
+#ifdef USE_PUSH_NOTIFICATIONS
+    
 #ifdef _UIKIT_
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes: types];
 #endif
 
 #ifdef _COCOA_
   [[NSApplication sharedApplication] registerForRemoteNotificationTypes: types];
+#endif
+    
 #endif
 
 }

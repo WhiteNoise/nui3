@@ -355,7 +355,8 @@ void nuiPainter::BroadcastDestroyTexture(nuiTexture* pTexture)
 {
   for (auto pPainter : gpPainters)
   {
-    pPainter->DestroyTexture(pTexture);
+      if(pPainter)
+          pPainter->DestroyTexture(pTexture);
   }
 }
 
@@ -363,7 +364,8 @@ void nuiPainter::BroadcastDestroySurface(nuiSurface* pSurface)
 {
   for (auto pPainter : gpPainters)
   {
-    pPainter->DestroySurface(pSurface);
+      if(pPainter)
+          pPainter->DestroySurface(pSurface);
   }
 }
 
@@ -371,7 +373,8 @@ void nuiPainter::BroadcastDestroyRenderArray(nuiRenderArray* pArray)
 {
   for (auto pPainter : gpPainters)
   {
-    pPainter->DestroyRenderArray(pArray);
+      if(pPainter)
+          pPainter->DestroyRenderArray(pArray);
   }
 }
 

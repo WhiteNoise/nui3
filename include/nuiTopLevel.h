@@ -169,6 +169,7 @@ bool CallMultiEventsFinished(nglMouseInfo& rInfo);
   void UnregisterObserver(nuiNotificationObserver* pObserver, const nglString& rNotificationName = nglString::Null); ///< Unregister pObserver so that it doesn't receive the given notification. By default it is removed from all notification types (nglString::Null).
   
   virtual const std::map<nglTouchId, nglMouseInfo>& GetMouseStates() const;
+    void ClearMouseStates();
   virtual nuiSize GetStatusBarSize() const;
 
 protected:

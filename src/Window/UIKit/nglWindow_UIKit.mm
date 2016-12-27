@@ -222,7 +222,7 @@ const nglChar* gpWindowErrorTable[] =
 
 - (void) InitNGLWindow
 {
-    if (!mInited)
+    if (!mInited && mpNGLWindow)
     {
         mInited = true;
         mpNGLWindow->CallOnCreation();

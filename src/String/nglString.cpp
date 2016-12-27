@@ -1571,7 +1571,7 @@ void nglString::DecodeUrl()
       if (-1 != (int)(dec1 = Hex2Dec(*(pSrc + 1)))
           && -1 != (int)(dec2 = Hex2Dec(*(pSrc + 2))))
       {
-        *pEnd++ = (dec1 << 4) + dec2;
+        *pEnd++ = (nglChar)(((int)dec1 << 4) + (int)dec2);
         pSrc += 3;
         continue;
       }
@@ -2920,6 +2920,7 @@ CFStringRef nglString::ToCFString() const
 
 nglString::nglString(CFStringRef string)
 {
+    mIsNull = true;
   if (!string)
   {
     Nullify();
@@ -2931,8 +2932,10 @@ nglString::nglString(CFStringRef string)
     const char* str = CFStringGetCStringPtr(string, kCFStringEncodingUTF8);
     if (str)
     {
-      mString = str;
-      return;
+
+        mString = str;
+        mIsNull = false;
+        return;
     }
   }
 
@@ -2944,6 +2947,7 @@ nglString::nglString(CFStringRef string)
                               kCFStringEncodingUTF8
                               );
   mString = str;
+  mIsNull = false;
   free(str);
 }
 #endif

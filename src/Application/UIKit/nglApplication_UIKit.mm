@@ -56,6 +56,7 @@ void objCCallOnMemoryWarning();
 */
 @implementation nglUIApplicationDelegate
 
+@synthesize window;
 
 - (void) dealloc
 {
@@ -90,7 +91,7 @@ void objCCallOnMemoryWarning();
   		objCCallOnInit(pUIApplication);
   	}
     
-
+    return YES;
 }
 
 - (BOOL) application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
@@ -103,6 +104,8 @@ void objCCallOnMemoryWarning();
         urlstr = [url absoluteString];
     
     objCCallOnOpenURL(nglString ((CFStringRef)urlstr));
+    
+    return YES;
 }
 
 - (void) applicationDidBecomeActive:          (UIApplication*) pUIApplication
@@ -187,6 +190,8 @@ void objCCallOnMemoryWarning();
 }
 
 ///////// Notifications:
+
+#ifdef USE_PUSH_NOTIFICATIONS
 - (void) application: (UIApplication*) pUIApp didReceiveRemoteNotification: (NSDictionary *)userInfo
 {
   std::map<nglString, nglString> infos;
@@ -228,6 +233,12 @@ void objCCallOnMemoryWarning();
 {
 }
 
+- (void)applicationWillEnterForeground:(UIApplication *)application
+{
+#pragma unused(application)
+}
+
+#endif
 
 
 @end///< nglUIApplicationDelegate

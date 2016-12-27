@@ -227,6 +227,7 @@ void nuiAudioDevice_AudioUnit::pausePlayback()
         //AudioSessionSetActive(false);
         
         NSError *setActiveError = nil;
+        
         [[AVAudioSession sharedInstance] setActive: NO
                                              error: &setActiveError];
 
@@ -288,9 +289,10 @@ void nuiAudioDevice_AudioUnit::stopPlayback()
     
     if(mAudioUnit)      // && interruptionWhilePlaying
     {
-        pausePlayback();
 
         AudioOutputUnitStop(mAudioUnit);
+        pausePlayback();
+
     }
 }
 

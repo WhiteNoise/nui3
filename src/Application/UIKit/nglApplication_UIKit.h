@@ -6,9 +6,12 @@
 
 @class nglUIWindow;
 
-@interface nglUIApplicationDelegate : NSObject <UIApplicationDelegate>
+@interface nglUIApplicationDelegate : UIResponder <UIApplicationDelegate>
 {
+
 }
+
+@property (strong, nonatomic) UIWindow *window;
 
 - (void) dealloc;
 - (void) applicationDidFinishLaunching:       (UIApplication*) pUIApp;
@@ -20,7 +23,7 @@
 - (void) applicationWillTerminate:            (UIApplication*) pUIApp;
 
 // Handling Remote Notifications
-
+#ifdef USE_PUSH_NOTIFICATIONS
 - (void) application: (UIApplication*) pUIApp didReceiveRemoteNotification: (NSDictionary *)userInfo;
 //- (void) application: (UIApplication*) pUIApp didReceiveRemoteNotification: (NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))handler;
 - (void) application: (UIApplication*) pUIApp didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken;
@@ -28,7 +31,7 @@
 
 // Handling Local Notifications
 - (void) application: (UIApplication*) pUIApp didReceiveLocalNotification:(UILocalNotification *)notification;
-
+#endif
 
 
 @end//nglUIApplicationDelegate

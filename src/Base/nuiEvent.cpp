@@ -290,7 +290,11 @@ bool nuiEventTargetBase::OnEvent(const nuiEvent& rEvent)
       nuiDelegateMemento pFunc = pLink->mTargetFunc;
       rEvent.mpUser = pLink->mpUser;
       
-      handled = CallEvent((void*)mpTarget, pFunc, rEvent);
+        if(mpTarget)
+        {
+            handled = CallEvent((void*)mpTarget, pFunc, rEvent);
+        }
+
     }
   }
   return handled;

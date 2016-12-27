@@ -1110,6 +1110,11 @@ const std::map<nglTouchId, nglMouseInfo>& nuiTopLevel::GetMouseStates() const
   return mMouseStates;
 }
 
+void nuiTopLevel::ClearMouseStates()
+{
+    mMouseStates.clear();
+}
+
 bool nuiTopLevel::CallMouseClick (nglMouseInfo& rInfo)
 {
   CheckValid();

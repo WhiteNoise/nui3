@@ -71,6 +71,9 @@ void nglTimerAction(CFRunLoopTimerRef       pCFTimer,
 
 void nglTimer::TimerAction()
 {
+    if(!mRunning)       // not sure why this is necessary/possible..
+        return;
+    
   nglTime now;
   OnTick(now - mLastTime);
   mLastTime = now;

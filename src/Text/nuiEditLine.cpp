@@ -62,8 +62,13 @@ bool nuiEditLine::KeyDown (const nglKeyEvent& rEvent)
   {
     if (Activated())
     {
-      nuiTopLevel* pTop = GetTopLevel();
-      pTop->EndTextInput();
+        if(!IsTrashed())
+        {
+            nuiTopLevel* pTop = GetTopLevel();
+            
+            if(pTop)
+                pTop->EndTextInput();
+        }
     }
     Invalidate();
     return true;
@@ -72,8 +77,12 @@ bool nuiEditLine::KeyDown (const nglKeyEvent& rEvent)
   {
     Aborted();
     {
-      nuiTopLevel* pTop = GetTopLevel();
-      pTop->EndTextInput();
+
+        if(!IsTrashed())
+        {
+            nuiTopLevel* pTop = GetTopLevel();
+            pTop->EndTextInput();
+        }
     }
     Invalidate();
     return true;

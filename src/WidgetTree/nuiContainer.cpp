@@ -464,7 +464,7 @@ bool nuiContainer::DispatchMouseClick(const nglMouseInfo& rInfo)
         {
           if (IsEnabled() && !HasGrab(rInfo.TouchId))
           {
-            if (pItem->DispatchMouseClick(rInfo))
+            if (pItem && pItem->DispatchMouseClick(rInfo))
             {
               delete pIt;
               return true;
