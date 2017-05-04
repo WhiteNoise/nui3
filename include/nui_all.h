@@ -329,7 +329,7 @@ typedef double nuiSize;
   #include "nuiObjectInspector.h"
 
   #include "nuiMidi.h"
-  #include "nuiVideoDecoder.h"
+//  #include "nuiVideoDecoder.h"
   #include "nuiAVIwriter.h"
 
 #endif

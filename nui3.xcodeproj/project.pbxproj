@@ -159,12 +159,6 @@
 		40182AD50F24F09500F11401 /* nuiAiffReader.h in Headers */ = {isa = PBXBuildFile; fileRef = 40182AD30F24F09500F11401 /* nuiAiffReader.h */; };
 		40182AD60F24F09500F11401 /* nuiAiffReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40182AD20F24F09500F11401 /* nuiAiffReader.cpp */; };
 		40182AD70F24F09500F11401 /* nuiAiffReader.h in Headers */ = {isa = PBXBuildFile; fileRef = 40182AD30F24F09500F11401 /* nuiAiffReader.h */; };
-		4021D4A812CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4021D4A712CA3423006EA9E2 /* nuiVideoDecoder.cpp */; };
-		4021D4A912CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4021D4A712CA3423006EA9E2 /* nuiVideoDecoder.cpp */; };
-		4021D4AA12CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4021D4A712CA3423006EA9E2 /* nuiVideoDecoder.cpp */; };
-		4021D4AB12CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4021D4A712CA3423006EA9E2 /* nuiVideoDecoder.cpp */; };
-		4021D4AC12CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4021D4A712CA3423006EA9E2 /* nuiVideoDecoder.cpp */; };
-		4021D4AD12CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4021D4A712CA3423006EA9E2 /* nuiVideoDecoder.cpp */; };
 		4024358F10568E550089BA0B /* nuiStopWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 4024358E10568E550089BA0B /* nuiStopWatch.h */; };
 		4024359010568E550089BA0B /* nuiStopWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 4024358E10568E550089BA0B /* nuiStopWatch.h */; };
 		4024359410568E6F0089BA0B /* nuiStopWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4024359210568E6F0089BA0B /* nuiStopWatch.cpp */; };
@@ -229,10 +223,6 @@
 		406F78D312DC9F3C00DBAC43 /* nuiSound.h in Headers */ = {isa = PBXBuildFile; fileRef = 406F78C112DC9F3C00DBAC43 /* nuiSound.h */; };
 		406F78D412DC9F3C00DBAC43 /* nuiSoundManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 406F78C212DC9F3C00DBAC43 /* nuiSoundManager.h */; };
 		406F78D512DC9F3C00DBAC43 /* nuiVoice.h in Headers */ = {isa = PBXBuildFile; fileRef = 406F78C312DC9F3C00DBAC43 /* nuiVoice.h */; };
-		408D9BA41097436800AEE78A /* nuiVideoDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 408D9BA21097436800AEE78A /* nuiVideoDecoder.h */; };
-		408D9BA51097436800AEE78A /* nuiVideoDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 408D9BA31097436800AEE78A /* nuiVideoDecoder.mm */; };
-		408D9BA61097436800AEE78A /* nuiVideoDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 408D9BA21097436800AEE78A /* nuiVideoDecoder.h */; };
-		408D9BA71097436800AEE78A /* nuiVideoDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 408D9BA31097436800AEE78A /* nuiVideoDecoder.mm */; };
 		40A459A70EFAA71F00043B1F /* nuiAudioDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 40A459A60EFAA71F00043B1F /* nuiAudioDecoder.h */; };
 		40A459A80EFAA71F00043B1F /* nuiAudioDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 40A459A60EFAA71F00043B1F /* nuiAudioDecoder.h */; };
 		40A459AC0EFAABC400043B1F /* nuiAudioDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40A459AB0EFAABC400043B1F /* nuiAudioDecoder.cpp */; };
@@ -915,7 +905,6 @@
 		73F086D312E9BA0700656E84 /* json_reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40033E7012B14D7D000695D2 /* json_reader.cpp */; };
 		73F086D412E9BA0700656E84 /* json_value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40033E7112B14D7D000695D2 /* json_value.cpp */; };
 		73F086D512E9BA0700656E84 /* json_writer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40033E7312B14D7D000695D2 /* json_writer.cpp */; };
-		73F086D612E9BA0700656E84 /* nuiVideoDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4021D4A712CA3423006EA9E2 /* nuiVideoDecoder.cpp */; };
 		73F086D712E9BA0700656E84 /* nuiAudioDb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 406F782812DC9AAA00DBAC43 /* nuiAudioDb.cpp */; };
 		73F086D812E9BA0700656E84 /* nuiAudioEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 406F782A12DC9AAA00DBAC43 /* nuiAudioEngine.cpp */; };
 		73F086D912E9BA0700656E84 /* nuiSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 406F782C12DC9AAA00DBAC43 /* nuiSound.cpp */; };
@@ -4666,7 +4655,6 @@
 		E5A8CEF111E33A54004E14CE /* nuiStopWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 4024358E10568E550089BA0B /* nuiStopWatch.h */; };
 		E5A8CEF211E33A54004E14CE /* nuiBindings.h in Headers */ = {isa = PBXBuildFile; fileRef = E58411C71077451500E0CB45 /* nuiBindings.h */; };
 		E5A8CEF311E33A54004E14CE /* nuiGLUTBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = E5D9FEE81082B350008D0F11 /* nuiGLUTBridge.h */; };
-		E5A8CEF411E33A54004E14CE /* nuiVideoDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 408D9BA21097436800AEE78A /* nuiVideoDecoder.h */; };
 		E5A8CEF511E33A54004E14CE /* nuiAsyncIStream.h in Headers */ = {isa = PBXBuildFile; fileRef = E540AB6010DFAC8F00791FBA /* nuiAsyncIStream.h */; };
 		E5A8CEF911E33A54004E14CE /* nuiTextureInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = E57ECB651110A6E300AE0A3A /* nuiTextureInspector.h */; };
 		E5A8CEFA11E33A54004E14CE /* nglReaderWriterLock.h in Headers */ = {isa = PBXBuildFile; fileRef = E5B7A1D911347AF4005403BF /* nglReaderWriterLock.h */; };
@@ -4955,7 +4943,6 @@
 		E5A8D14811E33A54004E14CE /* nuiStopWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4024359210568E6F0089BA0B /* nuiStopWatch.cpp */; };
 		E5A8D14911E33A54004E14CE /* nuiAudioDecoder_OSX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40E96FBA106D20160099D015 /* nuiAudioDecoder_OSX.cpp */; };
 		E5A8D14A11E33A54004E14CE /* nuiGLUTBridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5D9FEEC1082B382008D0F11 /* nuiGLUTBridge.cpp */; };
-		E5A8D14B11E33A54004E14CE /* nuiVideoDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 408D9BA31097436800AEE78A /* nuiVideoDecoder.mm */; };
 		E5A8D14C11E33A54004E14CE /* nuiAsyncIStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E540AB5C10DFAC5000791FBA /* nuiAsyncIStream.cpp */; };
 		E5A8D14F11E33A54004E14CE /* nuiTextureInspector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E57ECB611110A6BA00AE0A3A /* nuiTextureInspector.cpp */; };
 		E5A8D15011E33A54004E14CE /* nglReaderWriterLock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5B7A1D511347AE3005403BF /* nglReaderWriterLock.cpp */; };
@@ -5512,7 +5499,6 @@
 		E5D640FC1209AB9C009C26A9 /* nuiStopWatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 4024358E10568E550089BA0B /* nuiStopWatch.h */; };
 		E5D640FD1209AB9C009C26A9 /* nuiBindings.h in Headers */ = {isa = PBXBuildFile; fileRef = E58411C71077451500E0CB45 /* nuiBindings.h */; };
 		E5D640FE1209AB9C009C26A9 /* nuiGLUTBridge.h in Headers */ = {isa = PBXBuildFile; fileRef = E5D9FEE81082B350008D0F11 /* nuiGLUTBridge.h */; };
-		E5D640FF1209AB9C009C26A9 /* nuiVideoDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 408D9BA21097436800AEE78A /* nuiVideoDecoder.h */; };
 		E5D641001209AB9C009C26A9 /* nuiAsyncIStream.h in Headers */ = {isa = PBXBuildFile; fileRef = E540AB6010DFAC8F00791FBA /* nuiAsyncIStream.h */; };
 		E5D641041209AB9C009C26A9 /* nuiTextureInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = E57ECB651110A6E300AE0A3A /* nuiTextureInspector.h */; };
 		E5D641051209AB9C009C26A9 /* nglReaderWriterLock.h in Headers */ = {isa = PBXBuildFile; fileRef = E5B7A1D911347AF4005403BF /* nglReaderWriterLock.h */; };
@@ -5804,7 +5790,6 @@
 		E5D6434E1209AB9C009C26A9 /* nuiStopWatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4024359210568E6F0089BA0B /* nuiStopWatch.cpp */; };
 		E5D6434F1209AB9C009C26A9 /* nuiAudioDecoder_OSX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40E96FBA106D20160099D015 /* nuiAudioDecoder_OSX.cpp */; };
 		E5D643501209AB9C009C26A9 /* nuiGLUTBridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5D9FEEC1082B382008D0F11 /* nuiGLUTBridge.cpp */; };
-		E5D643511209AB9C009C26A9 /* nuiVideoDecoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 408D9BA31097436800AEE78A /* nuiVideoDecoder.mm */; };
 		E5D643521209AB9C009C26A9 /* nuiAsyncIStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E540AB5C10DFAC5000791FBA /* nuiAsyncIStream.cpp */; };
 		E5D643551209AB9C009C26A9 /* nuiTextureInspector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E57ECB611110A6BA00AE0A3A /* nuiTextureInspector.cpp */; };
 		E5D643561209AB9C009C26A9 /* nglReaderWriterLock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5B7A1D511347AE3005403BF /* nglReaderWriterLock.cpp */; };
@@ -7644,7 +7629,6 @@
 		40182A6D0F24C74A00F11401 /* nuiChunkSampleReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nuiChunkSampleReader.cpp; path = AudioSamples/nuiChunkSampleReader.cpp; sourceTree = "<group>"; };
 		40182AD20F24F09500F11401 /* nuiAiffReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nuiAiffReader.cpp; path = AudioSamples/nuiAiffReader.cpp; sourceTree = "<group>"; };
 		40182AD30F24F09500F11401 /* nuiAiffReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nuiAiffReader.h; path = ../include/nuiAiffReader.h; sourceTree = "<group>"; };
-		4021D4A712CA3423006EA9E2 /* nuiVideoDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nuiVideoDecoder.cpp; path = Video/nuiVideoDecoder.cpp; sourceTree = "<group>"; };
 		4024358E10568E550089BA0B /* nuiStopWatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nuiStopWatch.h; path = include/nuiStopWatch.h; sourceTree = SOURCE_ROOT; };
 		4024359210568E6F0089BA0B /* nuiStopWatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nuiStopWatch.cpp; sourceTree = "<group>"; };
 		406F782812DC9AAA00DBAC43 /* nuiAudioDb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nuiAudioDb.cpp; path = src/AudioEngine/nuiAudioDb.cpp; sourceTree = SOURCE_ROOT; };
@@ -7657,8 +7641,6 @@
 		406F78C112DC9F3C00DBAC43 /* nuiSound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nuiSound.h; path = include/nuiSound.h; sourceTree = SOURCE_ROOT; };
 		406F78C212DC9F3C00DBAC43 /* nuiSoundManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nuiSoundManager.h; path = include/nuiSoundManager.h; sourceTree = SOURCE_ROOT; };
 		406F78C312DC9F3C00DBAC43 /* nuiVoice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nuiVoice.h; path = include/nuiVoice.h; sourceTree = SOURCE_ROOT; };
-		408D9BA21097436800AEE78A /* nuiVideoDecoder.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = nuiVideoDecoder.h; path = ../include/nuiVideoDecoder.h; sourceTree = "<group>"; };
-		408D9BA31097436800AEE78A /* nuiVideoDecoder.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = nuiVideoDecoder.mm; path = Video/nuiVideoDecoder.mm; sourceTree = "<group>"; };
 		408D9C88109764A000AEE78A /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		40A459A60EFAA71F00043B1F /* nuiAudioDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nuiAudioDecoder.h; path = include/nuiAudioDecoder.h; sourceTree = SOURCE_ROOT; };
 		40A459AB0EFAABC400043B1F /* nuiAudioDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nuiAudioDecoder.cpp; path = AudioSamples/nuiAudioDecoder.cpp; sourceTree = "<group>"; };
@@ -9498,11 +9480,8 @@
 		408D9BA11097433F00AEE78A /* Video */ = {
 			isa = PBXGroup;
 			children = (
-				408D9BA21097436800AEE78A /* nuiVideoDecoder.h */,
-				408D9BA31097436800AEE78A /* nuiVideoDecoder.mm */,
 				BCF1A85D11BE67F700806A7A /* nuiAVIwriter.cpp */,
 				BCF1A85911BE67EE00806A7A /* nuiAVIwriter.h */,
-				4021D4A712CA3423006EA9E2 /* nuiVideoDecoder.cpp */,
 			);
 			name = Video;
 			sourceTree = "<group>";
@@ -14190,7 +14169,6 @@
 				4024359010568E550089BA0B /* nuiStopWatch.h in Headers */,
 				E58411CA1077451500E0CB45 /* nuiBindings.h in Headers */,
 				E5D9FEE91082B350008D0F11 /* nuiGLUTBridge.h in Headers */,
-				408D9BA61097436800AEE78A /* nuiVideoDecoder.h in Headers */,
 				E540AB6310DFAC8F00791FBA /* nuiAsyncIStream.h in Headers */,
 				E57ECB661110A6E300AE0A3A /* nuiTextureInspector.h in Headers */,
 				E5B7A1DA11347AF4005403BF /* nglReaderWriterLock.h in Headers */,
@@ -14573,7 +14551,6 @@
 				4024358F10568E550089BA0B /* nuiStopWatch.h in Headers */,
 				E58411C91077451500E0CB45 /* nuiBindings.h in Headers */,
 				E5D9FEEB1082B350008D0F11 /* nuiGLUTBridge.h in Headers */,
-				408D9BA41097436800AEE78A /* nuiVideoDecoder.h in Headers */,
 				E540AB6210DFAC8F00791FBA /* nuiAsyncIStream.h in Headers */,
 				E5B7A1DC11347AF4005403BF /* nglReaderWriterLock.h in Headers */,
 				E560A378113587D300AFBEAC /* nglCondition.h in Headers */,
@@ -14969,7 +14946,6 @@
 				E5A8CEF111E33A54004E14CE /* nuiStopWatch.h in Headers */,
 				E5A8CEF211E33A54004E14CE /* nuiBindings.h in Headers */,
 				E5A8CEF311E33A54004E14CE /* nuiGLUTBridge.h in Headers */,
-				E5A8CEF411E33A54004E14CE /* nuiVideoDecoder.h in Headers */,
 				E5A8CEF511E33A54004E14CE /* nuiAsyncIStream.h in Headers */,
 				E5A8CEF911E33A54004E14CE /* nuiTextureInspector.h in Headers */,
 				E5A8CEFA11E33A54004E14CE /* nglReaderWriterLock.h in Headers */,
@@ -15359,7 +15335,6 @@
 				E5D640FC1209AB9C009C26A9 /* nuiStopWatch.h in Headers */,
 				E5D640FD1209AB9C009C26A9 /* nuiBindings.h in Headers */,
 				E5D640FE1209AB9C009C26A9 /* nuiGLUTBridge.h in Headers */,
-				E5D640FF1209AB9C009C26A9 /* nuiVideoDecoder.h in Headers */,
 				E5D641001209AB9C009C26A9 /* nuiAsyncIStream.h in Headers */,
 				E5D641041209AB9C009C26A9 /* nuiTextureInspector.h in Headers */,
 				E5D641051209AB9C009C26A9 /* nglReaderWriterLock.h in Headers */,
@@ -17055,7 +17030,6 @@
 				73F086D312E9BA0700656E84 /* json_reader.cpp in Sources */,
 				73F086D412E9BA0700656E84 /* json_value.cpp in Sources */,
 				73F086D512E9BA0700656E84 /* json_writer.cpp in Sources */,
-				73F086D612E9BA0700656E84 /* nuiVideoDecoder.cpp in Sources */,
 				73F086D712E9BA0700656E84 /* nuiAudioDb.cpp in Sources */,
 				73F086D812E9BA0700656E84 /* nuiAudioEngine.cpp in Sources */,
 				73F086D912E9BA0700656E84 /* nuiSound.cpp in Sources */,
@@ -17682,7 +17656,6 @@
 				40033E7A12B14D7D000695D2 /* json_reader.cpp in Sources */,
 				40033E7B12B14D7D000695D2 /* json_value.cpp in Sources */,
 				40033E7C12B14D7D000695D2 /* json_writer.cpp in Sources */,
-				4021D4A812CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */,
 				406F783212DC9AAA00DBAC43 /* nuiAudioDb.cpp in Sources */,
 				406F783412DC9AAA00DBAC43 /* nuiAudioEngine.cpp in Sources */,
 				406F783612DC9AAA00DBAC43 /* nuiSound.cpp in Sources */,
@@ -18024,7 +17997,6 @@
 				40033E7D12B14D7D000695D2 /* json_reader.cpp in Sources */,
 				40033E7E12B14D7D000695D2 /* json_value.cpp in Sources */,
 				40033E7F12B14D7D000695D2 /* json_writer.cpp in Sources */,
-				4021D4AB12CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */,
 				406F785012DC9AAA00DBAC43 /* nuiAudioDb.cpp in Sources */,
 				406F785212DC9AAA00DBAC43 /* nuiAudioEngine.cpp in Sources */,
 				406F785412DC9AAA00DBAC43 /* nuiSound.cpp in Sources */,
@@ -18348,7 +18320,6 @@
 				4024359510568E6F0089BA0B /* nuiStopWatch.cpp in Sources */,
 				40E96FBD106D20160099D015 /* nuiAudioDecoder_OSX.cpp in Sources */,
 				E5D9FEEF1082B382008D0F11 /* nuiGLUTBridge.cpp in Sources */,
-				408D9BA71097436800AEE78A /* nuiVideoDecoder.mm in Sources */,
 				E540AB5F10DFAC5000791FBA /* nuiAsyncIStream.cpp in Sources */,
 				E57ECB621110A6BA00AE0A3A /* nuiTextureInspector.cpp in Sources */,
 				E5B7A1D611347AE3005403BF /* nglReaderWriterLock.cpp in Sources */,
@@ -18377,7 +18348,6 @@
 				E553C15512A55B21009DDD22 /* nglImageCGCodec.cpp in Sources */,
 				BC87DF0112A9598B00D836BF /* nuiNavigationButton.cpp in Sources */,
 				BC19B5D112AFC0F1002DA665 /* nuiNavigationViewDecoration.cpp in Sources */,
-				4021D4AA12CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */,
 				406F784612DC9AAA00DBAC43 /* nuiAudioDb.cpp in Sources */,
 				406F784812DC9AAA00DBAC43 /* nuiAudioEngine.cpp in Sources */,
 				406F784A12DC9AAA00DBAC43 /* nuiSound.cpp in Sources */,
@@ -18693,7 +18663,6 @@
 				4024359410568E6F0089BA0B /* nuiStopWatch.cpp in Sources */,
 				40E96FBC106D20160099D015 /* nuiAudioDecoder_OSX.cpp in Sources */,
 				E5D9FEED1082B382008D0F11 /* nuiGLUTBridge.cpp in Sources */,
-				408D9BA51097436800AEE78A /* nuiVideoDecoder.mm in Sources */,
 				E540AB5E10DFAC5000791FBA /* nuiAsyncIStream.cpp in Sources */,
 				E5B7A1D811347AE3005403BF /* nglReaderWriterLock.cpp in Sources */,
 				E560A374113587BB00AFBEAC /* nglCondition_posix.cpp in Sources */,
@@ -18720,7 +18689,6 @@
 				E553C15212A55B11009DDD22 /* nglImageCGCodec.cpp in Sources */,
 				BC87DF0212A9598B00D836BF /* nuiNavigationButton.cpp in Sources */,
 				BC19B5D212AFC0F1002DA665 /* nuiNavigationViewDecoration.cpp in Sources */,
-				4021D4A912CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */,
 				406F783C12DC9AAA00DBAC43 /* nuiAudioDb.cpp in Sources */,
 				406F783E12DC9AAA00DBAC43 /* nuiAudioEngine.cpp in Sources */,
 				406F784012DC9AAA00DBAC43 /* nuiSound.cpp in Sources */,
@@ -19039,7 +19007,6 @@
 				E5A8D14811E33A54004E14CE /* nuiStopWatch.cpp in Sources */,
 				E5A8D14911E33A54004E14CE /* nuiAudioDecoder_OSX.cpp in Sources */,
 				E5A8D14A11E33A54004E14CE /* nuiGLUTBridge.cpp in Sources */,
-				E5A8D14B11E33A54004E14CE /* nuiVideoDecoder.mm in Sources */,
 				E5A8D14C11E33A54004E14CE /* nuiAsyncIStream.cpp in Sources */,
 				E5A8D14F11E33A54004E14CE /* nuiTextureInspector.cpp in Sources */,
 				E5A8D15011E33A54004E14CE /* nglReaderWriterLock.cpp in Sources */,
@@ -19077,7 +19044,6 @@
 				40033E8012B14D7D000695D2 /* json_reader.cpp in Sources */,
 				40033E8112B14D7D000695D2 /* json_value.cpp in Sources */,
 				40033E8212B14D7D000695D2 /* json_writer.cpp in Sources */,
-				4021D4AD12CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */,
 				406F786412DC9AAA00DBAC43 /* nuiAudioDb.cpp in Sources */,
 				406F786612DC9AAA00DBAC43 /* nuiAudioEngine.cpp in Sources */,
 				406F786812DC9AAA00DBAC43 /* nuiSound.cpp in Sources */,
@@ -19391,7 +19357,6 @@
 				E5D6434E1209AB9C009C26A9 /* nuiStopWatch.cpp in Sources */,
 				E5D6434F1209AB9C009C26A9 /* nuiAudioDecoder_OSX.cpp in Sources */,
 				E5D643501209AB9C009C26A9 /* nuiGLUTBridge.cpp in Sources */,
-				E5D643511209AB9C009C26A9 /* nuiVideoDecoder.mm in Sources */,
 				E5D643521209AB9C009C26A9 /* nuiAsyncIStream.cpp in Sources */,
 				E5D643551209AB9C009C26A9 /* nuiTextureInspector.cpp in Sources */,
 				E5D643561209AB9C009C26A9 /* nglReaderWriterLock.cpp in Sources */,
@@ -19429,7 +19394,6 @@
 				40033E8312B14D7D000695D2 /* json_reader.cpp in Sources */,
 				40033E8412B14D7D000695D2 /* json_value.cpp in Sources */,
 				40033E8512B14D7D000695D2 /* json_writer.cpp in Sources */,
-				4021D4AC12CA3423006EA9E2 /* nuiVideoDecoder.cpp in Sources */,
 				406F785A12DC9AAA00DBAC43 /* nuiAudioDb.cpp in Sources */,
 				406F785C12DC9AAA00DBAC43 /* nuiAudioEngine.cpp in Sources */,
 				406F785E12DC9AAA00DBAC43 /* nuiSound.cpp in Sources */,
