@@ -5,8 +5,8 @@
   licence: see nui3/LICENCE.TXT
 */
 
-#ifndef __nuiTopLevel_h__
-#define __nuiTopLevel_h__
+#ifndef __NUITOPLEVELH__
+#define __NUITOPLEVELH__ TRUE
 
 //#include "nui.h"
 #include "nuiContainer.h"
